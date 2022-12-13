@@ -17,7 +17,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/separator.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart ' as pw;
+import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 class DetailStruk extends StatelessWidget {

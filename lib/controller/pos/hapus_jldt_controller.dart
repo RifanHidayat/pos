@@ -48,8 +48,13 @@ class HapusJldtController extends BaseController {
           var filter = "";
           for (var element in tampung) {
             if ("${element['key']}" != "$keyFaktur") {
-              filter =
-                  "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+              if (filter == "") {
+                filter =
+                    "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+              } else {
+                filter =
+                    "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+              }
             }
           }
           print('hasil filter setelah di hapus $filter');
@@ -65,6 +70,9 @@ class HapusJldtController extends BaseController {
           dashboardCt.customSelected.value = "";
           dashboardCt.jumlahItemDikeranjang.value = 0;
           dashboardCt.totalNominalDikeranjang.value = 0;
+          dashboardCt.persenDiskonPesanBarang.value.text = "";
+          dashboardCt.hargaDiskonPesanBarang.value.text = "";
+          dashboardCt.diskonHeader.value = 0.0;
           dashboardCt.allQtyJldt.value = 0;
           dashboardCt.listKeranjang.value.clear();
           dashboardCt.listKeranjangArsip.value.clear();

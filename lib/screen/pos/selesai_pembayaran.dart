@@ -1,30 +1,15 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
 import 'package:siscom_pos/screen/pos/detail_struk.dart';
-import 'package:siscom_pos/utils/app_data.dart';
-import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
-import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:open_file/open_file.dart';
-import 'package:flutter_dash/flutter_dash.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart ' as pw;
+
 import 'package:siscom_pos/utils/widget/separator.dart';
 
 class SelesaiPembayaran extends StatefulWidget {
@@ -379,7 +364,7 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                               child: Button1(
                                   colorBtn: Utility.primaryDefault,
                                   textBtn: "Transaksi Baru",
-                                  onTap: () {}),
+                                  onTap: () => pembayaranCt.transkasiBaru()),
                             )
                           ],
                         ),

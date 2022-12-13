@@ -72,7 +72,7 @@ dependencies:
   qr_code_scanner: ^1.0.1
   qr_flutter: ^4.0.0
   screenshot: ^1.2.3
-  pdf: ^3.6.0
+  pdf: ^3.6.3
   open_file: ^3.2.1
   image_gallery_saver: ^1.7.1
   flutter_dash: ^1.0.0

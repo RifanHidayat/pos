@@ -13,19 +13,23 @@ class SimpanPembayaran extends BaseController {
   var dashboardCt = Get.put(DashbardController());
 
   void validasiPembayaran(List dataDetailKartu) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Proses pembayaran...");
     Future<bool> prosesInsertPptghd = insertPPTGHD(dataDetailKartu);
     var hasilInsertPptghd = await prosesInsertPptghd;
     if (hasilInsertPptghd == true) {
       Future<bool> prosesPembayaran = updateJlhdPaid();
       var hasilPembayaran = await prosesPembayaran;
       if (hasilPembayaran == true) {
+        Get.back();
         Get.to(SelesaiPembayaran(),
             duration: Duration(milliseconds: 400),
             transition: Transition.downToUp);
       } else {
+        Get.back();
         UtilsAlert.showToast("Gagal proses pembayaran");
       }
     } else {
+      Get.back();
       UtilsAlert.showToast("Gagal proses pembayaran 1");
     }
   }
@@ -145,7 +149,63 @@ class SimpanPembayaran extends BaseController {
     var connect = Api.connectionApi("post", body, "insert_pptgdt");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    var data = valueBody['data'];
+    bool statusBerhasil = false;
+    if (valueBody['status'] == true) {
+      print('berhasil insert pptgdt ${valueBody["data"]}');
+      Future<bool> prosesInsertPutang = insertPutang(dataDetailKartu);
+      statusBerhasil = await prosesInsertPutang;
+    } else {
+      UtilsAlert.showToast('gagal proses 2');
+    }
+    return Future.value(statusBerhasil);
+  }
+
+  Future<bool> insertPutang(dataDetailKartu) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PUTANG',
+      'cabang_putang': '01',
+      'cbxx_putang': '01',
+      'salesm_putang': dashboardCt.kodePelayanSelected.value,
+      'custom_putang': dashboardCt.customSelected.value,
+      'wilayah_putang': dashboardCt.wilayahCustomerSelected.value,
+      'nomor_putang': dashboardCt.nomorFaktur.value,
+      'nomorcb_putang': dashboardCt.nomorCbLastSelected.value,
+      'noxx_putang': dashboardCt.nomorFaktur.value,
+      'noref_putang': '',
+      'ref_putang': '',
+      'nogiro_putang': '',
+      'nokey_putang': '00001',
+      'cb_putang': dashboardCt.cabangKodeSelected.value,
+      'tbayar_putang': '',
+      'ceer_putang': dataDetailKartu[0]["total_pembayaran"],
+      'doe_putang': tanggalDanJam,
+      'uang_putang': 'RP',
+      'kurs_putang': '1',
+      'deo_putang': dataInformasiSYSUSER[0],
+      'loe_putang': tanggalDanJam,
+      'toe_putang': jamTransaksi,
+      'sign_putang': '',
+      'tgljtp_putang': tanggalDanJam,
+      'tanggal_putang': tanggalDanJam,
+      'flag_putang': 'Z',
+      'tgl_putang': tanggalNow,
+      'jtgiro_putang': tanggalDanJam,
+      'produk_putang': '',
+      'reftr_putang': '',
+    };
+    var connect = Api.connectionApi("post", body, "insert_putang");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print("berhasil insert putang ${valueBody['data']}");
     return Future.value(valueBody['status']);
   }
 

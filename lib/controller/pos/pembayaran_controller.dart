@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/simpan_pembayaran.dart';
 import 'package:siscom_pos/screen/pos/pembayaran.dart';
@@ -76,6 +77,7 @@ class PembayaranController extends BaseController {
 
   var dashboardCt = Get.put(DashbardController());
   var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var buttonSheetPosCt = Get.put(BottomSheetPos());
 
   void startLoad() {
     var getTotal = Utility.hitungDetailTotalPos(
@@ -589,5 +591,10 @@ class PembayaranController extends BaseController {
       }
     ];
     simpanPembayaranCt.validasiPembayaran(dataDetailKartu);
+  }
+
+  void transkasiBaru() {
+    buttonSheetPosCt.validasiSebelumAksi("Buat Transaksi Baru",
+        "Yakin buat transaksi baru ?", "", "transaksi_baru", []);
   }
 }

@@ -1,10 +1,8 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -16,18 +14,15 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
 import 'package:siscom_pos/controller/pos/simpan_pembayaran.dart';
-import 'package:siscom_pos/screen/pos/selesai_pembayaran.dart';
-import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart ' as pw;
+import 'package:pdf/widgets.dart' as pw;
 
 class Pembayaran extends StatefulWidget {
   @override
@@ -889,9 +884,8 @@ class _PembayaranState extends State<Pembayaran> {
                       var hasilPembayaran = await prosesCheckPembayaran;
                       print(hasilPembayaran);
                       if (hasilPembayaran == true) {
-                       
                       } else {
-                        UtilsAlert.showToast("Pembayaran gagal");
+                        UtilsAlert.showToast("Pembayaran belum di bayar");
                       }
                     },
                   ),

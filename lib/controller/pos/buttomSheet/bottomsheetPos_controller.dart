@@ -967,7 +967,9 @@ class BottomSheetPos extends BaseController
                               textBtn: type == "hapus_faktur" ||
                                       type == "hapus_barang_once"
                                   ? "Hapus"
-                                  : "Simpan",
+                                  : type == "transaksi_baru"
+                                      ? "Transaksi Baru"
+                                      : "Simpan",
                               colorBtn: Utility.primaryDefault,
                               onTap: () {
                                 setState(() {
@@ -983,6 +985,8 @@ class BottomSheetPos extends BaseController
                                   } else if (type ==
                                       "input_persendiskon_header") {
                                     settingDiskonHeader();
+                                  } else if (type == "transaksi_baru") {
+                                    transaksiBaru();
                                   } else {
                                     masukKeranjangCt
                                         .masukKeranjang(dataSelected);
@@ -1406,5 +1410,75 @@ class BottomSheetPos extends BaseController
     Get.back();
     Get.back();
     Get.to(RincianPemesanan());
+  }
+
+  void transaksiBaru() {
+    List tampung = [];
+    var getValue1 = AppData.noFaktur.split("|");
+    for (var element in getValue1) {
+      var listFilter = element.split("-");
+      var data = {
+        "no_faktur": listFilter[0],
+        "key": listFilter[1],
+        "no_cabang": listFilter[2],
+        "nomor_antrian": listFilter[3],
+      };
+      tampung.add(data);
+    }
+    print('hasil filter nofaktur $tampung');
+
+    if (tampung.isNotEmpty) {
+      var filter = "";
+      for (var element in tampung) {
+        if ("${element['no_faktur']}" != dashboardCt.nomorFaktur.value) {
+          if (filter == "") {
+            filter =
+                "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+          } else {
+            filter =
+                "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+          }
+        }
+      }
+      print('hasil filter setelah di hapus $filter');
+      AppData.noFaktur = filter;
+    }
+
+    if (AppData.noFaktur != "") {
+      dashboardCt.checkingData();
+    } else {
+      dashboardCt.nomorFaktur.value = "-";
+      dashboardCt.primaryKeyFaktur.value = "";
+      dashboardCt.kodePelayanSelected.value = "";
+      dashboardCt.customSelected.value = "";
+      dashboardCt.jumlahItemDikeranjang.value = 0;
+      dashboardCt.totalNominalDikeranjang.value = 0;
+      dashboardCt.persenDiskonPesanBarang.value.text = "";
+      dashboardCt.hargaDiskonPesanBarang.value.text = "";
+      dashboardCt.diskonHeader.value = 0.0;
+      dashboardCt.allQtyJldt.value = 0;
+      dashboardCt.listKeranjang.value.clear();
+      dashboardCt.listKeranjangArsip.value.clear();
+      refrehVariabel();
+      dashboardCt.getKelompokBarang('');
+      dashboardCt.arsipController.startLoad();
+    }
+    dashboardCt.startLoad('hapus_faktur');
+    Get.back();
+    Get.back();
+    Get.back();
+    Get.back();
+  }
+
+  void refrehVariabel() {
+    dashboardCt.nomorFaktur.refresh();
+    dashboardCt.listKeranjangArsip.refresh();
+    dashboardCt.listKeranjang.refresh();
+    dashboardCt.allQtyJldt.refresh();
+    dashboardCt.jumlahItemDikeranjang.refresh();
+    dashboardCt.totalNominalDikeranjang.refresh();
+    dashboardCt.customSelected.refresh();
+    dashboardCt.kodePelayanSelected.refresh();
+    dashboardCt.primaryKeyFaktur.refresh();
   }
 }
