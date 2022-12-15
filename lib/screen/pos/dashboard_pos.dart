@@ -150,8 +150,35 @@ class _DashboardState extends State<Dashboard> {
                         ),
                         Flexible(
                           child: controller.listMenu.value.isEmpty
-                              ? Center(
-                                  child: Text(controller.loadingString.value),
+                              ? Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 30, right: 30),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        "assets/empty.png",
+                                        height: 200,
+                                      ),
+                                      SizedBox(
+                                        height: Utility.medium,
+                                      ),
+                                      Text(
+                                        "Tidak ada produk",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        "Silahkan melakukan tambah produk melalui website siscom online",
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            TextStyle(color: Utility.greyDark),
+                                      )
+                                    ],
+                                  ),
                                 )
                               : Padding(
                                   padding: const EdgeInsets.only(
@@ -918,104 +945,106 @@ class _DashboardState extends State<Dashboard> {
                   )
                 : Stack(
                     children: [
-                      InkWell(
-                        child: CardCustom(
-                            colorBg: Utility.baseColor2,
-                            radiusBorder: Utility.borderStyle1,
-                            widgetCardCustom: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Stack(
-                                  children: [
-                                    Container(
-                                      height: 90,
-                                      alignment: Alignment.bottomLeft,
-                                      width: MediaQuery.of(context).size.width,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(6),
-                                              topRight: Radius.circular(6)),
-                                          image: DecorationImage(
-                                              alignment: Alignment.topCenter,
-                                              image: AssetImage(
-                                                  'assets/no_image.png'),
-                                              // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
-                                              fit: BoxFit.fill)),
-                                    ),
-                                    Container(
-                                      height: 20,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                          color: Utility.primaryDefault,
-                                          borderRadius: BorderRadius.only(
+                      CardCustom(
+                          colorBg: Utility.baseColor2,
+                          radiusBorder: Utility.borderStyle1,
+                          widgetCardCustom: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                    height: 90,
+                                    alignment: Alignment.bottomLeft,
+                                    width: MediaQuery.of(context).size.width,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.only(
                                             topLeft: Radius.circular(6),
-                                          )),
-                                      child: Center(
-                                        child: Text(
-                                          "$stokWare",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: Utility.small),
-                                        ),
+                                            topRight: Radius.circular(6)),
+                                        image: DecorationImage(
+                                            alignment: Alignment.topCenter,
+                                            image: AssetImage(
+                                                'assets/no_image.png'),
+                                            // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
+                                            fit: BoxFit.fill)),
+                                  ),
+                                  Container(
+                                    height: 20,
+                                    width: 20,
+                                    decoration: BoxDecoration(
+                                        color: Utility.primaryDefault,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(6),
+                                        )),
+                                    child: Center(
+                                      child: Text(
+                                        "$stokWare",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: Utility.small),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              SizedBox(
+                                height: Utility.small,
+                              ),
+                              Flexible(
+                                  child: Padding(
+                                padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      flex: 70,
+                                      child: Text(
+                                        "$namaBarang",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: Utility.small,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 30,
+                                      child: Text(
+                                        "${globalController.convertToIdr(hargaJual, 0)}",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Utility.grey600,
+                                            fontSize: Utility.semiMedium),
                                       ),
                                     )
                                   ],
                                 ),
-                                SizedBox(
-                                  height: Utility.small,
-                                ),
-                                Flexible(
-                                    child: Padding(
-                                  padding:
-                                      EdgeInsets.only(left: 8.0, right: 8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        flex: 70,
-                                        child: Text(
-                                          "$namaBarang",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontSize: Utility.small,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 30,
-                                        child: Text(
-                                          "${globalController.convertToIdr(hargaJual, 0)}",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              color: Utility.grey600,
-                                              fontSize: Utility.semiMedium),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ))
-                              ],
-                            )),
-                      ),
-                      Container(
-                        height: MediaQuery.of(Get.context!).size.height,
-                        width: MediaQuery.of(Get.context!).size.width,
-                        decoration: BoxDecoration(
-                            color: Color.fromARGB(174, 171, 212, 243),
-                            borderRadius: Utility.borderStyle1),
+                              ))
+                            ],
+                          )),
+                      InkWell(
+                        onTap: () {
+                          buttomSheetProduk.editBarangKeranjang(
+                              controller.listMenu.value[index]);
+                        },
                         child: Container(
-                            width: 50,
-                            height: 30,
-                            child: Center(
-                                child: Text(
-                              "$jumlahBeli",
-                              style: TextStyle(
-                                  color: Utility.baseColor2,
-                                  fontWeight: FontWeight.bold),
-                            ))),
+                          height: MediaQuery.of(Get.context!).size.height,
+                          width: MediaQuery.of(Get.context!).size.width,
+                          decoration: BoxDecoration(
+                              color: Color.fromARGB(174, 171, 212, 243),
+                              borderRadius: Utility.borderStyle1),
+                          child: Container(
+                              width: 50,
+                              height: 30,
+                              child: Center(
+                                  child: Text(
+                                "$jumlahBeli",
+                                style: TextStyle(
+                                    color: Utility.baseColor2,
+                                    fontWeight: FontWeight.bold),
+                              ))),
+                        ),
                       )
                     ],
                   ),
@@ -1248,23 +1277,29 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ],
                     ),
-                    Container(
-                      width: MediaQuery.of(Get.context!).size.width,
-                      height: 90,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(174, 171, 212, 243),
-                          borderRadius: Utility.borderStyle1),
+                    InkWell(
+                      onTap: () {
+                        buttomSheetProduk.editBarangKeranjang(
+                            controller.listMenu.value[index]);
+                      },
                       child: Container(
-                          alignment: Alignment.center,
-                          width: 50,
-                          height: 30,
-                          child: Center(
-                              child: Text(
-                            "$jumlah_beli",
-                            style: TextStyle(
-                                color: Utility.baseColor2,
-                                fontWeight: FontWeight.bold),
-                          ))),
+                        width: MediaQuery.of(Get.context!).size.width,
+                        height: 90,
+                        decoration: BoxDecoration(
+                            color: Color.fromARGB(174, 171, 212, 243),
+                            borderRadius: Utility.borderStyle1),
+                        child: Container(
+                            alignment: Alignment.center,
+                            width: 50,
+                            height: 30,
+                            child: Center(
+                                child: Text(
+                              "$jumlah_beli",
+                              style: TextStyle(
+                                  color: Utility.baseColor2,
+                                  fontWeight: FontWeight.bold),
+                            ))),
+                      ),
                     )
                   ],
                 );

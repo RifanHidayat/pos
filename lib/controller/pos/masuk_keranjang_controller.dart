@@ -15,7 +15,7 @@ class MasukKeranjangController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var perhitunganCt = Get.put(PerhitunganController());
 
-  void masukKeranjang(produkSelected) async {
+  void masukKeranjang(produkSelected, imeiData) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Simpan data");
 
     var filterJml1 = dashboardCt.jumlahPesan.value.text;
@@ -27,23 +27,28 @@ class MasukKeranjangController extends BaseController {
         Utility.convertDate4(dashboardCt.informasiJlhd[0]["TANGGAL"]);
     var tanggalJlhd = "$convertTanggal1 23:59:59";
 
-    if (produkSelected[0]['TIPE'] == 3) {
-      aksiMasukKeranjangLocal(produkSelected);
+    if (filterJumlahPesan == 0.0) {
+      UtilsAlert.showToast("Quantity tidak valid");
+      Get.back();
+      Get.back();
     } else {
-      Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
-          produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
-      bool hasilValidasi1 = await validasi1;
-      if (hasilValidasi1 == true) {
-        aksiMasukKeranjangLocal(produkSelected);
-      } else {
-        Get.back();
-        Get.back();
-        Get.back();
-      }
+      print(imeiData);
+      print(filterJumlahPesan);
+      aksiMasukKeranjangLocal(produkSelected, imeiData);
+      // Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
+      //     produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
+      // bool hasilValidasi1 = await validasi1;
+      // if (hasilValidasi1 == true) {
+      //   // aksiMasukKeranjangLocal(produkSelected, imeiData);
+      // } else {
+      //   Get.back();
+      //   Get.back();
+      //   Get.back();
+      // }
     }
   }
 
-  void aksiMasukKeranjangLocal(produkSelected) async {
+  void aksiMasukKeranjangLocal(produkSelected, imeiData) async {
     setBusy();
     // check harga jual di edit
     var filter1 = dashboardCt.hargaJualPesanBarang.value.text;
@@ -74,56 +79,65 @@ class MasukKeranjangController extends BaseController {
     dashboardCt.jumlahItemDikeranjang.refresh();
     dashboardCt.totalNominalDikeranjang.refresh();
 
-    kirimJldtBarang(produkSelected, valueNomorKey, valueNomorUrut,
-        hrgJualEditFinal, filterJumlahPesan);
-    kirimProd3(produkSelected, valueNomorKey, valueNomorUrut, hrgJualEditFinal,
-        filterJumlahPesan);
-    updateWareStok(produkSelected, filterJumlahPesan);
-
-    // // // update data barang
-
-    for (var element in dashboardCt.listMenu.value) {
-      if ("${element['INISIAL']}" == "${produkSelected[0]['INISIAL']}") {
-        element["status"] = true;
-        element["jumlah_beli"] = dashboardCt.jumlahPesan.value.text;
-      }
+    if (imeiData.isNotEmpty) {
+      // insertJlim(produkSelected, valueNomorKey, valueNomorUrut,
+      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
+      // insertProd2(produkSelected, valueNomorKey, valueNomorUrut,
+      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
+      // insertImeix(produkSelected, valueNomorKey, valueNomorUrut,
+      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
     }
 
-    // masuk keranjang
-    for (var element in produkSelected) {
-      var filter = {
-        'NORUT': valueNomorUrut,
-        'GROUP': element['GROUP'],
-        'KODE': element['KODE'],
-        'INISIAL': element['INISIAL'],
-        'INGROUP': element['INGROUP'],
-        'NAMA': element['NAMA'],
-        'BARCODE': element['BARCODE'],
-        'TIPE': element['TIPE'],
-        'SAT': element['SAT'],
-        'STDBELI': element['STDBELI'],
-        'STDJUAL': hrgJualEditFinal,
-        'NAMAGAMBAR': element['NAMAGAMBAR'],
-        'MEREK': element['MEREK'],
-        'TIPE_PILIHAN': dashboardCt.typeBarangSelected.value,
-        'CATATAN_PEMBELIAN': dashboardCt.catatanPembelian.value.text,
-        'status': true,
-        'jumlah_beli': filterJumlahPesan.toInt(),
-      };
-      dashboardCt.listKeranjang.add(filter);
-    }
-    dashboardCt.catatanPembelian.value.text = "";
-    UtilsAlert.showToast("Berhasil tambah barang ke keranjang");
-    dashboardCt
-        .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
-    Get.back();
-    Get.back();
-    Get.back();
-    dashboardCt
-        .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
-    dashboardCt.listMenu.refresh();
-    dashboardCt.listKeranjang.refresh();
-    dashboardCt.listKeranjangArsip.refresh();
+    // kirimJldtBarang(produkSelected, valueNomorKey, valueNomorUrut,
+    //     hrgJualEditFinal, filterJumlahPesan);
+    // kirimProd3(produkSelected, valueNomorKey, valueNomorUrut, hrgJualEditFinal,
+    //     filterJumlahPesan);
+    // updateWareStok(produkSelected, filterJumlahPesan);
+
+    // // // // update data barang
+
+    // for (var element in dashboardCt.listMenu.value) {
+    //   if ("${element['INISIAL']}" == "${produkSelected[0]['INISIAL']}") {
+    //     element["status"] = true;
+    //     element["jumlah_beli"] = dashboardCt.jumlahPesan.value.text;
+    //   }
+    // }
+
+    // // masuk keranjang
+    // for (var element in produkSelected) {
+    //   var filter = {
+    //     'NORUT': valueNomorUrut,
+    //     'GROUP': element['GROUP'],
+    //     'KODE': element['KODE'],
+    //     'INISIAL': element['INISIAL'],
+    //     'INGROUP': element['INGROUP'],
+    //     'NAMA': element['NAMA'],
+    //     'BARCODE': element['BARCODE'],
+    //     'TIPE': element['TIPE'],
+    //     'SAT': element['SAT'],
+    //     'STDBELI': element['STDBELI'],
+    //     'STDJUAL': hrgJualEditFinal,
+    //     'NAMAGAMBAR': element['NAMAGAMBAR'],
+    //     'MEREK': element['MEREK'],
+    //     'TIPE_PILIHAN': dashboardCt.typeBarangSelected.value,
+    //     'CATATAN_PEMBELIAN': dashboardCt.catatanPembelian.value.text,
+    //     'status': true,
+    //     'jumlah_beli': filterJumlahPesan.toInt(),
+    //   };
+    //   dashboardCt.listKeranjang.add(filter);
+    // }
+    // dashboardCt.catatanPembelian.value.text = "";
+    // UtilsAlert.showToast("Berhasil tambah barang ke keranjang");
+    // dashboardCt
+    //     .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
+    // Get.back();
+    // Get.back();
+    // Get.back();
+    // dashboardCt
+    //     .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
+    // dashboardCt.listMenu.refresh();
+    // dashboardCt.listKeranjang.refresh();
+    // dashboardCt.listKeranjangArsip.refresh();
     setIdle();
   }
 
@@ -149,11 +163,11 @@ class MasukKeranjangController extends BaseController {
       'periode': '${AppData.periodeSelected}',
       'stringTabel': 'JLDT',
       'jldt_pk': "${dashboardCt.primaryKeyFaktur.value}",
-      'jldt_cabang': "01",
+      'jldt_cabang': dashboardCt.cabangKodeSelected.value,
       'jldt_nomor': "${dashboardCt.nomorFaktur.value}",
       'jldt_nourut': valueNomorUrut,
       'jldt_nokey': norutKey,
-      'jldt_cbxx': "01",
+      'jldt_cbxx': dashboardCt.cabangKodeSelected.value,
       'jldt_noxx': "${dashboardCt.nomorFaktur.value}",
       'jldt_nosub': norutKey,
       'jldt_tanggal': tanggalNow,
@@ -206,12 +220,12 @@ class MasukKeranjangController extends BaseController {
       "database": '${AppData.databaseSelected}',
       "periode": '${AppData.periodeSelected}',
       "stringTabel": 'PROD3',
-      "prod3_cabang": "01",
+      "prod3_cabang": dashboardCt.cabangKodeSelected.value,
       "prod3_nomor": "${dashboardCt.nomorFaktur.value}",
       "prod3_nomorcb": "${dashboardCt.nomorCbLastSelected.value}",
       "prod3_nourut": valueNomorUrut,
       "prod3_nokey": valueNoKey,
-      "prod3_cbxx": "01",
+      "prod3_cbxx": dashboardCt.cabangKodeSelected.value,
       "prod3_noxx": "${dashboardCt.nomorFaktur.value}",
       "prod3_nosub": valueNoKey,
       "prod3_noref": "${dashboardCt.informasiJlhd[0]['NOREF']}",
@@ -269,6 +283,131 @@ class MasukKeranjangController extends BaseController {
         print(valueBody);
       }
     });
+  }
+
+  void insertJlim(produkSelected, valueNomorKey, valueNomorUrut,
+      hrgJualEditFinal, filterJumlahPesan, imeiData) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'JLIM',
+      'pk_jlim': "${dashboardCt.primaryKeyFaktur.value}",
+      'cabang_jlim': dashboardCt.cabangKodeSelected.value,
+      'nomor_jlim': dashboardCt.nomorFaktur.value,
+      'nokey_jlim': valueNomorKey,
+      'flag_jlim': "7",
+      'doe_jlim': tanggalDanJam,
+      'toe_jlim': jamTransaksi,
+      'loe_jlim': tanggalDanJam,
+      'deo_jlim': dataInformasiSYSUSER[0],
+      'imei_jlim': imeiData,
+    };
+    var connect = Api.connectionApi("post", body, "insert_jlim");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    // List data = valueBody['data'];
+    print(valueBody);
+  }
+
+  void insertProd2(produkSelected, valueNomorKey, valueNomorUrut,
+      hrgJualEditFinal, filterJumlahPesan, imeiData) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'PROD2',
+      'cabang_prod2': dashboardCt.cabangKodeSelected.value,
+      'nomor_prod2': dashboardCt.nomorFaktur.value,
+      'nomorcb_prod2': dashboardCt.nomorCbLastSelected.value,
+      'nokey_prod2': valueNomorKey,
+      'cbxx_prod2': dashboardCt.cabangKodeSelected.value,
+      'noxx_prod2': dashboardCt.nomorFaktur.value,
+      'nosub_prod2': valueNomorKey,
+      'tanggal_prod2': tanggalNow,
+      'tgl_prod2': tanggalNow,
+      'custom_prod2': dashboardCt.customSelected.value,
+      'wilayah_prod2': dashboardCt.wilayahCustomerSelected.value,
+      'salesm_prod2': dashboardCt.kodePelayanSelected.value,
+      'gudang_prod2': dashboardCt.gudangSelected.value,
+      'group_prod2': produkSelected[0]['GROUP'],
+      'barang_prod2': produkSelected[0]['KODE'],
+      'uang_prod2': "RP",
+      'kurs_prod2': "1",
+      'harga_prod2': hrgJualEditFinal,
+      'flag_prod2': "7",
+      'doe_prod2': tanggalDanJam,
+      'toe_prod2': jamTransaksi,
+      'loe_prod2': tanggalDanJam,
+      'deo_prod2': dataInformasiSYSUSER[0],
+      'cb_prod2': dashboardCt.cabangKodeSelected.value,
+      'imei_jlim': imeiData,
+    };
+
+    var connect = Api.connectionApi("post", body, "insert_prod2");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    // List data = valueBody['data'];
+    print(valueBody);
+  }
+
+  void insertImeix(produkSelected, valueNomorKey, valueNomorUrut,
+      hrgJualEditFinal, filterJumlahPesan, imeiData) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'IMEIX',
+      'cabang_imeix': dashboardCt.cabangKodeSelected.value,
+      'nomor_imeix': dashboardCt.nomorFaktur.value,
+      'nomorcb_imeix': dashboardCt.nomorCbLastSelected.value,
+      'nokey_imeix': valueNomorKey,
+      'cbxx_imeix': dashboardCt.cabangKodeSelected.value,
+      'noxx_imeix': dashboardCt.nomorFaktur.value,
+      'nosub_imeix': valueNomorKey,
+      'tanggal_imeix': tanggalNow,
+      'tgl_imeix': tanggalNow,
+      'custom_imeix': dashboardCt.customSelected.value,
+      'wilayah_imeix': dashboardCt.wilayahCustomerSelected.value,
+      'salesm_imeix': dashboardCt.kodePelayanSelected.value,
+      'gudang_imeix': dashboardCt.gudangSelected.value,
+      'group_imeix': produkSelected[0]['GROUP'],
+      'barang_imeix': produkSelected[0]['KODE'],
+      'uang_imeix': "RP",
+      'kurs_imeix': "1",
+      'harga_imeix': hrgJualEditFinal,
+      'flag_imeix': "7",
+      'doe_imeix': tanggalDanJam,
+      'toe_imeix': jamTransaksi,
+      'loe_imeix': tanggalDanJam,
+      'deo_imeix': dataInformasiSYSUSER[0],
+      'cb_imeix': dashboardCt.cabangKodeSelected.value,
+      'imei_jlim': imeiData,
+    };
+
+    var connect = Api.connectionApi("post", body, "insert_imeix");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    // List data = valueBody['data'];
+    print(valueBody);
   }
 
   Future<bool> checkStok(group, kode, tanggalJlhd, filterJumlahPesan) async {

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:siscom_pos/controller/pos/hapus_jldt_controller.dart';
 import 'package:siscom_pos/controller/pos/masuk_keranjang_controller.dart';
 import 'package:siscom_pos/controller/pos/simpan_faktur_controller.dart';
 import 'package:siscom_pos/screen/pos/rincian_pemesanan.dart';
+import 'package:siscom_pos/screen/pos/scan_imei.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -31,9 +31,17 @@ class BottomSheetPos extends BaseController
   var editKeranjangCt = Get.put(EditKeranjangController());
 
   var viewScreenOrder = false.obs;
+  var tipeImei = false.obs;
+
   var typeFocus = "".obs;
+  var imeiSelected = "".obs;
+  Rx<List<String>> imeiBarang = Rx<List<String>>([]);
+
+  var screenCustomImei = 0.obs;
 
   var listDataMeja = [].obs;
+  var listDataImei = [].obs;
+  var listDataImeiSelected = [].obs;
 
   FocusNode _focus = FocusNode();
 
@@ -92,33 +100,81 @@ class BottomSheetPos extends BaseController
     _focus.dispose();
   }
 
-  void buttomShowCardMenu(context, id, jual) {
+  void buttomShowCardMenu(context, id, jual) async {
     dashboardCt.totalPesan.value = 0;
     dashboardCt.totalPesanNoEdit.value = 0;
     dashboardCt.catatanPembelian.value.text = "";
     dashboardCt.persenDiskonPesanBarang.value.text = "";
     dashboardCt.hargaDiskonPesanBarang.value.text = "";
+    imeiSelected.value = "";
+    imeiBarang.value.clear();
+    listDataImei.value.clear();
     var produkSelected = [];
     for (var element in dashboardCt.listMenu.value) {
       if ("${element['GROUP']}${element['KODE']}" == id) {
         produkSelected.add(element);
       }
     }
-    if (produkSelected[0]['TIPE'] != "1") {
-      print('produk terpilih $produkSelected');
-      dashboardCt.tipeBarangDetail.value = int.parse(produkSelected[0]['TIPE']);
-      if (dashboardCt.kodePelayanSelected.value == "" ||
-          dashboardCt.customSelected.value == "" ||
-          dashboardCt.cabangKodeSelected.value == "") {
-        UtilsAlert.showToast(
-            "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
+    print('produk terpilih $produkSelected');
+    dashboardCt.tipeBarangDetail.value = int.parse(produkSelected[0]['TIPE']);
+    if (dashboardCt.kodePelayanSelected.value == "" ||
+        dashboardCt.customSelected.value == "" ||
+        dashboardCt.cabangKodeSelected.value == "") {
+      UtilsAlert.showToast(
+          "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
+    } else {
+      if (produkSelected[0]['TIPE'] == "1") {
+        print('proses check imei');
+        Future<bool> checkingImei = prosesCheckImei(produkSelected);
+        var hasilEmei = await checkingImei;
+        if (hasilEmei == true) {
+          // print(imeiBarang.value);
+          // print(imeiSelected.value);
+          checkingUkuran(context, produkSelected, jual, "", 0, "", "", "", "",
+              "", "", "", "");
+        } else {
+          UtilsAlert.showToast("Data IMEI tidak valid");
+        }
       } else {
         checkingUkuran(context, produkSelected, jual, "", 0, "", "", "", "", "",
             "", "", "");
       }
-    } else {
-      // sheetButtomMenu2();
     }
+  }
+
+  Future<bool> prosesCheckImei(produkSelected) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'IMEIX',
+      'tanggal_transaksi': tanggalNow,
+      'kode_barang': produkSelected[0]['KODE'],
+      'group_barang': produkSelected[0]['GROUP'],
+      'kode_cabang': dashboardCt.cabangKodeSelected.value,
+      'kode_gudang': dashboardCt.gudangSelected.value,
+    };
+    var connect = Api.connectionApi("post", body, "getImei");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    bool hasilProses = false;
+    if (valueBody['status'] == true) {
+      if (data.isNotEmpty) {
+        var getFirst = data.first;
+        imeiSelected.value = getFirst["IMEI"];
+        for (var element in data) {
+          imeiBarang.value.add(element["IMEI"]);
+        }
+        listDataImei.value = data;
+        refreshAll();
+        hasilProses = true;
+      }
+    } else {
+      hasilProses = false;
+    }
+    return Future.value(hasilProses);
   }
 
   void checkingUkuran(context, produkSelected, jual, type, qtyProduk, nomorUrut,
@@ -142,7 +198,8 @@ class BottomSheetPos extends BaseController
         dashboardCt.htgUkuran.value = "${getFirst['HTG']}";
         dashboardCt.pakUkuran.value = "${getFirst['PAK']}";
         if (type != "edit_keranjang") {
-          dashboardCt.jumlahPesan.value.text = "1";
+          dashboardCt.jumlahPesan.value.text =
+              produkSelected[0]["TIPE"] == "1" ? "0" : "1";
           dashboardCt.totalPesan.value =
               double.parse("${getFirst['STDJUAL']}").toPrecision(2);
           dashboardCt.totalPesanNoEdit.value =
@@ -171,17 +228,29 @@ class BottomSheetPos extends BaseController
         for (var element in data) {
           dashboardCt.typeBarang.value.add(element['NAMA']);
         }
+        tipeImei.value = produkSelected[0]["TIPE"] == "1" ? true : false;
+        screenCustomImei.value = 0;
         dashboardCt.listTypeBarang.value = data;
-        dashboardCt.totalPesan.refresh();
-        dashboardCt.jumlahPesan.refresh();
-        dashboardCt.hargaJualPesanBarang.refresh();
-        dashboardCt.typeBarangSelected.refresh();
-        dashboardCt.listTypeBarang.refresh();
+        listDataImeiSelected.value.clear();
+        refreshAll();
         typeFocus.value = "";
         sheetButtomMenu1(produkSelected, type, nomorUrut, keyFaktur,
             nomorFaktur, gudang, group, kode, qtyProduk);
       }
     });
+  }
+
+  void refreshAll() {
+    dashboardCt.totalPesan.refresh();
+    dashboardCt.jumlahPesan.refresh();
+    dashboardCt.hargaJualPesanBarang.refresh();
+    dashboardCt.typeBarangSelected.refresh();
+    dashboardCt.listTypeBarang.refresh();
+    tipeImei.refresh();
+    imeiSelected.refresh();
+    imeiBarang.refresh();
+    listDataImei.refresh();
+    screenCustomImei.refresh();
   }
 
   void editKeranjang(context, group, kode, jual, qtyProduk, nomorUrut,
@@ -322,445 +391,89 @@ class BottomSheetPos extends BaseController
                       ),
 
                       SizedBox(
-                        height: Utility.normal,
+                        height: Utility.large + 6,
                       ),
 
-                      // screen input quantity
+                      // screen barang IMEI
 
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 60,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                "Quantity",
-                                style: TextStyle(color: Utility.grey900),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 40,
-                            child: Container(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            aksiKurangQty(context);
-                                          });
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 4.0),
-                                          child: Center(
-                                            child: Icon(
-                                              Iconsax.minus_square,
-                                              size: 22,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: CardCustomForm(
-                                        colorBg: Utility.baseColor2,
-                                        tinggiCard: 30.0,
-                                        radiusBorder: Utility.borderStyle1,
-                                        widgetCardForm: Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 6.0),
-                                          child: FocusScope(
-                                            child: Focus(
-                                              onFocusChange: (focus) {
-                                                aksiFokus1();
-                                              },
-                                              child: TextField(
-                                                textAlign: TextAlign.center,
-                                                cursorColor:
-                                                    Utility.primaryDefault,
-                                                controller: dashboardCt
-                                                    .jumlahPesan.value,
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                ),
-                                                style: TextStyle(
-                                                    fontSize: 14.0,
-                                                    height: 1.0,
-                                                    color: Colors.black),
-                                                onSubmitted: (value) {
-                                                  aksiInputQty(context, value);
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            aksiTambahQty(context);
-                                          });
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 4.0),
-                                          child: Center(
-                                            child: Icon(
-                                              Iconsax.add_square,
-                                              size: 22,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          )
-                        ],
-                      ),
-
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-
-                      // screen harga standar jual
-
-                      Container(
-                        height: 50,
-                        width: MediaQuery.of(Get.context!).size.width,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: Utility.borderStyle2,
-                            border: Border.all(
-                                width: 1.0,
-                                color: Color.fromARGB(255, 211, 205, 205))),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 10,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    color: Utility.grey100,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(16),
-                                      bottomLeft: Radius.circular(16),
-                                    )),
-                                child: Center(
-                                  child: Text("Rp"),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 90,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 6.0),
-                                child: FocusScope(
-                                  child: Focus(
-                                    onFocusChange: (focus) {
-                                      aksiFokus2();
+                      tipeImei.value == false
+                          ? SizedBox()
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        screenCustomImei.value = 0;
+                                      });
                                     },
-                                    child: TextField(
-                                      inputFormatters: [
-                                        CurrencyTextInputFormatter(
-                                          locale: 'id',
-                                          symbol: '',
-                                          decimalDigits: 0,
-                                        )
-                                      ],
-                                      cursorColor: Colors.black,
-                                      controller: dashboardCt
-                                          .hargaJualPesanBarang.value,
-                                      keyboardType:
-                                          TextInputType.numberWithOptions(
-                                              signed: true),
-                                      textInputAction: TextInputAction.done,
-                                      decoration: new InputDecoration(
-                                          border: InputBorder.none),
-                                      style: TextStyle(
-                                          fontSize: 14.0,
-                                          height: 1.0,
-                                          color: Colors.black),
-                                      onSubmitted: (value) {
-                                        aksiGantiHargaStdJual(context, value);
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-
-                      // screen type barang
-
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: Utility.borderStyle2,
-                            border: Border.all(
-                                width: 0.5,
-                                color: Color.fromARGB(255, 211, 205, 205))),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              isDense: true,
-                              autofocus: true,
-                              focusColor: Colors.grey,
-                              items: dashboardCt.typeBarang.value
-                                  .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value,
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                );
-                              }).toList(),
-                              value: dashboardCt.typeBarangSelected.value,
-                              onChanged: (selectedValue) {
-                                setState(() {
-                                  dashboardCt.typeBarangSelected.value =
-                                      selectedValue!;
-                                  dashboardCt.typeBarangSelected.refresh();
-                                });
-                              },
-                              isExpanded: true,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-
-                      // screen diskon barang
-
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 30,
-                            child: Container(
-                              height: 50,
-                              margin: EdgeInsets.only(right: 6.0),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: Utility.borderStyle2,
-                                  border: Border.all(
-                                      width: 1.0,
-                                      color:
-                                          Color.fromARGB(255, 211, 205, 205))),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: 80,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 6),
-                                      child: FocusScope(
-                                        child: Focus(
-                                          onFocusChange: (focus) {
-                                            typeFocus.value = "persen_diskon";
-                                          },
-                                          child: TextField(
-                                            textAlign: TextAlign.center,
-                                            cursorColor: Colors.black,
-                                            controller: dashboardCt
-                                                .persenDiskonPesanBarang.value,
-                                            keyboardType:
-                                                TextInputType.numberWithOptions(
-                                                    signed: true),
-                                            textInputAction:
-                                                TextInputAction.done,
-                                            decoration: new InputDecoration(
-                                                border: InputBorder.none),
-                                            style: TextStyle(
-                                                fontSize: 14.0,
-                                                height: 1.0,
-                                                color: Colors.black),
-                                            onSubmitted: (value) {
-                                              aksiInputPersenDiskon(
-                                                  context, value);
-                                            },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: screenCustomImei.value == 0
+                                                ? Utility.primaryDefault
+                                                : Colors.transparent,
+                                            width: 2.0,
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                      flex: 20,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Utility.grey100,
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(16),
-                                              bottomRight: Radius.circular(16),
-                                            )),
-                                        child: Center(
-                                          child: Text("%"),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 70,
-                            child: Container(
-                              height: 50,
-                              margin: EdgeInsets.only(left: 6.0),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: Utility.borderStyle2,
-                                  border: Border.all(
-                                      width: 1.0,
-                                      color:
-                                          Color.fromARGB(255, 211, 205, 205))),
-                              child: IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 20,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Utility.grey100,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(16),
-                                              bottomLeft: Radius.circular(16),
-                                            )),
-                                        child: Center(
-                                          child: Text("Rp"),
+                                      child: Center(
+                                        child: Text(
+                                          "Detail",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 70,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: FocusScope(
-                                          child: Focus(
-                                            onFocusChange: (focus) {
-                                              typeFocus.value =
-                                                  "nominal_diskon";
-                                            },
-                                            child: TextField(
-                                              inputFormatters: [
-                                                CurrencyTextInputFormatter(
-                                                  locale: 'id',
-                                                  symbol: '',
-                                                  decimalDigits: 0,
-                                                )
-                                              ],
-                                              cursorColor: Colors.black,
-                                              controller: dashboardCt
-                                                  .hargaDiskonPesanBarang.value,
-                                              keyboardType: TextInputType
-                                                  .numberWithOptions(
-                                                      signed: true),
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              decoration: new InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: "Nominal Diskon"),
-                                              style: TextStyle(
-                                                  fontSize: 14.0,
-                                                  height: 1.0,
-                                                  color: Colors.black),
-                                              onSubmitted: (value) {
-                                                aksiInputNominalDiskon(
-                                                    context, value);
-                                              },
-                                            ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        screenCustomImei.value = 1;
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: screenCustomImei.value == 1
+                                                ? Utility.primaryDefault
+                                                : Colors.transparent,
+                                            width: 2.0,
                                           ),
                                         ),
                                       ),
+                                      child: Center(
+                                        child: Text(
+                                          "Serial Number/Imei",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
                                     ),
-                                    dashboardCt.hargaDiskonPesanBarang.value
-                                                .text !=
-                                            ""
-                                        ? Expanded(
-                                            flex: 10,
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  clearInputanDiskon();
-                                                });
-                                              },
-                                              child: Center(
-                                                child: type == "edit_keranjang"
-                                                    ? SizedBox()
-                                                    : Icon(
-                                                        Iconsax.minus_cirlce,
-                                                        color: Colors.red,
-                                                      ),
-                                              ),
-                                            ),
-                                          )
-                                        : SizedBox()
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                )
+                              ],
                             ),
-                          )
-                        ],
-                      ),
 
                       SizedBox(
-                        height: Utility.medium,
+                        height: Utility.large + 6,
                       ),
 
-                      // screen tambah catatan
-
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: Utility.borderStyle2,
-                            border: Border.all(
-                                width: 1.0,
-                                color: Color.fromARGB(255, 211, 205, 205))),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: TextField(
-                            cursorColor: Colors.black,
-                            controller: dashboardCt.catatanPembelian.value,
-                            maxLines: null,
-                            maxLength: 225,
-                            decoration: new InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Tambah Catatan"),
-                            keyboardType: TextInputType.multiline,
-                            textInputAction: TextInputAction.done,
-                            style: TextStyle(
-                                fontSize: 12.0,
-                                height: 2.0,
-                                color: Colors.black),
-                          ),
-                        ),
-                      ),
+                      tipeImei.value == false
+                          ? screenDetailInputBarang(setState, type)
+                          : screenCustomImei.value == 0
+                              ? screenDetailInputBarang(setState, type)
+                              : screenCustomImei.value == 1
+                                  ? screenImei(setState)
+                                  : screenDetailInputBarang(setState, type),
 
                       SizedBox(
-                        height: Utility.medium,
+                        height: Utility.large,
                       ),
 
                       // screen total
@@ -870,6 +583,621 @@ class BottomSheetPos extends BaseController
             );
           });
         });
+  }
+
+  Widget screenDetailInputBarang(setState, type) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // screen input quantity
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5.0),
+                  child: Text(
+                    "Quantity",
+                    style: TextStyle(color: Utility.grey900),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 40,
+                child: Container(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (tipeImei.value == false) {
+                                  aksiKurangQty(Get.context!);
+                                }
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: Center(
+                                child: Icon(
+                                  Iconsax.minus_square,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: CardCustomForm(
+                            colorBg: Utility.baseColor2,
+                            tinggiCard: 30.0,
+                            radiusBorder: Utility.borderStyle1,
+                            widgetCardForm: Padding(
+                              padding: const EdgeInsets.only(bottom: 6.0),
+                              child: FocusScope(
+                                child: Focus(
+                                  onFocusChange: (focus) {
+                                    aksiFokus1();
+                                  },
+                                  child: TextField(
+                                    textAlign: TextAlign.center,
+                                    readOnly:
+                                        tipeImei.value == false ? false : true,
+                                    cursorColor: Utility.primaryDefault,
+                                    controller: dashboardCt.jumlahPesan.value,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                    ),
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        height: 1.0,
+                                        color: Colors.black),
+                                    onSubmitted: (value) {
+                                      aksiInputQty(Get.context!, value);
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (tipeImei.value == false) {
+                                  aksiTambahQty(Get.context!);
+                                }
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: Center(
+                                child: Icon(
+                                  Iconsax.add_square,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )),
+              )
+            ],
+          ),
+
+          SizedBox(
+            height: Utility.medium,
+          ),
+
+          // screen harga standar jual
+
+          Container(
+            height: 50,
+            width: MediaQuery.of(Get.context!).size.width,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 10,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Utility.grey100,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
+                        )),
+                    child: Center(
+                      child: Text("Rp"),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 90,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6.0),
+                    child: FocusScope(
+                      child: Focus(
+                        onFocusChange: (focus) {
+                          aksiFokus2();
+                        },
+                        child: TextField(
+                          inputFormatters: [
+                            CurrencyTextInputFormatter(
+                              locale: 'id',
+                              symbol: '',
+                              decimalDigits: 0,
+                            )
+                          ],
+                          cursorColor: Colors.black,
+                          controller: dashboardCt.hargaJualPesanBarang.value,
+                          keyboardType:
+                              TextInputType.numberWithOptions(signed: true),
+                          textInputAction: TextInputAction.done,
+                          decoration:
+                              new InputDecoration(border: InputBorder.none),
+                          style: TextStyle(
+                              fontSize: 14.0, height: 1.0, color: Colors.black),
+                          onSubmitted: (value) {
+                            aksiGantiHargaStdJual(Get.context!, value);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+
+          SizedBox(
+            height: Utility.medium,
+          ),
+
+          // screen type barang
+
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 0.5, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isDense: true,
+                  autofocus: true,
+                  focusColor: Colors.grey,
+                  items: dashboardCt.typeBarang.value
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
+                  value: dashboardCt.typeBarangSelected.value,
+                  onChanged: (selectedValue) {
+                    setState(() {
+                      dashboardCt.typeBarangSelected.value = selectedValue!;
+                      dashboardCt.typeBarangSelected.refresh();
+                    });
+                  },
+                  isExpanded: true,
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(
+            height: Utility.medium,
+          ),
+
+          // screen diskon barang
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 30,
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.only(right: 6.0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: Utility.borderStyle2,
+                      border: Border.all(
+                          width: 1.0,
+                          color: Color.fromARGB(255, 211, 205, 205))),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 80,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 6),
+                          child: FocusScope(
+                            child: Focus(
+                              onFocusChange: (focus) {
+                                typeFocus.value = "persen_diskon";
+                              },
+                              child: TextField(
+                                textAlign: TextAlign.center,
+                                cursorColor: Colors.black,
+                                controller:
+                                    dashboardCt.persenDiskonPesanBarang.value,
+                                keyboardType: TextInputType.numberWithOptions(
+                                    signed: true),
+                                textInputAction: TextInputAction.done,
+                                decoration: new InputDecoration(
+                                    border: InputBorder.none),
+                                style: TextStyle(
+                                    fontSize: 14.0,
+                                    height: 1.0,
+                                    color: Colors.black),
+                                onSubmitted: (value) {
+                                  aksiInputPersenDiskon(Get.context!, value);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                          flex: 20,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Utility.grey100,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  bottomRight: Radius.circular(16),
+                                )),
+                            child: Center(
+                              child: Text("%"),
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 70,
+                child: Container(
+                  height: 50,
+                  margin: EdgeInsets.only(left: 6.0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: Utility.borderStyle2,
+                      border: Border.all(
+                          width: 1.0,
+                          color: Color.fromARGB(255, 211, 205, 205))),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 20,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Utility.grey100,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(16),
+                                  bottomLeft: Radius.circular(16),
+                                )),
+                            child: Center(
+                              child: Text("Rp"),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 70,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 6),
+                            child: FocusScope(
+                              child: Focus(
+                                onFocusChange: (focus) {
+                                  typeFocus.value = "nominal_diskon";
+                                },
+                                child: TextField(
+                                  inputFormatters: [
+                                    CurrencyTextInputFormatter(
+                                      locale: 'id',
+                                      symbol: '',
+                                      decimalDigits: 0,
+                                    )
+                                  ],
+                                  cursorColor: Colors.black,
+                                  controller:
+                                      dashboardCt.hargaDiskonPesanBarang.value,
+                                  keyboardType: TextInputType.numberWithOptions(
+                                      signed: true),
+                                  textInputAction: TextInputAction.done,
+                                  decoration: new InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "Nominal Diskon"),
+                                  style: TextStyle(
+                                      fontSize: 14.0,
+                                      height: 1.0,
+                                      color: Colors.black),
+                                  onSubmitted: (value) {
+                                    aksiInputNominalDiskon(Get.context!, value);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        dashboardCt.hargaDiskonPesanBarang.value.text != ""
+                            ? Expanded(
+                                flex: 10,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      clearInputanDiskon();
+                                    });
+                                  },
+                                  child: Center(
+                                    child: type == "edit_keranjang"
+                                        ? SizedBox()
+                                        : Icon(
+                                            Iconsax.minus_cirlce,
+                                            color: Colors.red,
+                                          ),
+                                  ),
+                                ),
+                              )
+                            : SizedBox()
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+
+          SizedBox(
+            height: Utility.medium,
+          ),
+
+          // screen tambah catatan
+
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: TextField(
+                cursorColor: Colors.black,
+                controller: dashboardCt.catatanPembelian.value,
+                maxLines: null,
+                maxLength: 225,
+                decoration: new InputDecoration(
+                    border: InputBorder.none, hintText: "Tambah Catatan"),
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.done,
+                style:
+                    TextStyle(fontSize: 12.0, height: 2.0, color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget screenImei(setState) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 40,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: Utility.borderStyle2,
+                        border: Border.all(
+                            width: 0.5,
+                            color: Color.fromARGB(255, 211, 205, 205))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isDense: true,
+                          autofocus: true,
+                          focusColor: Colors.grey,
+                          items: imeiBarang.value
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
+                          value: imeiSelected.value,
+                          onChanged: (selectedValue) {
+                            setState(() {
+                              imeiSelected.value = selectedValue!;
+                              imeiSelected.refresh();
+                              int lengthBefore =
+                                  listDataImeiSelected.value.length;
+                              listDataImeiSelected.value
+                                  .add(imeiSelected.value);
+                              var filter =
+                                  listDataImeiSelected.toSet().toList();
+                              listDataImeiSelected.value = filter;
+                              listDataImeiSelected.refresh();
+                              if (lengthBefore !=
+                                  listDataImeiSelected.value.length) {
+                                aksiTambahQty(Get.context!);
+                              }
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 40,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: Center(
+                        child: Button3(
+                      textBtn: "Scan IMEI",
+                      colorSideborder: Utility.primaryDefault,
+                      overlayColor: Utility.infoLight50,
+                      colorText: Utility.primaryDefault,
+                      icon1: Icon(
+                        Iconsax.scan_barcode,
+                        color: Utility.primaryDefault,
+                      ),
+                      onTap: () => Get.to(ScanImei()),
+                    )),
+                  ),
+                ),
+                Expanded(
+                  flex: 10,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        imeiSelected.value = imeiSelected.value;
+                        int lengthBefore = listDataImeiSelected.value.length;
+                        listDataImeiSelected.value.add(imeiSelected.value);
+                        var filter = listDataImeiSelected.toSet().toList();
+                        listDataImeiSelected.value = filter;
+                        listDataImeiSelected.refresh();
+                        if (lengthBefore != listDataImeiSelected.value.length) {
+                          aksiTambahQty(Get.context!);
+                        }
+                      });
+                    },
+                    child: Center(
+                      child: Icon(
+                        Iconsax.refresh,
+                        color: Utility.primaryDefault,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Utility.large,
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle1,
+                border: Border.all(
+                    width: 0.5, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "IMEI Terpilih",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: listDataImeiSelected.value.length,
+                    itemBuilder: (context, index) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IntrinsicHeight(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 90,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "${listDataImeiSelected.value[index]}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 10,
+                                    child: Center(
+                                        child: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          listDataImeiSelected.value
+                                              .removeWhere((element) =>
+                                                  element ==
+                                                  listDataImeiSelected
+                                                      .value[index]);
+                                          aksiKurangQty(Get.context!);
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Iconsax.trash,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                    )),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Divider()
+                        ],
+                      );
+                    })
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Utility.large,
+          )
+        ],
+      ),
+    );
   }
 
   void aksiFokus1() {}
@@ -988,8 +1316,14 @@ class BottomSheetPos extends BaseController
                                   } else if (type == "transaksi_baru") {
                                     transaksiBaru();
                                   } else {
-                                    masukKeranjangCt
-                                        .masukKeranjang(dataSelected);
+                                    if (tipeImei.value == true) {
+                                      masukKeranjangCt.masukKeranjang(
+                                          dataSelected,
+                                          listDataImeiSelected.value);
+                                    } else {
+                                      masukKeranjangCt
+                                          .masukKeranjang(dataSelected, []);
+                                    }
                                   }
                                 });
                               },
@@ -1174,7 +1508,8 @@ class BottomSheetPos extends BaseController
   void aksiKurangQty(content) {
     double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
-    if (vld2 <= 0 || vld2 == 1 || vld2 == 0) {
+
+    if (vld2 <= 0) {
       UtilsAlert.showToast("Quantity tidak valid");
     } else {
       var hargaJualEdit = dashboardCt.hargaJualPesanBarang.value.text;
@@ -1480,5 +1815,27 @@ class BottomSheetPos extends BaseController
     dashboardCt.customSelected.refresh();
     dashboardCt.kodePelayanSelected.refresh();
     dashboardCt.primaryKeyFaktur.refresh();
+  }
+
+  void editBarangKeranjang(selectedProduk) {
+    var filterProduk = [];
+    for (var element in dashboardCt.listKeranjangArsip.value) {
+      if ("${element['GROUP']}${element['BARANG']}" ==
+          "${selectedProduk["GROUP"]}${selectedProduk["KODE"]}") {
+        filterProduk.add(element);
+      }
+    }
+    editKeranjang(
+        Get.context!,
+        selectedProduk["GROUP"],
+        selectedProduk["KODE"],
+        selectedProduk["STDJUAL"],
+        selectedProduk["jumlah_beli"],
+        filterProduk[0]["NOURUT"],
+        filterProduk[0]["PK"],
+        filterProduk[0]["NOMOR"],
+        filterProduk[0]["GUDANG"],
+        filterProduk[0]["DISCD"],
+        filterProduk[0]["DISC1"]);
   }
 }

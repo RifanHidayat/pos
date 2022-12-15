@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:siscom_pos/controller/global_controller.dart';
+import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/scan_barang_controller.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -23,6 +25,8 @@ class _ScanBarangState extends State<ScanBarang> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 
   var scanBarangCt = Get.put(ScanBarangController());
+  var globalCt = Get.put(GlobalController());
+  
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -211,7 +215,10 @@ class _ScanBarangState extends State<ScanBarang> {
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text("Refresh"),
+                                      child: Text(
+                                        "Refresh",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                     ),
                                   ))
                             ],
@@ -231,62 +238,132 @@ class _ScanBarangState extends State<ScanBarang> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(Get.context!).size.width,
-                      margin: EdgeInsets.only(left: 16, right: 16),
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          borderRadius: Utility.borderStyle1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: scanBarangCt.barangSelect.value.isEmpty
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Barcode Type",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: Utility.medium),
+                () => SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: MediaQuery.of(Get.context!).size.width,
+                        margin: EdgeInsets.only(left: 16, right: 16),
+                        decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            borderRadius: Utility.borderStyle1),
+                        child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: Utility.medium,
+                                ),
+                                IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 25,
+                                        child: Container(
+                                          height: 60,
+                                          alignment: Alignment.center,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(6),
+                                                  topRight: Radius.circular(6),
+                                                  bottomLeft:
+                                                      Radius.circular(6),
+                                                  bottomRight:
+                                                      Radius.circular(6)),
+                                              image: DecorationImage(
+                                                  alignment:
+                                                      Alignment.topCenter,
+                                                  image: AssetImage(
+                                                      'assets/no_image.png'),
+                                                  // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
+                                                  fit: BoxFit.fill)),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 65,
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${scanBarangCt.barangSelect.value[0]['NAMA']}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect.value[0]['STDJUAL'], 0)}",
+                                                style: TextStyle(
+                                                  color: Utility.greyDark,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 10,
+                                        child: IconButton(
+                                          onPressed: () => scanBarangCt
+                                              .validasiDetailPilihMenu(),
+                                          icon: Icon(
+                                            Iconsax.add_circle,
+                                            color: Utility.primaryDefault,
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                  SizedBox(
-                                    height: Utility.small,
-                                  ),
-                                  Text("${scanBarangCt.typeScan.value}"),
-                                  SizedBox(
-                                    height: Utility.medium,
-                                  ),
-                                  Text(
-                                    "Data Scan",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: Utility.medium),
-                                  ),
-                                  SizedBox(
-                                    height: Utility.small,
-                                  ),
-                                  Text("${scanBarangCt.codeScan.value}"),
-                                  SizedBox(
-                                    height: Utility.medium,
-                                  ),
-                                  Button1(
-                                    textBtn: "Periksa Barang",
-                                    colorBtn: Utility.primaryDefault,
-                                    colorText: Colors.white,
-                                    onTap: () {},
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [],
-                              ),
-                      ),
-                    )
-                  ],
+                                ),
+                                SizedBox(
+                                  height: Utility.medium,
+                                ),
+                                // Text(
+                                //   "Barcode Type",
+                                //   style: TextStyle(
+                                //       fontWeight: FontWeight.bold,
+                                //       fontSize: Utility.medium),
+                                // ),
+                                // SizedBox(
+                                //   height: Utility.small,
+                                // ),
+                                // Text("${scanBarangCt.typeScan.value}"),
+                                // SizedBox(
+                                //   height: Utility.medium,
+                                // ),
+                                // Text(
+                                //   "Data Scan",
+                                //   style: TextStyle(
+                                //       fontWeight: FontWeight.bold,
+                                //       fontSize: Utility.medium),
+                                // ),
+                                // SizedBox(
+                                //   height: Utility.small,
+                                // ),
+                                // Text("${scanBarangCt.codeScan.value}"),
+                                // SizedBox(
+                                //   height: Utility.medium,
+                                // ),
+                                // Button1(
+                                //   textBtn: "Periksa Barang",
+                                //   colorBtn: Utility.primaryDefault,
+                                //   colorText: Colors.white,
+                                //   onTap: () {},
+                                // ),
+                              ],
+                            )),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
