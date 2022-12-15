@@ -27,15 +27,19 @@ class MasukKeranjangController extends BaseController {
         Utility.convertDate4(dashboardCt.informasiJlhd[0]["TANGGAL"]);
     var tanggalJlhd = "$convertTanggal1 23:59:59";
 
-    Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
-        produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
-    bool hasilValidasi1 = await validasi1;
-    if (hasilValidasi1 == true) {
+    if (produkSelected[0]['TIPE'] == 3) {
       aksiMasukKeranjangLocal(produkSelected);
     } else {
-      Get.back();
-      Get.back();
-      Get.back();
+      Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
+          produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
+      bool hasilValidasi1 = await validasi1;
+      if (hasilValidasi1 == true) {
+        aksiMasukKeranjangLocal(produkSelected);
+      } else {
+        Get.back();
+        Get.back();
+        Get.back();
+      }
     }
   }
 

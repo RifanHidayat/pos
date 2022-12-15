@@ -3,14 +3,16 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class Sidebar extends StatelessWidget {
-  final controller = Get.put(DashbardController());
-  var globalController = Get.put(GlobalController());
+  final controller = Get.put(SidebarController());
+  final dashboardCt = Get.put(DashbardController());
+  var globalCt = Get.put(GlobalController());
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +71,7 @@ class Sidebar extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(left: 16.0, right: 16.0),
                 child: CardCustom(
-                    colorBg: controller.listKeranjangArsip.value.isEmpty &&
-                            controller.nomorFaktur.value == "-"
-                        ? Utility.baseColor2
-                        : Utility.greyLight100,
+                    colorBg: Utility.baseColor2,
                     radiusBorder: Utility.borderStyle1,
                     widgetCardCustom: IntrinsicHeight(
                       child: Row(
@@ -82,17 +81,11 @@ class Sidebar extends StatelessWidget {
                           Expanded(
                             child: InkWell(
                               onTap: () {
-                                if (controller
-                                        .listKeranjangArsip.value.isEmpty &&
-                                    controller.nomorFaktur.value == "-") {
-                                  globalController.buttomSheet1(
-                                      controller.listCabang.value,
-                                      "Pilih Cabang",
-                                      "dashboard",
-                                      controller.cabangNameSelected.value);
-                                } else {
-                                  print("sudah pilih jldt");
-                                }
+                                globalCt.buttomSheet1(
+                                    controller.listCabang.value,
+                                    "Pilih Cabang",
+                                    "sidebar",
+                                    controller.cabangNameSelectedSide.value);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.only(
@@ -127,13 +120,13 @@ class Sidebar extends StatelessWidget {
                                               ),
                                             ),
                                             Text(
-                                              "${controller.cabangNameSelected.value}"
+                                              "${controller.cabangNameSelectedSide.value}"
                                                           .length >
                                                       18
-                                                  ? "${controller.cabangNameSelected.value}"
+                                                  ? "${controller.cabangNameSelectedSide.value}"
                                                           .substring(0, 18) +
                                                       '...'
-                                                  : "${controller.cabangNameSelected.value}",
+                                                  : "${controller.cabangNameSelectedSide.value}",
                                               style: TextStyle(
                                                   color: Utility.greyDark,
                                                   fontSize: Utility.normal),
@@ -187,6 +180,7 @@ class Sidebar extends StatelessWidget {
             //         ),
             //   ),
             // ),
+
             Padding(
               padding: const EdgeInsets.only(left: 16.0),
               child: Text(
@@ -199,13 +193,19 @@ class Sidebar extends StatelessWidget {
               leading: Icon(Iconsax.shop),
               iconColor: Utility.greyDark,
               title: Text('Point of Sale'),
-              onTap: () => null,
+              tileColor: controller.sidebarMenuSelected.value == 1
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("pos"),
             ),
             ListTile(
               leading: Icon(Iconsax.shopping_cart),
               iconColor: Utility.greyDark,
               title: Text('Penjualan'),
-              onTap: () => null,
+              tileColor: controller.sidebarMenuSelected.value == 2
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("penjualan"),
             ),
             ListTile(
               leading: Icon(Iconsax.box_search),
@@ -269,7 +269,7 @@ class Sidebar extends StatelessWidget {
                   size: 20,
                 ),
                 colorText: Colors.red,
-                onTap: () => controller.logout(),
+                onTap: () => dashboardCt.logout(),
               ),
             ),
             Padding(

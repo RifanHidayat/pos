@@ -3,6 +3,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/auth/pilih_database.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -33,6 +34,8 @@ class AuthController extends GetxController {
   var databaseSelected = "".obs;
   var databaseSelectedRegis = "".obs;
   var passwordSelected = "".obs;
+
+  var sidebarCt = Get.put(SidebarController());
 
   void startLoad() {
     getTimeNow();
@@ -155,6 +158,7 @@ class AuthController extends GetxController {
                 "${getFirst['KODE']}-${getFirst['NAMA']}-${getFirst['CUSTOM']}-${getFirst['GUDANG']}";
             AppData.flagMember = "${data[0]['FLAGMEMBER']}";
             AppData.bidUsaha = "${data[0]['BIDUSAHA']}";
+            sidebarCt.getCabang();
             Navigator.pop(Get.context!);
             Get.offAll(Dashboard());
           }

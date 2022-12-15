@@ -80,7 +80,7 @@ class DashbardController extends BaseController {
   var customSelected = "".obs;
   var wilayahCustomerSelected = "".obs;
 
-  // cabang variabel
+  // cabang pos variabel
   var cabangKodeSelected = "".obs;
   var cabangNameSelected = "".obs;
   var gudangSelected = "".obs;
@@ -419,13 +419,15 @@ class DashbardController extends BaseController {
   }
 
   void loadMoreMenu() {
-    var getKode = "";
-    for (var element in listKelompokBarang.value) {
-      if (element['NAMA'] == kategoriBarang.value) {
-        getKode = element['INISIAL'];
+    if (statusCari.value == false) {
+      var getKode = "";
+      for (var element in listKelompokBarang.value) {
+        if (element['NAMA'] == kategoriBarang.value) {
+          getKode = element['INISIAL'];
+        }
       }
+      getMenu(getKode, '');
     }
-    getMenu(getKode, '');
   }
 
   void changeTampilanList() {
@@ -442,6 +444,7 @@ class DashbardController extends BaseController {
         getKode = element['INISIAL'];
       }
     }
+    print('get kode $getKode');
     getMenu(getKode, '');
   }
 
@@ -487,13 +490,11 @@ class DashbardController extends BaseController {
         viewButtonKeranjang.value = true;
         viewButtonKeranjang.refresh();
         if (type != 'simpan_faktur') {
-          if (listKeranjang.value.isEmpty &&
-              nomorFaktur.value == "" &&
+          if (listKeranjangArsip.value.isEmpty &&
+              nomorFaktur.value == "-" &&
               primaryKeyFaktur.value == "") {
             checkingKeranjang();
-            print('proses simpan faktur');
           } else {
-            // print('masuk ke sini');
             if (nomorFaktur.value != "-" && primaryKeyFaktur.value != "") {
               checkingDetailKeranjangArsip(primaryKeyFaktur.value);
             }
@@ -527,40 +528,41 @@ class DashbardController extends BaseController {
           var kodeSalesArsip = "";
           listKeranjangArsip.value = data;
           listKeranjangArsip.refresh();
-          checkingKeranjang();
           for (var element1 in listMenu.value) {
             for (var element2 in data) {
-              if ("${element1['GROUP']}${element1['KODE']}" ==
-                  "${element2['GROUP']}${element2['BARANG']}") {
-                element1['status'] = true;
-                element1['jumlah_beli'] = element2['QTY'];
-                var filter = {
-                  'NORUT': element2['NOURUT'],
-                  'GROUP': element1['GROUP'],
-                  'KODE': element1['KODE'],
-                  'INISIAL': element1['INISIAL'],
-                  'INGROUP': element1['INGROUP'],
-                  'NAMA': element1['NAMA'],
-                  'BARCODE': element1['BARCODE'],
-                  'TIPE': element1['TIPE'],
-                  'SAT': element1['SAT'],
-                  'STDBELI': element1['STDBELI'],
-                  'STDJUAL': element2['HARGA'],
-                  'NAMAGAMBAR': element1['NAMAGAMBAR'],
-                  'MEREK': element1['MEREK'],
-                  'TIPE_PILIHAN': "",
-                  'CATATAN_PEMBELIAN': element2['KETERANGAN'],
-                  'status': true,
-                  'jumlah_beli': element2['QTY'],
-                };
-                listKeranjang.value.add(filter);
-                listKeranjang.refresh();
-              }
+              // if ("${element1['GROUP']}${element1['KODE']}" ==
+              //     "${element2['GROUP']}${element2['BARANG']}") {
+              //   print('data yang sama $element2');
+              //   var filter = {
+              //     'NORUT': element2['NOURUT'],
+              //     'GROUP': element1['GROUP'],
+              //     'KODE': element1['KODE'],
+              //     'INISIAL': element1['INISIAL'],
+              //     'INGROUP': element1['INGROUP'],
+              //     'NAMA': element1['NAMA'],
+              //     'BARCODE': element1['BARCODE'],
+              //     'TIPE': element1['TIPE'],
+              //     'SAT': element1['SAT'],
+              //     'STDBELI': element1['STDBELI'],
+              //     'STDJUAL': element2['HARGA'],
+              //     'NAMAGAMBAR': element1['NAMAGAMBAR'],
+              //     'MEREK': element1['MEREK'],
+              //     'TIPE_PILIHAN': "",
+              //     'CATATAN_PEMBELIAN': element2['KETERANGAN'],
+              //     'status': true,
+              //     'jumlah_beli': element2['QTY'],
+              //   };
+              //   listKeranjang.value.add(filter);
+              //   listKeranjang.refresh();
+              //   element1['status'] = true;
+              //   element1['jumlah_beli'] = element2['QTY'];
+              // }
               kodeCbArsip = element2['CB'];
               gudangArsip = element2['GUDANG'];
               kodeSalesArsip = element2['SALESM'];
             }
           }
+          checkingKeranjang();
           // validasiCabangsdPelanggan(kodeCbArsip, gudangArsip, kodeSalesArsip);
         } else {
           checkingKeranjang();
@@ -573,27 +575,24 @@ class DashbardController extends BaseController {
   }
 
   void checkingKeranjang() {
-    if (listKeranjangArsip.isNotEmpty) {
-      hitungAllArsipMenu();
-    } else {
-      double hitungJumlahSeluruh = 0.0;
-      for (var element1 in listMenu.value) {
-        for (var element2 in listKeranjang.value) {
-          if ("${element1['INGROUP']}" == "${element2['INGROUP']}" &&
-              "${element1['GROUP']}${element1['KODE']}" ==
-                  "${element2['GROUP']}${element2['KODE']}") {
-            element1['status'] = true;
-            element1['jumlah_beli'] = element2['jumlah_beli'];
-            double hitung = double.parse("${element2['jumlah_beli']}") *
-                double.parse("${element2['STDJUAL']}");
-            hitungJumlahSeluruh += hitung;
-          }
+    double hitungJumlahSeluruh = 0.0;
+    for (var element1 in listMenu.value) {
+      for (var element2 in listKeranjangArsip.value) {
+        if ("${element1['GROUP']}${element1['KODE']}" ==
+            "${element2['GROUP']}${element2['BARANG']}") {
+          element1['status'] = true;
+          element1['jumlah_beli'] = element2['QTY'];
+          double hitung = double.parse("${element2['QTY']}") *
+              double.parse("${element2['STDJUAL']}");
+          hitungJumlahSeluruh += hitung;
         }
       }
-      jumlahItemDikeranjang.value = listKeranjang.value.length;
-      totalNominalDikeranjang.value = hitungJumlahSeluruh;
     }
-
+    jumlahItemDikeranjang.value = listKeranjang.value.length;
+    totalNominalDikeranjang.value = hitungJumlahSeluruh;
+    if (listKeranjangArsip.isNotEmpty) {
+      hitungAllArsipMenu();
+    }
     listKeranjang.refresh();
     listMenu.refresh();
     jumlahItemDikeranjang.refresh();
@@ -737,8 +736,6 @@ class DashbardController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
-        print('update data jlhd');
-        print(valueBody);
       }
     });
   }
@@ -759,8 +756,6 @@ class DashbardController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
-        print('update data jldt');
-        print(valueBody);
       }
     });
   }
@@ -936,5 +931,62 @@ class DashbardController extends BaseController {
         return null!;
       },
     );
+  }
+
+  void pencarianDataBarang(value) async {
+    var valueCari = value.toUpperCase();
+    if (valueCari != "") {
+      statusCari.value = true;
+      Map<String, dynamic> body = {
+        'database': AppData.databaseSelected,
+        'periode': AppData.periodeSelected,
+        'stringTabel': 'PROD1',
+        'kode_gudang': gudangSelected.value,
+        'value_pencarian': valueCari
+      };
+      var connect = Api.connectionApi("post", body, "pencarian_data_barang");
+      var getValue = await connect;
+      var valueBody = jsonDecode(getValue.body);
+      List data = valueBody['data'];
+      loadingString.value =
+          data.isEmpty ? "Tidak ada barang" : "Sedang memuat...";
+      List tmp1 = [];
+      for (var element in data) {
+        var filter = {
+          'GROUP': element['GROUP'],
+          'KODE': element['KODE'],
+          'INISIAL': element['INISIAL'],
+          'INGROUP': element['INGROUP'],
+          'NAMA': element['NAMA'],
+          'BARCODE': element['BARCODE'],
+          'TIPE': element['TIPE'],
+          'SAT': element['SAT'],
+          'STDBELI': element['STDBELI'],
+          'STDJUAL': element['STDJUAL'],
+          'NAMAGAMBAR': element['NAMAGAMBAR'],
+          'MEREK': element['MEREK'],
+          'STOKWARE': element['STOKWARE'],
+          'nama_merek': element['nama_merek'],
+          'status': false,
+          'jumlah_beli': 0,
+        };
+        tmp1.add(filter);
+      }
+      listMenu.value = tmp1;
+      listMenu.refresh();
+      viewButtonKeranjang.value = true;
+      viewButtonKeranjang.refresh();
+      for (var element1 in listMenu.value) {
+        for (var element2 in listKeranjangArsip.value) {
+          if ("${element1['GROUP']}${element1['KODE']}" ==
+              "${element2['GROUP']}${element2['BARANG']}") {
+            element1['status'] = true;
+            element1['jumlah_beli'] = element2['QTY'];
+          }
+        }
+      }
+    } else {
+      print('tidak proses cari');
+    }
   }
 }

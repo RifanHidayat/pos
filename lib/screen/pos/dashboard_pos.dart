@@ -10,6 +10,7 @@ import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/screen/pos/arsip_faktur.dart';
 import 'package:siscom_pos/screen/pos/rincian_pemesanan.dart';
+import 'package:siscom_pos/screen/pos/scan_barang.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -269,9 +270,7 @@ class _DashboardState extends State<Dashboard> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 14.0),
                 child: InkWell(
-                    onTap: () {
-                      controller.startLoad('');
-                    },
+                    onTap: () => Get.to(ScanBarang()),
                     child: Icon(Iconsax.scan_barcode)),
               )),
           Expanded(
@@ -650,7 +649,7 @@ class _DashboardState extends State<Dashboard> {
                           "dashboard",
                           controller.kategoriBarang.value);
                       controller.aktifButton.value = 3;
-                      this.controller.aktifButton.refresh();
+                      controller.aktifButton.refresh();
                     },
                     child: CardCustom(
                       colorBg: controller.aktifButton.value == 3
@@ -732,23 +731,24 @@ class _DashboardState extends State<Dashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 85,
+                      flex: 80,
                       child: TextField(
                         focusNode: myFocusNode,
                         controller: controller.cari.value,
                         decoration: InputDecoration(
                             border: InputBorder.none, hintText: "Cari"),
+                        textInputAction: TextInputAction.done,
                         style: TextStyle(
                             fontSize: 14.0, height: 1.5, color: Colors.black),
                         onSubmitted: (value) {
-                          // controller.cariData(value);
+                          controller.pencarianDataBarang(value);
                         },
                       ),
                     ),
                     !controller.statusCari.value
                         ? SizedBox()
                         : Expanded(
-                            flex: 15,
+                            flex: 20,
                             child: IconButton(
                               icon: Icon(
                                 Iconsax.close_circle,
@@ -757,7 +757,7 @@ class _DashboardState extends State<Dashboard> {
                               onPressed: () {
                                 controller.statusCari.value = false;
                                 controller.cari.value.text = "";
-                                // controller.onReady();
+                                controller.aksiPilihKategoriBarang();
                               },
                             ),
                           )
