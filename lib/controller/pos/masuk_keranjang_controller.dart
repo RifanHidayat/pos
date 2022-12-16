@@ -32,19 +32,16 @@ class MasukKeranjangController extends BaseController {
       Get.back();
       Get.back();
     } else {
-      print(imeiData);
-      print(filterJumlahPesan);
-      aksiMasukKeranjangLocal(produkSelected, imeiData);
-      // Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
-      //     produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
-      // bool hasilValidasi1 = await validasi1;
-      // if (hasilValidasi1 == true) {
-      //   // aksiMasukKeranjangLocal(produkSelected, imeiData);
-      // } else {
-      //   Get.back();
-      //   Get.back();
-      //   Get.back();
-      // }
+      Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
+          produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
+      bool hasilValidasi1 = await validasi1;
+      if (hasilValidasi1 == true) {
+        aksiMasukKeranjangLocal(produkSelected, imeiData);
+      } else {
+        Get.back();
+        Get.back();
+        Get.back();
+      }
     }
   }
 
@@ -80,64 +77,64 @@ class MasukKeranjangController extends BaseController {
     dashboardCt.totalNominalDikeranjang.refresh();
 
     if (imeiData.isNotEmpty) {
-      // insertJlim(produkSelected, valueNomorKey, valueNomorUrut,
-      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
-      // insertProd2(produkSelected, valueNomorKey, valueNomorUrut,
-      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
-      // insertImeix(produkSelected, valueNomorKey, valueNomorUrut,
-      //     hrgJualEditFinal, filterJumlahPesan, imeiData);
+      insertJlim(produkSelected, valueNomorKey, valueNomorUrut,
+          hrgJualEditFinal, filterJumlahPesan, imeiData);
+      insertProd2(produkSelected, valueNomorKey, valueNomorUrut,
+          hrgJualEditFinal, filterJumlahPesan, imeiData);
+      insertImeix(produkSelected, valueNomorKey, valueNomorUrut,
+          hrgJualEditFinal, filterJumlahPesan, imeiData);
     }
 
-    // kirimJldtBarang(produkSelected, valueNomorKey, valueNomorUrut,
-    //     hrgJualEditFinal, filterJumlahPesan);
-    // kirimProd3(produkSelected, valueNomorKey, valueNomorUrut, hrgJualEditFinal,
-    //     filterJumlahPesan);
-    // updateWareStok(produkSelected, filterJumlahPesan);
+    kirimJldtBarang(produkSelected, valueNomorKey, valueNomorUrut,
+        hrgJualEditFinal, filterJumlahPesan);
+    kirimProd3(produkSelected, valueNomorKey, valueNomorUrut, hrgJualEditFinal,
+        filterJumlahPesan);
+    updateWareStok(produkSelected, filterJumlahPesan);
 
-    // // // // update data barang
+    // // // update data barang
 
-    // for (var element in dashboardCt.listMenu.value) {
-    //   if ("${element['INISIAL']}" == "${produkSelected[0]['INISIAL']}") {
-    //     element["status"] = true;
-    //     element["jumlah_beli"] = dashboardCt.jumlahPesan.value.text;
-    //   }
-    // }
+    for (var element in dashboardCt.listMenu.value) {
+      if ("${element['INISIAL']}" == "${produkSelected[0]['INISIAL']}") {
+        element["status"] = true;
+        element["jumlah_beli"] = dashboardCt.jumlahPesan.value.text;
+      }
+    }
 
-    // // masuk keranjang
-    // for (var element in produkSelected) {
-    //   var filter = {
-    //     'NORUT': valueNomorUrut,
-    //     'GROUP': element['GROUP'],
-    //     'KODE': element['KODE'],
-    //     'INISIAL': element['INISIAL'],
-    //     'INGROUP': element['INGROUP'],
-    //     'NAMA': element['NAMA'],
-    //     'BARCODE': element['BARCODE'],
-    //     'TIPE': element['TIPE'],
-    //     'SAT': element['SAT'],
-    //     'STDBELI': element['STDBELI'],
-    //     'STDJUAL': hrgJualEditFinal,
-    //     'NAMAGAMBAR': element['NAMAGAMBAR'],
-    //     'MEREK': element['MEREK'],
-    //     'TIPE_PILIHAN': dashboardCt.typeBarangSelected.value,
-    //     'CATATAN_PEMBELIAN': dashboardCt.catatanPembelian.value.text,
-    //     'status': true,
-    //     'jumlah_beli': filterJumlahPesan.toInt(),
-    //   };
-    //   dashboardCt.listKeranjang.add(filter);
-    // }
-    // dashboardCt.catatanPembelian.value.text = "";
-    // UtilsAlert.showToast("Berhasil tambah barang ke keranjang");
-    // dashboardCt
-    //     .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
-    // Get.back();
-    // Get.back();
-    // Get.back();
-    // dashboardCt
-    //     .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
-    // dashboardCt.listMenu.refresh();
-    // dashboardCt.listKeranjang.refresh();
-    // dashboardCt.listKeranjangArsip.refresh();
+    // masuk keranjang
+    for (var element in produkSelected) {
+      var filter = {
+        'NORUT': valueNomorUrut,
+        'GROUP': element['GROUP'],
+        'KODE': element['KODE'],
+        'INISIAL': element['INISIAL'],
+        'INGROUP': element['INGROUP'],
+        'NAMA': element['NAMA'],
+        'BARCODE': element['BARCODE'],
+        'TIPE': element['TIPE'],
+        'SAT': element['SAT'],
+        'STDBELI': element['STDBELI'],
+        'STDJUAL': hrgJualEditFinal,
+        'NAMAGAMBAR': element['NAMAGAMBAR'],
+        'MEREK': element['MEREK'],
+        'TIPE_PILIHAN': dashboardCt.typeBarangSelected.value,
+        'CATATAN_PEMBELIAN': dashboardCt.catatanPembelian.value.text,
+        'status': true,
+        'jumlah_beli': filterJumlahPesan.toInt(),
+      };
+      dashboardCt.listKeranjang.add(filter);
+    }
+    dashboardCt.catatanPembelian.value.text = "";
+    UtilsAlert.showToast("Berhasil tambah barang ke keranjang");
+    dashboardCt
+        .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
+    Get.back();
+    Get.back();
+    Get.back();
+    dashboardCt
+        .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
+    dashboardCt.listMenu.refresh();
+    dashboardCt.listKeranjang.refresh();
+    dashboardCt.listKeranjangArsip.refresh();
     setIdle();
   }
 
@@ -353,7 +350,7 @@ class MasukKeranjangController extends BaseController {
       'loe_prod2': tanggalDanJam,
       'deo_prod2': dataInformasiSYSUSER[0],
       'cb_prod2': dashboardCt.cabangKodeSelected.value,
-      'imei_jlim': imeiData,
+      'imei_prod2': imeiData,
     };
 
     var connect = Api.connectionApi("post", body, "insert_prod2");
@@ -400,7 +397,7 @@ class MasukKeranjangController extends BaseController {
       'loe_imeix': tanggalDanJam,
       'deo_imeix': dataInformasiSYSUSER[0],
       'cb_imeix': dashboardCt.cabangKodeSelected.value,
-      'imei_jlim': imeiData,
+      'imei_imeix': imeiData,
     };
 
     var connect = Api.connectionApi("post", body, "insert_imeix");

@@ -8,7 +8,7 @@ class SimpanFakturController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var arsipFakturCt = Get.put(ArsipFakturController());
 
-  simpanFakturSebagaiArsip() {
+  simpanFakturSebagaiArsip(type) {
     dashboardCt.nomorFaktur.value = "-";
     dashboardCt.primaryKeyFaktur.value = "";
     dashboardCt.nomorCbLastSelected.value = "";
@@ -34,8 +34,10 @@ class SimpanFakturController extends BaseController {
 
     dashboardCt.getKelompokBarang('simpan_faktur');
     arsipFakturCt.startLoad();
-    UtilsAlert.showToast("Berhasil simpan arsip faktur");
-    Get.back();
-    Get.back();
+    if (type != "proses_split_bill") {
+      UtilsAlert.showToast("Berhasil simpan arsip faktur");
+      Get.back();
+      Get.back();
+    }
   }
 }

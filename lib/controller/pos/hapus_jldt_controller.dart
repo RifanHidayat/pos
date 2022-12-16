@@ -92,7 +92,7 @@ class HapusJldtController extends BaseController {
     setIdle();
   }
 
-  void hapusBarangOnce(dataSelected) {
+  void hapusBarangOnce(dataSelected, type) {
     UtilsAlert.loadingSimpanData(Get.context!, "Hapus data");
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
@@ -126,11 +126,13 @@ class HapusJldtController extends BaseController {
           dashboardCt.hitungAllArsipMenu();
           print(
               "list keranjang setelah di hapus ${dashboardCt.listKeranjangArsip.value}");
-          Get.back();
-          Get.back();
-          Get.back();
-          Get.back();
-          Get.to(RincianPemesanan());
+          if (type != 'proses_split_bill') {
+            Get.back();
+            Get.back();
+            Get.back();
+            Get.back();
+            Get.to(RincianPemesanan());
+          }
         } else {
           UtilsAlert.showToast("Gagal hapus barang");
         }

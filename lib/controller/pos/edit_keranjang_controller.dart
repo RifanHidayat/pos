@@ -15,7 +15,7 @@ class EditKeranjangController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var perhitunganCt = Get.put(PerhitunganController());
 
-  void editKeranjang(produkSelected) {
+  void editKeranjang(produkSelected, type) {
     UtilsAlert.loadingSimpanData(Get.context!, "Edit data");
     // update data barang
     var filterData = dashboardCt.listKeranjangArsip.value.firstWhere(
@@ -33,10 +33,10 @@ class EditKeranjangController extends BaseController {
     var filterJml2 = filterJml1.replaceAll(",", ".");
     var finalQtyEdit = double.parse(filterJml2);
 
-    editJldtBarang(filterData, hrgJualEditFinal, finalQtyEdit);
+    editJldtBarang(filterData, hrgJualEditFinal, finalQtyEdit, type);
   }
 
-  editJldtBarang(filterData, hrgJualEditFinal, finalQtyEdit) {
+  editJldtBarang(filterData, hrgJualEditFinal, finalQtyEdit, type) {
     var dt = DateTime.now();
     var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
     var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
@@ -103,13 +103,21 @@ class EditKeranjangController extends BaseController {
               dashboardCt.catatanPembelian.value.text;
           dashboardCt.listKeranjangArsip.refresh();
           dashboardCt.hitungAllArsipMenu();
-          Get.back();
-          Get.back();
-          Get.back();
-          Get.back();
-          Get.to(
-            RincianPemesanan(),
-          );
+          if (type == 'edit_dari_scanbarcode') {
+            Get.back();
+            Get.back();
+            Get.to(
+              RincianPemesanan(),
+            );
+          } else {
+            Get.back();
+            Get.back();
+            Get.back();
+            Get.back();
+            Get.to(
+              RincianPemesanan(),
+            );
+          }
         } else {
           UtilsAlert.showToast(valueBody['message']);
           Get.back();

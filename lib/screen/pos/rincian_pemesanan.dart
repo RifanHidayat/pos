@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/arsip_bt_controller.dart';
+import 'package:siscom_pos/controller/pos/buttomSheet/splitbill_bt_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/rincian_pemesanan_controller.dart';
 import 'package:siscom_pos/screen/pos/pembayaran.dart';
@@ -23,6 +24,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
   var controller = Get.put(RincianPemesananController());
   var dashboardCt = Get.put(DashbardController());
   var buttonSheetPosController = Get.put(BottomSheetPos());
+  var splitBillBtSheetCt = Get.put(SplitBillBtSheetController());
 
   @override
   void initState() {
@@ -291,21 +293,24 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Center(
-                                                child: InkWell(
-                                                  onTap: () {},
+                                          child: InkWell(
+                                            onTap: () {
+                                              splitBillBtSheetCt
+                                                  .pilihMetodeSplit();
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Center(
                                                   child:
                                                       Icon(Iconsax.receipt_2),
                                                 ),
-                                              ),
-                                              Text("Split")
-                                            ],
+                                                Text("Split")
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         Expanded(
@@ -374,7 +379,8 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                               Get.to(Pembayaran(),
                                                   duration: Duration(
                                                       milliseconds: 500),
-                                                  transition: Transition.upToDown);
+                                                  transition:
+                                                      Transition.upToDown);
                                             },
                                           ),
                                         )

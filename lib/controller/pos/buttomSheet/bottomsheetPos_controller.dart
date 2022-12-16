@@ -1302,14 +1302,16 @@ class BottomSheetPos extends BaseController
                               onTap: () {
                                 setState(() {
                                   if (type == "edit_keranjang") {
-                                    editKeranjangCt.editKeranjang(dataSelected);
+                                    editKeranjangCt.editKeranjang(
+                                        dataSelected, '');
                                   } else if (type == "hapus_faktur") {
                                     hapusJldtCt
                                         .hapusFakturDanJldt(dataSelected);
                                   } else if (type == "arsip_faktur") {
-                                    simpanFakturCt.simpanFakturSebagaiArsip();
+                                    simpanFakturCt.simpanFakturSebagaiArsip('');
                                   } else if (type == "hapus_barang_once") {
-                                    hapusJldtCt.hapusBarangOnce(dataSelected);
+                                    hapusJldtCt.hapusBarangOnce(
+                                        dataSelected, '');
                                   } else if (type ==
                                       "input_persendiskon_header") {
                                     settingDiskonHeader();
@@ -1468,6 +1470,7 @@ class BottomSheetPos extends BaseController
                                   onTap: () {
                                     setState(() {
                                       dashboardCt.nomorMeja.value = kodeMeja;
+                                      updatePilihMeja();
                                       Get.back();
                                       Get.back();
                                       Get.to(RincianPemesanan());
@@ -1745,6 +1748,20 @@ class BottomSheetPos extends BaseController
     Get.back();
     Get.back();
     Get.to(RincianPemesanan());
+  }
+
+  void updatePilihMeja() async {
+    Map<String, dynamic> body = {
+      "database": '${AppData.databaseSelected}',
+      "periode": '${AppData.periodeSelected}',
+      "stringTabel": 'JLHD',
+      'nomor_faktur': dashboardCt.nomorFaktur.value,
+      'value_nomor_meja': dashboardCt.nomorMeja.value
+    };
+    var connect = Api.connectionApi("post", body, "update_nomor_meja");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print(valueBody);
   }
 
   void transaksiBaru() {

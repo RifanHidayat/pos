@@ -39,6 +39,8 @@ class Utility {
   static Color grey900 = Color(0xff333B4A);
   static Color greyDark = Color(0xff333B4A);
 
+  static Color errorLight = Color(0xffFFE7D8);
+
   // SIZE
   static double verySmall = 8.0;
   static double small = 10.0;
