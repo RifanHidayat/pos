@@ -10,8 +10,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class Sidebar extends StatelessWidget {
-  final controller = Get.put(SidebarController());
-  final dashboardCt = Get.put(DashbardController());
+  var controller = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
 
   @override
@@ -269,7 +268,7 @@ class Sidebar extends StatelessWidget {
                   size: 20,
                 ),
                 colorText: Colors.red,
-                onTap: () => dashboardCt.logout(),
+                onTap: () => controller.logout(),
               ),
             ),
             Padding(

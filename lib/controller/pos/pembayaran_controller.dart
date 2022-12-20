@@ -10,7 +10,8 @@ import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
-import 'package:siscom_pos/controller/pos/simpan_pembayaran.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/screen/pos/pembayaran.dart';
 import 'package:siscom_pos/screen/pos/selesai_pembayaran.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -34,11 +35,14 @@ class PembayaranController extends BaseController {
   var viewDetailHeader = false.obs;
   var viewPrintQr = false.obs;
   var viewScreenShootDetailStruk = false.obs;
+  var statusPembayaranSplit = false.obs;
 
   var buttonPilihBayar = 0.obs;
   var totalTagihan = 0.obs;
+  var totalTagihanSplit = 0.obs;
   var totalPembayaran = 0.obs;
   var selectedRadioButtonPilihPembayaran = 0.obs;
+  var idPembayaranSplit = 0.obs;
 
   var tipePembayaranSelected = "Tunai".obs;
   var statusKartuSelected = "".obs;
@@ -78,8 +82,9 @@ class PembayaranController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var simpanPembayaranCt = Get.put(SimpanPembayaran());
   var buttonSheetPosCt = Get.put(BottomSheetPos());
+  var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
 
-  void startLoad() {
+  void startLoad(statusSplitPembayaran) {
     var getTotal = Utility.hitungDetailTotalPos(
         '${dashboardCt.totalNominalDikeranjang.value}',
         '${dashboardCt.diskonHeader.value}',
@@ -89,6 +94,13 @@ class PembayaranController extends BaseController {
     getTipePembayaran();
     opsiUang();
     getDetailCabang();
+    if (statusSplitPembayaran[0] == true) {
+      statusPembayaranSplit.value = statusSplitPembayaran[0];
+      idPembayaranSplit.value = statusSplitPembayaran[1];
+      statusPembayaranSplit.refresh();
+      idPembayaranSplit.refresh();
+      getTotalPembayaranSplit(statusSplitPembayaran);
+    }
   }
 
   void getTipePembayaran() {
@@ -164,11 +176,34 @@ class PembayaranController extends BaseController {
     pilihanOpsiUangShow.refresh();
   }
 
+  void getTotalPembayaranSplit(statusSplitPembayaran) {
+    for (var element in splitJumlahBayarCt.listPembayaranSplit) {
+      if (element['id'] == statusSplitPembayaran[1]) {
+        totalTagihanSplit.value = element['total_bayar'];
+        totalTagihanSplit.refresh();
+      }
+    }
+    // if (statusSplitPembayaran[1] != 0) {
+    //   for (var element in splitJumlahBayarCt.listPembayaranSplit) {
+    //     if (element['id'] == statusSplitPembayaran[1]) {
+    //       totalTagihanSplit.value = element['total_bayar'];
+    //       totalTagihanSplit.refresh();
+    //     }
+    //   }
+    // } else {
+    //   totalTagihanSplit.value = statusSplitPembayaran[2];
+    //   totalTagihanSplit.refresh();
+    // }
+  }
+
   Future<bool> buatQrisCode() async {
+    var totalQrisHarusDibayar = statusPembayaranSplit.value == false
+        ? totalTagihan.value
+        : totalTagihanSplit.value;
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
     var getUrl =
-        // "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=${totalPembayaran.value}";
-        "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=50";
+        "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=$totalQrisHarusDibayar";
+    // "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=50";
     Map<String, String> headers = {
       'Content-type': 'application/json',
       'Accept': 'application/json',
@@ -186,12 +221,15 @@ class PembayaranController extends BaseController {
   }
 
   Future<bool> checkQrisCode() async {
+    var totalQrisHarusDibayar = statusPembayaranSplit.value == false
+        ? totalTagihan.value
+        : totalTagihanSplit.value;
     var tanggalPembayaran =
         "${DateFormat('yyyy-MM-dd').format(DateTime.now())}";
     UtilsAlert.loadingSimpanData(Get.context!, "Check pembayaran...");
     var getUrl =
-        // "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=${totalPembayaran.value}";
-        "https://qris.id/restapi/qris/checkpaid_qris.php?do=checkStatus&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&invid=${stringInvoiceIdQris.value}&trxvalue=50&trxdate=$tanggalPembayaran";
+        "https://qris.id/restapi/qris/show_qris.php?do=create-invoice&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&cliTrxNumber=${dashboardCt.nomorFaktur.value}&cliTrxAmount=$totalQrisHarusDibayar";
+    // "https://qris.id/restapi/qris/checkpaid_qris.php?do=checkStatus&apikey=139139211126496&mID=${dashboardCt.midQrisCabang.value}&invid=${stringInvoiceIdQris.value}&trxvalue=50&trxdate=$tanggalPembayaran";
     Map<String, String> headers = {
       'Content-type': 'application/json',
       'Accept': 'application/json',
@@ -555,19 +593,29 @@ class PembayaranController extends BaseController {
                             keteranganKartu.value.text == "") {
                           UtilsAlert.showToast("Lengkapi form terlebih dahulu");
                         } else {
+                          var filterUang = Utility.convertStringRpToDouble(
+                              uangterima.value.text);
                           var dataDetailKartu = [
                             {
                               'app_code': appcodeKartu.value.text,
                               'nama_kartu': namaKartu.value.text,
                               'nomor_kartu': nomorKartu.value.text,
                               'keterangab_kartu': keteranganKartu.value.text,
-                              'total_tagihan': totalTagihan.value,
-                              'total_pembayaran': totalPembayaran.value,
+                              'total_tagihan':
+                                  statusPembayaranSplit.value == false
+                                      ? totalTagihan.value
+                                      : totalTagihanSplit.value,
+                              'total_pembayaran': filterUang,
                               'tipe_pembayaran': tipePembayaranSelected.value,
                             }
                           ];
-                          simpanPembayaranCt
-                              .validasiPembayaran(dataDetailKartu);
+                          var infoSplitPembayaran = [
+                            statusPembayaranSplit.value,
+                            idPembayaranSplit.value,
+                            totalTagihanSplit.value
+                          ];
+                          simpanPembayaranCt.validasiPembayaran(
+                              dataDetailKartu, infoSplitPembayaran);
                         }
                       },
                     ),
@@ -579,18 +627,26 @@ class PembayaranController extends BaseController {
   }
 
   void pembayaranTanpaKartu() {
+    var filterUang = Utility.convertStringRpToDouble(uangterima.value.text);
     var dataDetailKartu = [
       {
         'app_code': appcodeKartu.value.text,
         'nama_kartu': namaKartu.value.text,
         'nomor_kartu': nomorKartu.value.text,
         'keterangab_kartu': keteranganKartu.value.text,
-        'total_tagihan': totalTagihan.value,
-        'total_pembayaran': totalPembayaran.value,
+        'total_tagihan': statusPembayaranSplit.value == false
+            ? totalTagihan.value
+            : totalTagihanSplit.value,
+        'total_pembayaran': filterUang,
         'tipe_pembayaran': tipePembayaranSelected.value,
       }
     ];
-    simpanPembayaranCt.validasiPembayaran(dataDetailKartu);
+    var infoSplitPembayaran = [
+      statusPembayaranSplit.value,
+      idPembayaranSplit.value,
+      totalTagihanSplit.value
+    ];
+    simpanPembayaranCt.validasiPembayaran(dataDetailKartu, infoSplitPembayaran);
   }
 
   void transkasiBaru() {

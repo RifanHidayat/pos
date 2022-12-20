@@ -12,6 +12,8 @@ import 'package:screenshot/screenshot.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/separator.dart';
@@ -27,6 +29,8 @@ class DetailStruk extends StatelessWidget {
   var pembayaranCt = Get.put(PembayaranController());
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
+  var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
 
   //Create an instance of ScreenshotController
   ScreenshotController screenshotController = ScreenshotController();
@@ -237,7 +241,11 @@ class DetailStruk extends StatelessWidget {
                             screenshotController
                                 .capture(delay: Duration(milliseconds: 5))
                                 .then((capturedImage) async {
-                              ShowCapturedWidget(capturedImage!, 1);
+                              ShowCapturedWidget(
+                                  capturedImage!,
+                                  1,
+                                  simpanPembayaranCt.informasiSelesaiPembayaran
+                                      .value[0]['status']);
                               // ShowCapturedWidget(
                               //     context, capturedImage!, 2);
                             }).catchError((onError) {
@@ -258,7 +266,12 @@ class DetailStruk extends StatelessWidget {
                                 screenshotController
                                     .capture(delay: Duration(milliseconds: 5))
                                     .then((capturedImage) async {
-                                  ShowCapturedWidget(capturedImage!, 2);
+                                  ShowCapturedWidget(
+                                      capturedImage!,
+                                      2,
+                                      simpanPembayaranCt
+                                          .informasiSelesaiPembayaran
+                                          .value[0]['status']);
                                   // ShowCapturedWidget(
                                   //     context, capturedImage!, 2);
                                 }).catchError((onError) {
@@ -278,7 +291,12 @@ class DetailStruk extends StatelessWidget {
                                 screenshotController
                                     .capture(delay: Duration(milliseconds: 5))
                                     .then((capturedImage) async {
-                                  ShowCapturedWidget(capturedImage!, 3);
+                                  ShowCapturedWidget(
+                                      capturedImage!,
+                                      3,
+                                      simpanPembayaranCt
+                                          .informasiSelesaiPembayaran
+                                          .value[0]['status']);
                                   // ShowCapturedWidget(
                                   //     context, capturedImage!, 2);
                                 }).catchError((onError) {
@@ -804,6 +822,74 @@ class DetailStruk extends StatelessWidget {
             ],
           ),
         ),
+        simpanPembayaranCt.informasiSelesaiPembayaran.value[0]['status'] ==
+                false
+            ? SizedBox()
+            : SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Divider(),
+                      ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: splitJumlahBayarCt
+                              .listPembayaranSplit.value.length,
+                          itemBuilder: (context, index) {
+                            var idBayarSplit = splitJumlahBayarCt
+                                .listPembayaranSplit.value[index]['id'];
+                            var tipeBayar = splitJumlahBayarCt
+                                .listPembayaranSplit.value[index]['tipe_bayar'];
+
+                            var totalBayar = splitJumlahBayarCt
+                                .listPembayaranSplit
+                                .value[index]['total_bayar'];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "Split $idBayarSplit - $tipeBayar",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: !pembayaranCt
+                                                    .viewScreenShootDetailStruk
+                                                    .value
+                                                ? Utility.normal
+                                                : Utility.small,
+                                            color: Utility.grey900),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        "Rp ${currencyFormatter.format(totalBayar)}",
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                            fontSize: !pembayaranCt
+                                                    .viewScreenShootDetailStruk
+                                                    .value
+                                                ? Utility.normal
+                                                : Utility.small),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Divider(),
+                              ],
+                            );
+                          }),
+                      SizedBox(
+                        height: Utility.medium,
+                      )
+                    ],
+                  ),
+                ),
+              ),
         Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 16.0),
           child: Row(
@@ -891,7 +977,7 @@ class DetailStruk extends StatelessWidget {
   //   );
   // }
 
-  void ShowCapturedWidget(Uint8List capturedImage, type) async {
+  void ShowCapturedWidget(Uint8List capturedImage, type, statusSplit) async {
     final pdf = pw.Document();
     // final image = pw.MemoryImage(capturedImage);
     pdf.addPage(pw.Page(
@@ -1167,6 +1253,49 @@ class DetailStruk extends StatelessWidget {
                           ]))
                     ],
                   ),
+            pw.SizedBox(
+              height: 6,
+            ),
+            statusSplit == false || type == 3
+                ? pw.SizedBox()
+                : pw.ListView.builder(
+                    itemCount:
+                        splitJumlahBayarCt.listPembayaranSplit.value.length,
+                    itemBuilder: (context, index) {
+                      var idBayarSplit = splitJumlahBayarCt
+                          .listPembayaranSplit.value[index]['id'];
+                      var tipeBayar = splitJumlahBayarCt
+                          .listPembayaranSplit.value[index]['tipe_bayar'];
+
+                      var totalBayar = splitJumlahBayarCt
+                          .listPembayaranSplit.value[index]['total_bayar'];
+                      return pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Expanded(
+                                child: pw.Text(
+                                  "Split $idBayarSplit - $tipeBayar",
+                                  style: pw.TextStyle(fontSize: 4),
+                                ),
+                              ),
+                              pw.Expanded(
+                                child: pw.Text(
+                                  "Rp ${currencyFormatter.format(totalBayar)}",
+                                  textAlign: pw.TextAlign.right,
+                                  style: pw.TextStyle(fontSize: 4),
+                                ),
+                              )
+                            ],
+                          ),
+                          pw.SizedBox(
+                            height: 3,
+                          ),
+                        ],
+                      );
+                    }),
             type == 3
                 ? pw.SizedBox()
                 : pw.SizedBox(

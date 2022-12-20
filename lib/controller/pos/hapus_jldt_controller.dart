@@ -14,7 +14,7 @@ class HapusJldtController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var perhitunganCt = Get.put(PerhitunganController());
 
-  hapusFakturDanJldt(dataSelected) {
+  Future<bool> hapusFakturDanJldt(dataSelected) async {
     setBusy();
     UtilsAlert.loadingSimpanData(Get.context!, "Hapus data");
     var keyFaktur =
@@ -26,74 +26,80 @@ class HapusJldtController extends BaseController {
       'key_faktur': keyFaktur,
     };
     var connect = Api.connectionApi("post", body, "hapus_jlhd_jldt");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        var data = valueBody['data'];
-        List tampung = [];
-        var getValue1 = AppData.noFaktur.split("|");
-        for (var element in getValue1) {
-          var listFilter = element.split("-");
-          var data = {
-            "no_faktur": listFilter[0],
-            "key": listFilter[1],
-            "no_cabang": listFilter[2],
-            "nomor_antrian": listFilter[3],
-          };
-          tampung.add(data);
-        }
-        print('hasil filter nofaktur $tampung');
-        print('keyfaktur $keyFaktur');
-        if (tampung.isNotEmpty) {
-          var filter = "";
-          for (var element in tampung) {
-            if ("${element['key']}" != "$keyFaktur") {
-              if (filter == "") {
-                filter =
-                    "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
-              } else {
-                filter =
-                    "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
-              }
+    bool prosesHapusJlhdjldt = false;
+
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+
+    if (valueBody['status'] == true) {
+      prosesHapusJlhdjldt = valueBody['status'];
+      List tampung = [];
+      var getValue1 = AppData.noFaktur.split("|");
+      for (var element in getValue1) {
+        var listFilter = element.split("-");
+        var data = {
+          "no_faktur": listFilter[0],
+          "key": listFilter[1],
+          "no_cabang": listFilter[2],
+          "nomor_antrian": listFilter[3],
+        };
+        tampung.add(data);
+      }
+      print('hasil filter nofaktur $tampung');
+      print('keyfaktur $keyFaktur');
+      if (tampung.isNotEmpty) {
+        var filter = "";
+        for (var element in tampung) {
+          if ("${element['key']}" != "$keyFaktur") {
+            if (filter == "") {
+              filter =
+                  "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+            } else {
+              filter =
+                  "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
             }
           }
-          print('hasil filter setelah di hapus $filter');
-          AppData.noFaktur = filter;
         }
-
-        if (AppData.noFaktur != "") {
-          dashboardCt.checkingData();
-        } else {
-          dashboardCt.nomorFaktur.value = "-";
-          dashboardCt.primaryKeyFaktur.value = "";
-          dashboardCt.kodePelayanSelected.value = "";
-          dashboardCt.customSelected.value = "";
-          dashboardCt.jumlahItemDikeranjang.value = 0;
-          dashboardCt.totalNominalDikeranjang.value = 0;
-          dashboardCt.persenDiskonPesanBarang.value.text = "";
-          dashboardCt.hargaDiskonPesanBarang.value.text = "";
-          dashboardCt.diskonHeader.value = 0.0;
-          dashboardCt.allQtyJldt.value = 0;
-          dashboardCt.listKeranjang.value.clear();
-          dashboardCt.listKeranjangArsip.value.clear();
-          refrehVariabel();
-          dashboardCt.getKelompokBarang('');
-          dashboardCt.arsipController.startLoad();
-        }
-        dashboardCt.startLoad('hapus_faktur');
-        Get.back();
-        Get.back();
-        Get.back();
-        if (dataSelected != "") {
-          Get.back();
-        }
+        print('hasil filter setelah di hapus $filter');
+        AppData.noFaktur = filter;
       }
-    });
+
+      if (AppData.noFaktur != "") {
+        dashboardCt.checkingData();
+      } else {
+        dashboardCt.nomorFaktur.value = "-";
+        dashboardCt.primaryKeyFaktur.value = "";
+        dashboardCt.kodePelayanSelected.value = "";
+        dashboardCt.customSelected.value = "";
+        dashboardCt.jumlahItemDikeranjang.value = 0;
+        dashboardCt.totalNominalDikeranjang.value = 0;
+        dashboardCt.persenDiskonPesanBarang.value.text = "";
+        dashboardCt.hargaDiskonPesanBarang.value.text = "";
+        dashboardCt.diskonHeader.value = 0.0;
+        dashboardCt.allQtyJldt.value = 0;
+        dashboardCt.listKeranjang.value.clear();
+        dashboardCt.listKeranjangArsip.value.clear();
+        refrehVariabel();
+        dashboardCt.getKelompokBarang('');
+        // dashboardCt.arsipController.startLoad();
+      }
+      dashboardCt.startLoad('hapus_faktur');
+      Get.back();
+      Get.back();
+      Get.back();
+      if (dataSelected != "") {
+        Get.back();
+      }
+    }
     setIdle();
+    return Future.value(prosesHapusJlhdjldt);
   }
 
-  void hapusBarangOnce(dataSelected, type) {
-    UtilsAlert.loadingSimpanData(Get.context!, "Hapus data");
+  Future<bool> hapusBarangOnce(dataSelected, type) async {
+    if (type != "proses_split_bill") {
+      UtilsAlert.loadingSimpanData(Get.context!, "Hapus data");
+    }
+
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -107,37 +113,39 @@ class HapusJldtController extends BaseController {
       'qty_dihapus': '${dataSelected[6]}',
     };
     var connect = Api.connectionApi("post", body, "hapus_jldt");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        if (valueBody['status'] == true) {
-          UtilsAlert.showToast("Berhasil hapus barang");
-          for (var element in dashboardCt.listKeranjang.value) {
-            if ("${element["GROUP"]}${element["KODE"]}" ==
-                "${dataSelected[4]}${dataSelected[5]}") {
-              element["status"] = false;
-              element["jumlah_beli"] = 0;
-            }
-          }
-          dashboardCt.getKelompokBarang('first');
-          dashboardCt.listKeranjangArsip.value
-              .removeWhere((element) => element["NOURUT"] == dataSelected[0]);
-          dashboardCt.listKeranjangArsip.refresh();
-          dashboardCt.hitungAllArsipMenu();
-          print(
-              "list keranjang setelah di hapus ${dashboardCt.listKeranjangArsip.value}");
-          if (type != 'proses_split_bill') {
-            Get.back();
-            Get.back();
-            Get.back();
-            Get.back();
-            Get.to(RincianPemesanan());
-          }
-        } else {
-          UtilsAlert.showToast("Gagal hapus barang");
+    bool prosesHapusJldt = false;
+
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    if (valueBody['status'] == true) {
+      prosesHapusJldt = true;
+      UtilsAlert.showToast("Berhasil hapus barang");
+      for (var element in dashboardCt.listKeranjang.value) {
+        if ("${element["GROUP"]}${element["KODE"]}" ==
+            "${dataSelected[4]}${dataSelected[5]}") {
+          element["status"] = false;
+          element["jumlah_beli"] = 0;
         }
       }
-    });
+      dashboardCt.getKelompokBarang('first');
+      dashboardCt.listKeranjangArsip.value
+          .removeWhere((element) => element["NOURUT"] == dataSelected[0]);
+      dashboardCt.listKeranjangArsip.refresh();
+      dashboardCt.hitungAllArsipMenu();
+      // print(
+      //     "list keranjang setelah di hapus ${dashboardCt.listKeranjangArsip.value}");
+      if (type != 'proses_split_bill') {
+        Get.back();
+        Get.back();
+        Get.back();
+        Get.back();
+        Get.to(RincianPemesanan());
+      } else {
+        UtilsAlert.showToast("Gagal hapus barang");
+      }
+    }
+    return Future.value(prosesHapusJldt);
   }
 
   void refrehVariabel() {

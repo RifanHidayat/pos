@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/pos/buat_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/hapus_jldt_controller.dart';
 import 'package:siscom_pos/controller/pos/masuk_keranjang_controller.dart';
@@ -11,6 +12,7 @@ class SplitBillController extends BaseController {
   var hapusJldtCt = Get.put(HapusJldtController());
   var simpanFakturCt = Get.put(SimpanFakturController());
   var masukKeranjangCt = Get.put(MasukKeranjangController());
+  var buatFakturCt = Get.put(BuatFakturController());
 
   var dataKeranjangScreenSplitBill = [].obs;
 
@@ -80,7 +82,7 @@ class SplitBillController extends BaseController {
       UtilsAlert.showToast('Gagal split bill');
       Get.back();
     } else {
-      var dataKeranjangTerpilihSplit = dashboardCt.listKeranjangArsip.value
+      var dataKeranjangTerpilihSplit = dashboardCt.listKeranjangArsip
           .firstWhere((element) =>
               element['NOURUT'] == tampungSelectedSplit[0]['NOURUT']);
       var dataSelected = [
@@ -92,24 +94,50 @@ class SplitBillController extends BaseController {
         dataKeranjangTerpilihSplit['BARANG'],
         dataKeranjangTerpilihSplit['QTY']
       ];
-      Future<bool> proses2SplitBill = aksiProses2SplitBill();
-      var hasilProses2 = await proses2SplitBill;
-      // hapusJldtCt.hapusBarangOnce(dataSelected, 'proses_split_bill');
-      // simpanFakturCt.simpanFakturSebagaiArsip('proses_split_bill');
-      // dashboardCt.getAkhirNomorFaktur();
-      // masukKeranjangCt
-      //     .aksiMasukKeranjangLocal([dataKeranjangTerpilihSplit], []);
-      // Get.back();
-      // Get.back();
-      // Get.back();
-      // dashboardCt.startLoad('');
+      // print(dataKeranjangTerpilihSplit);
+      // print(dataKeranjangTerpilihSplit['NOURUT']);
+      print('proses 1 jalan');
+      Future<bool> proses1 =
+          hapusJldtCt.hapusBarangOnce(dataSelected, 'proses_split_bill');
+      var hasilProses1 = await proses1;
+      print('hasil proses 1 $hasilProses1');
+      if (hasilProses1 == true) {
+        print('proses 2 jalan');
+        Future<bool> proses2 =
+            simpanFakturCt.simpanFakturSebagaiArsip('proses_split_bill');
+        var hasilProses2 = await proses2;
+        print('hasil proses 2 $hasilProses2');
+        if (hasilProses2 == true) {
+          print('proses 3 jalan');
+          Future<bool> proses3 = buatFakturCt.getAkhirNomorFaktur();
+          var hasilProses3 = await proses3;
+          print('hasil proses 3 $hasilProses3');
+          if (hasilProses3 == true) {
+            print('proses 4 jalan');
+            var dataProdukSelected = {
+              'NOURUT': dataKeranjangTerpilihSplit['NOURUT'],
+              'PK': dataKeranjangTerpilihSplit['PK'],
+              'NOMOR': dataKeranjangTerpilihSplit['NOMOR'],
+              'GUDANG': dataKeranjangTerpilihSplit['GUDANG'],
+              'GROUP': dataKeranjangTerpilihSplit['GROUP'],
+              'KODE': dataKeranjangTerpilihSplit['BARANG'],
+              'QTY': dataKeranjangTerpilihSplit['QTY'],
+              'SAT': dataKeranjangTerpilihSplit['SAT'],
+            };
+            Future<bool> proses4 = masukKeranjangCt
+                .aksiMasukKeranjangLocal([dataProdukSelected], []);
+            var hasilProses4 = await proses4;
+            print('hasil proses 4 $hasilProses4');
+            if (hasilProses4 == true) {
+              Get.back();
+              Get.back();
+              Get.back();
+              // dashboardCt.startLoad('');
+            }
+          }
+        }
+      }
     }
-  }
-
-  Future<bool> aksiProses2SplitBill() {
-    bool hasilAkhir = false;
-
-    return Future.value(hasilAkhir);
   }
 
   void refreshAll() {

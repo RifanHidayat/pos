@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
+import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/screen/pos/selesai_pembayaran.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -11,8 +12,13 @@ import 'package:siscom_pos/utils/toast.dart';
 
 class SimpanPembayaran extends BaseController {
   var dashboardCt = Get.put(DashbardController());
+  var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
 
-  void validasiPembayaran(List dataDetailKartu) async {
+  var informasiSelesaiPembayaran = [].obs;
+
+  var statusSelesaiPembayaranSplit = false.obs;
+
+  void validasiPembayaran(List dataDetailKartu, infoSplitPembayaran) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Proses pembayaran...");
     Future<bool> prosesInsertPptghd = insertPPTGHD(dataDetailKartu);
     var hasilInsertPptghd = await prosesInsertPptghd;
@@ -21,6 +27,32 @@ class SimpanPembayaran extends BaseController {
       var hasilPembayaran = await prosesPembayaran;
       if (hasilPembayaran == true) {
         Get.back();
+        if (infoSplitPembayaran[0] == true) {
+          updatePembayaranSplitSelesai(
+              infoSplitPembayaran, dataDetailKartu[0]['tipe_pembayaran']);
+        } else {
+          var data = [
+            {
+              'status': false,
+              'id_split': 0,
+              'total_tagihan_split': 0,
+            }
+          ];
+          informasiSelesaiPembayaran.value = data;
+          informasiSelesaiPembayaran.refresh();
+        }
+        // if (statusSelesaiPembayaranSplit.value == false) {
+        // } else {
+        //   var data = [
+        //     {
+        //       'status': infoSplitPembayaran[0],
+        //       'id_split': infoSplitPembayaran[1],
+        //       'total_tagihan_split': infoSplitPembayaran[2],
+        //     }
+        //   ];
+        //   informasiSelesaiPembayaran.value = data;
+        //   informasiSelesaiPembayaran.refresh();
+        // }
         Get.to(SelesaiPembayaran(),
             duration: Duration(milliseconds: 400),
             transition: Transition.downToUp);
@@ -33,6 +65,43 @@ class SimpanPembayaran extends BaseController {
       UtilsAlert.showToast("Gagal proses pembayaran 1");
     }
   }
+
+  void updatePembayaranSplitSelesai(infoSplitPembayaran, tipePembayaran) {
+    splitJumlahBayarCt.listPembayaranSplit.forEach((element) {
+      if (element['id'] == infoSplitPembayaran[1]) {
+        element['tipe_bayar'] = tipePembayaran;
+        element['status'] = true;
+      }
+    });
+
+    splitJumlahBayarCt.listPembayaranSplit.refresh();
+    var data = [
+      {
+        'status': infoSplitPembayaran[0],
+        'id_split': infoSplitPembayaran[1],
+        'total_tagihan_split': infoSplitPembayaran[2],
+      }
+    ];
+    informasiSelesaiPembayaran.value = data;
+    informasiSelesaiPembayaran.refresh();
+    UtilsAlert.showToast("Split pembayaran ${infoSplitPembayaran[1]} berhasil");
+  }
+
+  // void checkPembayaranSplit() {
+  //   var jumlahSplitPembayaran = splitJumlahBayarCt.listPembayaranSplit.length;
+  //   var tampung = [];
+  //   for (var element in splitJumlahBayarCt.listPembayaranSplit) {
+  //     if (element['status'] == true) {
+  //       tampung.add(element);
+  //     }
+  //   }
+  //   var hitung = jumlahSplitPembayaran - tampung.length;
+  //   if (hitung == 0) {
+  //     statusSelesaiPembayaranSplit.value = true;
+  //   } else {
+  //     statusSelesaiPembayaranSplit.value = false;
+  //   }
+  // }
 
   Future<bool> insertPPTGHD(dataDetailKartu) async {
     // check last number
@@ -89,6 +158,7 @@ class SimpanPembayaran extends BaseController {
     }
 
     return Future.value(statusBerhasil);
+    // return Future.value(true);
   }
 
   Future<bool> insertPPTGDT(dataDetailKartu, pkNumber) async {

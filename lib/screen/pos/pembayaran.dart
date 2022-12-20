@@ -13,7 +13,8 @@ import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
-import 'package:siscom_pos/controller/pos/simpan_pembayaran.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
@@ -23,8 +24,11 @@ import 'package:screenshot/screenshot.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
 class Pembayaran extends StatefulWidget {
+  var dataPembayaran;
+  Pembayaran({Key? key, this.dataPembayaran}) : super(key: key);
   @override
   _PembayaranState createState() => _PembayaranState();
 }
@@ -34,6 +38,10 @@ class _PembayaranState extends State<Pembayaran> {
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
   var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
+
+  bool statusSplitPembayaran = false;
+  bool statusBack = false;
 
   Timer? countdownTimer;
   Duration myDuration = const Duration(minutes: 30);
@@ -88,7 +96,8 @@ class _PembayaranState extends State<Pembayaran> {
 
   @override
   void initState() {
-    controller.startLoad();
+    statusSplitPembayaran = widget.dataPembayaran[0];
+    controller.startLoad(widget.dataPembayaran);
     super.initState();
   }
 
@@ -124,13 +133,17 @@ class _PembayaranState extends State<Pembayaran> {
                   colorIcon: Utility.primaryDefault,
                   icon: 1,
                   onTap: () {
-                    Get.back();
+                    var status =
+                        simpanPembayaranCt.statusSelesaiPembayaranSplit.value;
+                    checkBeforeBack(status, widget.dataPembayaran[0]);
                   },
                 )),
             body: WillPopScope(
                 onWillPop: () async {
-                  Get.back();
-                  return true;
+                  var status =
+                      simpanPembayaranCt.statusSelesaiPembayaranSplit.value;
+                  checkBeforeBack(status, widget.dataPembayaran[0]);
+                  return statusBack;
                 },
                 child: Obx(
                   () => SingleChildScrollView(
@@ -143,6 +156,26 @@ class _PembayaranState extends State<Pembayaran> {
                           SizedBox(
                             height: Utility.medium,
                           ),
+                          widget.dataPembayaran[0] == true
+                              ? SizedBox(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Center(
+                                        child: Text(
+                                          "Split Pembayaran",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: Utility.medium,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : SizedBox(),
                           totalTagihan(),
                           SizedBox(
                             height: Utility.medium,
@@ -218,8 +251,10 @@ class _PembayaranState extends State<Pembayaran> {
           InkWell(
             onTap: () {
               setState(() {
-                controller.viewDetailHeader.value =
-                    !controller.viewDetailHeader.value;
+                if (widget.dataPembayaran[0] == false) {
+                  controller.viewDetailHeader.value =
+                      !controller.viewDetailHeader.value;
+                }
               });
             },
             child: IntrinsicHeight(
@@ -238,12 +273,18 @@ class _PembayaranState extends State<Pembayaran> {
                             "Total Tagihan",
                             style: TextStyle(color: Utility.nonAktif),
                           ),
-                          Text(
-                            "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                            style: TextStyle(
-                                color: Utility.grey900,
-                                fontWeight: FontWeight.bold),
-                          ),
+                          widget.dataPembayaran[0] == false
+                              ? Text(
+                                  "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                  style: TextStyle(
+                                      color: Utility.grey900,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              : Text(
+                                  "${currencyFormatter.format(controller.totalTagihanSplit.value)}",
+                                  style: TextStyle(
+                                      color: Utility.grey900,
+                                      fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -702,44 +743,49 @@ class _PembayaranState extends State<Pembayaran> {
           SizedBox(
             height: Utility.small,
           ),
-          GridView.builder(
-              padding: EdgeInsets.all(0),
-              physics: BouncingScrollPhysics(),
-              itemCount: controller.pilihanOpsiUangShow.length,
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 4.5,
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5),
-              itemBuilder: (context, index) {
-                var nama = controller.pilihanOpsiUangShow[index]['nama'];
-                var nominal = controller.pilihanOpsiUangShow[index]['nominal'];
-                return CardCustom(
-                    colorBg: Colors.white,
-                    radiusBorder: Utility.borderStyle1,
-                    widgetCardCustom: Material(
-                      borderRadius: Utility.borderStyle1,
-                      child: InkWell(
-                        highlightColor: Utility.infoLight100,
-                        borderRadius: Utility.borderStyle1,
-                        onTap: () {
-                          setState(() {
-                            controller.totalPembayaran.value = nominal.toInt();
-                            controller.uangterima.value.text =
-                                globalCt.convertToIdr(nominal, 0);
-                          });
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: nama == "Uang pas"
-                              ? Text("$nama")
-                              : Text("${currencyFormatter.format(nominal)}"),
-                        ),
-                      ),
-                    ));
-              })
+          widget.dataPembayaran[0] == true
+              ? SizedBox()
+              : GridView.builder(
+                  padding: EdgeInsets.all(0),
+                  physics: BouncingScrollPhysics(),
+                  itemCount: controller.pilihanOpsiUangShow.length,
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 4.5,
+                      crossAxisSpacing: 5,
+                      mainAxisSpacing: 5),
+                  itemBuilder: (context, index) {
+                    var nama = controller.pilihanOpsiUangShow[index]['nama'];
+                    var nominal =
+                        controller.pilihanOpsiUangShow[index]['nominal'];
+                    return CardCustom(
+                        colorBg: Colors.white,
+                        radiusBorder: Utility.borderStyle1,
+                        widgetCardCustom: Material(
+                          borderRadius: Utility.borderStyle1,
+                          child: InkWell(
+                            highlightColor: Utility.infoLight100,
+                            borderRadius: Utility.borderStyle1,
+                            onTap: () {
+                              setState(() {
+                                controller.totalPembayaran.value =
+                                    nominal.toInt();
+                                controller.uangterima.value.text =
+                                    globalCt.convertToIdr(nominal, 0);
+                              });
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: nama == "Uang pas"
+                                  ? Text("$nama")
+                                  : Text(
+                                      "${currencyFormatter.format(nominal)}"),
+                            ),
+                          ),
+                        ));
+                  })
         ],
       ),
     );
@@ -937,4 +983,57 @@ class _PembayaranState extends State<Pembayaran> {
   //     ),
   //   );
   // }
+
+  checkBeforeBack(status, splitType) {
+    if (splitType == true) {
+      if (status == true) {
+        showDialog();
+      } else {
+        setState(() {
+          statusBack = true;
+          Get.back();
+        });
+      }
+    } else {
+      setState(() {
+        statusBack = true;
+        Get.back();
+      });
+    }
+  }
+
+  void showDialog() {
+    showGeneralDialog(
+      barrierDismissible: false,
+      context: Get.context!,
+      barrierColor: Colors.black54, // space around dialog
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, a1, a2, child) {
+        return ScaleTransition(
+            scale: CurvedAnimation(
+                parent: a1,
+                curve: Curves.elasticOut,
+                reverseCurve: Curves.easeOutCubic),
+            child: ModalPopupPeringatan(
+              title: "Batal Split Pembayaran",
+              content: "Yakin membatalkan split pembayaran ?",
+              positiveBtnText: "Batal",
+              negativeBtnText: "Urungkan",
+              positiveBtnPressed: () {
+                setState(() {
+                  statusBack = true;
+                  simpanPembayaranCt.statusSelesaiPembayaranSplit.value = false;
+                  simpanPembayaranCt.statusSelesaiPembayaranSplit.refresh();
+                  Get.back();
+                  Get.back();
+                });
+              },
+            ));
+      },
+      pageBuilder: (BuildContext context, Animation animation,
+          Animation secondaryAnimation) {
+        return null!;
+      },
+    );
+  }
 }

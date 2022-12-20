@@ -15,7 +15,7 @@ class MasukKeranjangController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var perhitunganCt = Get.put(PerhitunganController());
 
-  void masukKeranjang(produkSelected, imeiData) async {
+  Future<bool> masukKeranjang(produkSelected, imeiData) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Simpan data");
 
     var filterJml1 = dashboardCt.jumlahPesan.value.text;
@@ -26,7 +26,7 @@ class MasukKeranjangController extends BaseController {
     var convertTanggal1 =
         Utility.convertDate4(dashboardCt.informasiJlhd[0]["TANGGAL"]);
     var tanggalJlhd = "$convertTanggal1 23:59:59";
-
+    bool prosesMasukKeranjang = false;
     if (filterJumlahPesan == 0.0) {
       UtilsAlert.showToast("Quantity tidak valid");
       Get.back();
@@ -36,16 +36,18 @@ class MasukKeranjangController extends BaseController {
           produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
       bool hasilValidasi1 = await validasi1;
       if (hasilValidasi1 == true) {
-        aksiMasukKeranjangLocal(produkSelected, imeiData);
+        Future<bool> proses = aksiMasukKeranjangLocal(produkSelected, imeiData);
+        prosesMasukKeranjang = await proses;
       } else {
         Get.back();
         Get.back();
         Get.back();
       }
     }
+    return Future.value(prosesMasukKeranjang);
   }
 
-  void aksiMasukKeranjangLocal(produkSelected, imeiData) async {
+  Future<bool> aksiMasukKeranjangLocal(produkSelected, imeiData) async {
     setBusy();
     // check harga jual di edit
     var filter1 = dashboardCt.hargaJualPesanBarang.value.text;
@@ -60,6 +62,9 @@ class MasukKeranjangController extends BaseController {
 
     Future<String> checkNorutKeranjang = checkNorut();
     var valueNomorUrut = await checkNorutKeranjang;
+
+    print('nomor key $valueNomorKey');
+    print('nomor urut $valueNomorUrut');
 
     var filterJml1 = dashboardCt.jumlahPesan.value.text;
     var filterJml2 = filterJml1.replaceAll(",", ".");
@@ -136,6 +141,7 @@ class MasukKeranjangController extends BaseController {
     dashboardCt.listKeranjang.refresh();
     dashboardCt.listKeranjangArsip.refresh();
     setIdle();
+    return Future.value(true);
   }
 
   void kirimJldtBarang(produkSelected, norutKey, valueNomorUrut,
@@ -201,7 +207,6 @@ class MasukKeranjangController extends BaseController {
         var data = valueBody['data'];
         print('insert jldt');
         print(valueBody);
-        // perhitunganCt.perhitungan1("masuk_keranjang");
       }
     });
   }

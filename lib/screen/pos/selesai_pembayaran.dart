@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/selesai_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
 import 'package:siscom_pos/screen/pos/detail_struk.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -18,9 +20,11 @@ class SelesaiPembayaran extends StatefulWidget {
 }
 
 class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
+  var controller = Get.put(SelesaiPembayaranController());
   var pembayaranCt = Get.put(PembayaranController());
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
+  var simpanPembayaranCt = Get.put(SimpanPembayaran());
 
   @override
   void initState() {
@@ -127,13 +131,26 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                       ),
                                       Expanded(
                                         flex: 60,
-                                        child: Text(
-                                          "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                              color: Utility.grey900,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                                        child: simpanPembayaranCt
+                                                    .informasiSelesaiPembayaran
+                                                    .value[0]['status'] ==
+                                                false
+                                            ? Text(
+                                                "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                    color: Utility.grey900,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )
+                                            : Text(
+                                                "${currencyFormatter.format(simpanPembayaranCt.informasiSelesaiPembayaran.value[0]['total_tagihan_split'])}",
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                    color: Utility.grey900,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
                                       )
                                     ],
                                   ),
@@ -165,15 +182,14 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                               ),
                                       ),
                                       Expanded(
-                                        flex: 60,
-                                        child: Text(
-                                          "${currencyFormatter.format(pembayaranCt.totalPembayaran.value)}",
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                              color: Utility.grey900,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      )
+                                          flex: 60,
+                                          child: Text(
+                                            "${currencyFormatter.format(int.parse("${pembayaranCt.uangterima.value.text.replaceAll('.', '')}"))}",
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                                color: Utility.grey900,
+                                                fontWeight: FontWeight.bold),
+                                          ))
                                     ],
                                   ),
                                   SizedBox(
@@ -198,16 +214,59 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                       ),
                                       Expanded(
                                         flex: 60,
-                                        child: Text(
-                                          "${currencyFormatter.format(Utility.pengurangan("${pembayaranCt.totalPembayaran.value}", "${pembayaranCt.totalTagihan.value}"))}",
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                                        child: simpanPembayaranCt
+                                                    .informasiSelesaiPembayaran
+                                                    .value[0]['status'] ==
+                                                false
+                                            ? Text(
+                                                "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )
+                                            : Text(
+                                                "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihanSplit.value}"))}",
+                                                textAlign: TextAlign.right,
+                                                style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
                                       )
                                     ],
                                   ),
+                                  simpanPembayaranCt.informasiSelesaiPembayaran
+                                                  .value[0]['status'] ==
+                                              false ||
+                                          simpanPembayaranCt
+                                                  .statusSelesaiPembayaranSplit
+                                                  .value ==
+                                              true
+                                      ? SizedBox()
+                                      : SizedBox(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                height: Utility.medium,
+                                              ),
+                                              Button1(
+                                                textBtn:
+                                                    "Lanjutkan Split Pembayaran",
+                                                colorBtn:
+                                                    Utility.primaryDefault,
+                                                colorText: Colors.white,
+                                                onTap: () {
+                                                  Get.back();
+                                                  Get.back();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                 ],
                               ),
                             )
@@ -219,157 +278,185 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                 ),
                 Expanded(
                     flex: 20,
-                    child: CardCustom(
-                      colorBg: Colors.white,
-                      radiusBorder: const BorderRadius.only(
-                        topLeft: Radius.circular(18),
-                        topRight: Radius.circular(18),
-                      ),
-                      widgetCardCustom: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: Utility.small,
+                    child: simpanPembayaranCt.informasiSelesaiPembayaran
+                                    .value[0]['status'] ==
+                                false ||
+                            simpanPembayaranCt
+                                    .statusSelesaiPembayaranSplit.value ==
+                                true
+                        ? CardCustom(
+                            colorBg: Colors.white,
+                            radiusBorder: const BorderRadius.only(
+                              topLeft: Radius.circular(18),
+                              topRight: Radius.circular(18),
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Center(
-                                    child: InkWell(
-                                      onTap: () {
-                                        pembayaranCt.viewScreenShootDetailStruk
-                                            .value = false;
-                                        Get.to(
-                                            DetailStruk(
-                                              typeStrukDetail: "kirim_struk",
-                                            ),
-                                            transition: Transition.leftToRight,
-                                            duration:
-                                                Duration(milliseconds: 500));
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Iconsax.send_2,
-                                            color: Utility.greyDark,
-                                            size: 26,
-                                          ),
-                                          SizedBox(
-                                            height: Utility.small,
-                                          ),
-                                          Text(
-                                            "Kirim Struk",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: Utility.normal),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+                            widgetCardCustom: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    height: Utility.small,
                                   ),
-                                ),
-                                Expanded(
-                                  child: Center(
-                                    child: InkWell(
-                                      onTap: () {
-                                        pembayaranCt.viewScreenShootDetailStruk
-                                            .value = false;
-                                        Get.to(
-                                            DetailStruk(
-                                              typeStrukDetail: "cetak_struk",
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: InkWell(
+                                            onTap: () {
+                                              pembayaranCt
+                                                  .viewScreenShootDetailStruk
+                                                  .value = false;
+                                              Get.to(
+                                                  DetailStruk(
+                                                    typeStrukDetail:
+                                                        "kirim_struk",
+                                                  ),
+                                                  transition:
+                                                      Transition.leftToRight,
+                                                  duration: Duration(
+                                                      milliseconds: 500));
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Iconsax.send_2,
+                                                  color: Utility.greyDark,
+                                                  size: 26,
+                                                ),
+                                                SizedBox(
+                                                  height: Utility.small,
+                                                ),
+                                                Text(
+                                                  "Kirim Struk",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: Utility.normal),
+                                                )
+                                              ],
                                             ),
-                                            transition: Transition.leftToRight,
-                                            duration:
-                                                Duration(milliseconds: 500));
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Iconsax.receipt_item,
-                                            color: Utility.greyDark,
-                                            size: 26,
                                           ),
-                                          SizedBox(
-                                            height: Utility.small,
-                                          ),
-                                          Text(
-                                            "Cetak Struk",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: Utility.normal),
-                                          )
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Center(
-                                    child: InkWell(
-                                      onTap: () {
-                                        pembayaranCt.viewScreenShootDetailStruk
-                                            .value = false;
-                                        Get.to(
-                                            DetailStruk(
-                                              typeStrukDetail: "cetak_pesanan",
+                                      Expanded(
+                                        child: Center(
+                                          child: InkWell(
+                                            onTap: () {
+                                              pembayaranCt
+                                                  .viewScreenShootDetailStruk
+                                                  .value = false;
+                                              Get.to(
+                                                  DetailStruk(
+                                                    typeStrukDetail:
+                                                        "cetak_struk",
+                                                  ),
+                                                  transition:
+                                                      Transition.leftToRight,
+                                                  duration: Duration(
+                                                      milliseconds: 500));
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Iconsax.receipt_item,
+                                                  color: Utility.greyDark,
+                                                  size: 26,
+                                                ),
+                                                SizedBox(
+                                                  height: Utility.small,
+                                                ),
+                                                Text(
+                                                  "Cetak Struk",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: Utility.normal),
+                                                )
+                                              ],
                                             ),
-                                            transition: Transition.leftToRight,
-                                            duration:
-                                                Duration(milliseconds: 500));
-                                      },
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Iconsax.receipt_2,
-                                            color: Utility.greyDark,
-                                            size: 26,
                                           ),
-                                          SizedBox(
-                                            height: Utility.small,
-                                          ),
-                                          Text(
-                                            "Cetak Pesanan",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: Utility.normal),
-                                          )
-                                        ],
+                                        ),
                                       ),
-                                    ),
+                                      Expanded(
+                                        child: Center(
+                                          child: InkWell(
+                                            onTap: () {
+                                              pembayaranCt
+                                                  .viewScreenShootDetailStruk
+                                                  .value = false;
+                                              Get.to(
+                                                  DetailStruk(
+                                                    typeStrukDetail:
+                                                        "cetak_pesanan",
+                                                  ),
+                                                  transition:
+                                                      Transition.leftToRight,
+                                                  duration: Duration(
+                                                      milliseconds: 500));
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Iconsax.receipt_2,
+                                                  color: Utility.greyDark,
+                                                  size: 26,
+                                                ),
+                                                SizedBox(
+                                                  height: Utility.small,
+                                                ),
+                                                Text(
+                                                  "Cetak Pesanan",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: Utility.normal),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                )
-                              ],
+                                  SizedBox(
+                                    height: Utility.medium,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 16.0, right: 16.0),
+                                    child: Button1(
+                                        colorBtn: Utility.primaryDefault,
+                                        textBtn: "Transaksi Baru",
+                                        onTap: () {
+                                          if (simpanPembayaranCt
+                                                  .informasiSelesaiPembayaran
+                                                  .value[0]['status'] ==
+                                              true) {
+                                            Get.back();
+                                          }
+                                          pembayaranCt.transkasiBaru();
+                                        }),
+                                  )
+                                ],
+                              ),
                             ),
-                            SizedBox(
-                              height: Utility.medium,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 16.0, right: 16.0),
-                              child: Button1(
-                                  colorBtn: Utility.primaryDefault,
-                                  textBtn: "Transaksi Baru",
-                                  onTap: () => pembayaranCt.transkasiBaru()),
-                            )
-                          ],
-                        ),
-                      ),
-                    ))
+                          )
+                        : SizedBox())
               ],
             ),
           ),

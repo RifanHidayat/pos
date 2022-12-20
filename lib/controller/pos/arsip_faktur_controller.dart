@@ -20,20 +20,30 @@ class ArsipFakturController extends BaseController {
 
   var loadingString = "Sedang memuat".obs;
 
-  void startLoad() {
-    getFakturArsip();
-  }
-
-  void getFakturArsip() {
+  void getFakturArsip() async {
     if (AppData.noFaktur != "") {
-      listArsipFaktur.value.clear();
-      listArsipFakturDetailBarang.value.clear();
       var getValue1 = AppData.noFaktur.split("|");
+      List hasilDataListJlhd = [];
+      List hasilDataListJldt = [];
       for (var element in getValue1) {
         var listFilter = element.split("-");
         var keyFaktur = listFilter[1];
-        getJlhd(keyFaktur);
+        Future<List> dataListJlhd = getJlhd(keyFaktur);
+        List tampung = await dataListJlhd;
+        if (tampung.isNotEmpty) {
+          for (var ele in tampung) {
+            hasilDataListJlhd.add(ele);
+          }
+        }
+        Future<List> dataListJdt = getJldt(keyFaktur);
+        var tampung1 = await dataListJdt;
+        if (tampung1.isNotEmpty) {
+          for (var ele in tampung) {
+            hasilDataListJldt.add(ele);
+          }
+        }
       }
+      hitungArsip(hasilDataListJlhd, hasilDataListJldt);
     } else {
       listArsipFaktur.value.clear();
       this.listArsipFaktur.refresh();
@@ -43,7 +53,7 @@ class ArsipFakturController extends BaseController {
     }
   }
 
-  void getJlhd(keyFaktur) {
+  Future<List> getJlhd(keyFaktur) async {
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -51,55 +61,58 @@ class ArsipFakturController extends BaseController {
       'key_faktur': '$keyFaktur',
     };
     var connect = Api.connectionApi("post", body, "get_once_jlhd");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        List data = valueBody['data'];
-        for (var element in data) {
-          listArsipFaktur.value.add(element);
-        }
-        Map<String, dynamic> body = {
-          'database': '${AppData.databaseSelected}',
-          'periode': '${AppData.periodeSelected}',
-          'stringTabel': 'JLDT',
-          'key_faktur': '$keyFaktur',
-        };
-        var connect = Api.connectionApi("post", body, "get_once_jldt");
-        connect.then((dynamic res) {
-          if (res.statusCode == 200) {
-            var valueBody = jsonDecode(res.body);
-            List data = valueBody['data'];
-            for (var element in data) {
-              listArsipFakturDetailBarang.value.add(element);
-            }
-            hitungArsip();
-          } else {
-            UtilsAlert.showToast("Terjadi kesalahan");
-          }
-        });
-      } else {
-        UtilsAlert.showToast("Terjadi kesalahan");
+
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List hasilData = [];
+    if (valueBody['status'] == true) {
+      List data = valueBody['data'];
+      List tampung = [];
+      for (var element in data) {
+        tampung.add(element);
       }
-    });
+      hasilData = tampung;
+    }
+    return Future.value(hasilData);
   }
 
-  void hitungArsip() {
+  Future<List> getJldt(keyFaktur) async {
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'JLDT',
+      'key_faktur': '$keyFaktur',
+    };
+    var connect = Api.connectionApi("post", body, "get_once_jldt");
+
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List hasilData = [];
+    if (valueBody['status'] == true) {
+      List data = valueBody['data'];
+      List tampung2 = [];
+      for (var element in data) {
+        tampung2.add(element);
+      }
+      hasilData = tampung2;
+    }
+    return Future.value(hasilData);
+  }
+
+  void hitungArsip(hasilDataListJlhd, hasilDataListJldt) {
     var tampung = [];
     setBusy();
-    for (var element in listArsipFaktur.value) {
+    for (var element in hasilDataListJlhd) {
       int total = 0;
       String tanggal = "";
       String jam = "";
-      for (var element2 in listArsipFakturDetailBarang.value) {
+      for (var element2 in hasilDataListJldt) {
         if (element['PK'] == element2['PK']) {
-          double hitung1 = double.parse("${element2['QTY']}") *
-              double.parse("${element2['HARGA']}");
-          int hitungQty = hitung1.toInt();
-          total += hitungQty;
           tanggal = Utility.convertDate(element2['TANGGAL']);
           jam = element2['TOE'];
         }
       }
+      print('nomor ${element['NOMOR']}');
       print('harga net ${element['HRGNET']}');
       var data = {
         'PK': element['PK'],
@@ -120,6 +133,5 @@ class ArsipFakturController extends BaseController {
         ? "Tidak ada arsip tersimpan"
         : "Sedang memuat...";
     this.loadingStatus.refresh();
-    setIdle();
   }
 }

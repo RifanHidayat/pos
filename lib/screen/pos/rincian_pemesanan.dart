@@ -376,7 +376,10 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                             colorBtn: Utility.primaryDefault,
                                             textBtn: "Pilih Pembayaran",
                                             onTap: () {
-                                              Get.to(Pembayaran(),
+                                              Get.to(
+                                                  Pembayaran(
+                                                    dataPembayaran: [false, ""],
+                                                  ),
                                                   duration: Duration(
                                                       milliseconds: 500),
                                                   transition:

@@ -35,7 +35,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
 
   @override
   void initState() {
-    controller.startLoad();
+    controller.getFakturArsip();
     myFocusNode = FocusNode();
     super.initState();
   }
@@ -257,6 +257,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
                           children: [
                             Text(
                                 "${globalController.convertToIdr(totalFaktur, 0)}"),
+                            // Text("$totalFaktur"),
                             Text(
                               "$jam",
                               textAlign: TextAlign.right,

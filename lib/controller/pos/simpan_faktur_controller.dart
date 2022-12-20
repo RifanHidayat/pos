@@ -8,17 +8,21 @@ class SimpanFakturController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var arsipFakturCt = Get.put(ArsipFakturController());
 
-  simpanFakturSebagaiArsip(type) {
+  Future<bool> simpanFakturSebagaiArsip(type) {
+    if (type != "proses_split_bill") {
+      dashboardCt.nomorCbLastSelected.value = "";
+      dashboardCt.kodePelayanSelected.value = "";
+      dashboardCt.customSelected.value = "";
+      dashboardCt.ppnCabang.value = 0;
+      dashboardCt.serviceChargerCabang.value = 0;
+    }
     dashboardCt.nomorFaktur.value = "-";
     dashboardCt.primaryKeyFaktur.value = "";
-    dashboardCt.nomorCbLastSelected.value = "";
-    dashboardCt.kodePelayanSelected.value = "";
-    dashboardCt.customSelected.value = "";
+
     dashboardCt.jumlahItemDikeranjang.value = 0;
     dashboardCt.totalNominalDikeranjang.value = 0;
     dashboardCt.diskonHeader.value = 0.0;
-    dashboardCt.ppnCabang.value = 0;
-    dashboardCt.serviceChargerCabang.value = 0;
+
     dashboardCt.listKeranjang.value.clear();
 
     dashboardCt.nomorFaktur.refresh();
@@ -33,11 +37,11 @@ class SimpanFakturController extends BaseController {
     dashboardCt.serviceChargerCabang.refresh();
 
     dashboardCt.getKelompokBarang('simpan_faktur');
-    arsipFakturCt.startLoad();
     if (type != "proses_split_bill") {
       UtilsAlert.showToast("Berhasil simpan arsip faktur");
       Get.back();
       Get.back();
     }
+    return Future.value(true);
   }
 }

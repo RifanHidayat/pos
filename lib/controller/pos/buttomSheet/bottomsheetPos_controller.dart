@@ -1674,6 +1674,8 @@ class BottomSheetPos extends BaseController
     UtilsAlert.loadingSimpanData(Get.context!, "Proses simpan data...");
     var getNominalDiskonHeader = Utility.convertStringRpToDouble(
         dashboardCt.hargaDiskonPesanBarang.value.text);
+    var getNominalSeviceCharge = Utility.convertStringRpToDouble(
+        dashboardCt.serviceChargeHarga.value.text);
 
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
@@ -1683,6 +1685,7 @@ class BottomSheetPos extends BaseController
       'key_faktur': dashboardCt.primaryKeyFaktur.value,
       'qty_all': '${dashboardCt.allQtyJldt.value}',
       'nominal_diskon_header': '$getNominalDiskonHeader',
+      'nominal_servicecharge': '$getNominalSeviceCharge',
     };
     var connect = Api.connectionApi("post", body, "setting_diskon_header");
     var getValue = await connect;
@@ -1690,8 +1693,13 @@ class BottomSheetPos extends BaseController
     if (valueBody['status'] == true) {
       var diskonPersen = Utility.validasiValueDouble(
           dashboardCt.persenDiskonPesanBarang.value.text);
+      var serviceChargePersen = Utility.validasiValueDouble(
+          dashboardCt.serviceChargePesan.value.text);
       dashboardCt.diskonHeader.value = diskonPersen;
+      dashboardCt.serviceChargerCabang.value = serviceChargePersen;
       dashboardCt.diskonHeader.refresh();
+      dashboardCt.serviceChargerCabang.refresh();
+
       UtilsAlert.showToast("${valueBody['message']}");
       Get.back();
       Get.back();
@@ -1700,9 +1708,6 @@ class BottomSheetPos extends BaseController
       Get.to(RincianPemesanan());
       dashboardCt
           .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
-      dashboardCt.listMenu.refresh();
-      dashboardCt.listKeranjang.refresh();
-      dashboardCt.listKeranjangArsip.refresh();
     } else {
       UtilsAlert.showToast("Gagal simpan data rincian pemesanan");
       Get.back();
@@ -1813,7 +1818,7 @@ class BottomSheetPos extends BaseController
       dashboardCt.listKeranjangArsip.value.clear();
       refrehVariabel();
       dashboardCt.getKelompokBarang('');
-      dashboardCt.arsipController.startLoad();
+      // dashboardCt.arsipController.startLoad();
     }
     dashboardCt.startLoad('hapus_faktur');
     Get.back();

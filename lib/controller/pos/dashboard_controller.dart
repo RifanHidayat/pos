@@ -1,26 +1,13 @@
 import 'dart:convert';
-
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
-import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
-import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
-import 'package:siscom_pos/controller/pos/masuk_keranjang_controller.dart';
-import 'package:siscom_pos/screen/auth/login.dart';
-import 'package:siscom_pos/screen/pos/rincian_pemesanan.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
-import 'package:siscom_pos/utils/widget/button.dart';
-import 'package:siscom_pos/utils/widget/card_custom.dart';
-import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
 class DashbardController extends BaseController {
   RefreshController refreshController = RefreshController(initialRefresh: true);
@@ -238,7 +225,7 @@ class DashbardController extends BaseController {
           aksiGetSalesman(cabangKodeSelected.value, informasiJlhd[0]["SALESM"],
               'loadArsip');
           aksiGetCustomer(informasiJlhd[0]["SALESM"], 'loadArsip');
-          getKelompokBarang('first');
+          getKelompokBarang(type);
         } else {
           var sysUser = AppData.sysuserInformasi.split("-");
           var hakAksesCabang = sysUser[3].split(" ");
@@ -312,6 +299,7 @@ class DashbardController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
+        data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
         listSalesman.value = data;
         if (data.isEmpty) {
           pelayanSelected.value = "Data pelayan kosong";
@@ -362,6 +350,7 @@ class DashbardController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
+        data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
         listPelanggan.value = data;
         if (data.isEmpty) {
           namaPelanggan.value = "Data pelanggan kosong";
@@ -408,10 +397,14 @@ class DashbardController extends BaseController {
         var data = valueBody['data'];
         listKelompokBarang.value = data;
         listKelompokBarang.value.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
-        var getFirst = data.first;
-        var kodeInisial = getFirst['INISIAL'];
-        kategoriBarang.value = getFirst['NAMA'];
-        getMenu(kodeInisial, type);
+        if (type == "arsip") {
+          aksiPilihKategoriBarang();
+        } else {
+          var getFirst = data.first;
+          var kodeInisial = getFirst['INISIAL'];
+          kategoriBarang.value = getFirst['NAMA'];
+          getMenu(kodeInisial, type);
+        }
         kategoriBarang.refresh();
         listKelompokBarang.refresh();
       }
@@ -607,6 +600,7 @@ class DashbardController extends BaseController {
     double discdHeader = 0.0;
     double dischHeader = 0.0;
     double discnHeader = 0.0;
+    double biayaHeader = 0.0;
 
     for (var element in listKeranjangArsip.value) {
       double hargaBarang = double.parse("${element['HARGA']}");
@@ -626,13 +620,13 @@ class DashbardController extends BaseController {
       discdHeader = discdHeader + hitung2;
       dischHeader = dischHeader + dischBarang;
       discnHeader = discnHeader + hitungDiscn;
+      biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
 
       // update jldt
       double hrgSetelahDiskon = finalHitung - dischBarang;
       var hitungPpnJldt =
           Utility.nominalPPNHeader('$hrgSetelahDiskon', '${ppnCabang.value}');
-      var hitungServiceJldt = Utility.nominalPPNHeader(
-          '$hrgSetelahDiskon', '${serviceChargerCabang.value}');
+      var hitungServiceJldt = double.parse("${element['BIAYA']}");
       var valueFinalDiscnJldt = hitungDiscnJldt.toPrecision(2);
       var valueFinalPpnJldt = hitungPpnJldt.toPrecision(2);
       updateJldt(element['NOKEY'], valueFinalDiscnJldt, valueFinalPpnJldt,
@@ -661,36 +655,52 @@ class DashbardController extends BaseController {
     // print("TAXP header ${ppnCabang.value}");
     // print("charge header ${serviceChargerCabang.value}");
 
-    var hargaSetelahDiskonHeader = totalNominalDikeranjang.value - dischHeader;
-    var nominalPpn = Utility.nominalPPNHeader(
-        '${hargaSetelahDiskonHeader}', '${ppnCabang.value}');
-    var nominalService = Utility.nominalPPNHeader(
-        '${hargaSetelahDiskonHeader}', '${serviceChargerCabang.value}');
-
-    var hargaNetHeader = hargaSetelahDiskonHeader + nominalPpn + nominalService;
+    // perhitungan diskon header
 
     if (diskonHeader.value == 0.0) {
-      print('harga setelah diskon $hargaSetelahDiskonHeader');
       print('disch ${informasiJlhd.value[0]['DISCH']}');
-      var fltr1 = Utility.persenDiskonHeader(
-          "$hargaSetelahDiskonHeader", "${informasiJlhd.value[0]['DISCH']}");
+      var fltr1 = Utility.persenDiskonHeader("${totalNominalDikeranjang.value}",
+          "${informasiJlhd.value[0]['DISCH']}");
 
       diskonHeader.value = fltr1.toPrecision(2);
+      diskonHeader.refresh();
     }
 
-    ppnCabang.value =
-        Utility.convertStringRpToDouble("${informasiJlhd.value[0]['TAXP']}");
-    serviceChargerCabang.value = Utility.persenDiskonHeader(
-        "$hargaSetelahDiskonHeader", "${informasiJlhd.value[0]['BIAYA']}");
-    diskonHeader.refresh();
+    var hargaSetelahDiskonHeader = totalNominalDikeranjang.value - dischHeader;
+
+    // perhitungan ppn header
+
+    var nominalPpn = Utility.nominalPPNHeader(
+        '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
+
+    ppnCabang.value = double.parse('${informasiJlhd.value[0]['TAXP']}');
     ppnCabang.refresh();
+
+    // perhitungan service charge
+
+    var convertPersenServiceCharge =
+        Utility.persenDiskonHeader("$hargaSetelahDiskonHeader", "$biayaHeader");
+
+    var precisionPersenServiceCharge =
+        convertPersenServiceCharge.toPrecision(2);
+
+    serviceChargerCabang.value = precisionPersenServiceCharge;
+
     serviceChargerCabang.refresh();
+
+    var nominalService = Utility.nominalPPNHeader(
+        '$hargaSetelahDiskonHeader', '${serviceChargerCabang.value}');
+
+    var convertServiceChargeNominal = nominalService.toPrecision(2);
+
+    var hargaNetHeader =
+        hargaSetelahDiskonHeader + nominalPpn + convertServiceChargeNominal;
 
     var fixedTaxn = nominalPpn.toPrecision(2);
     var fixedHrgNet = hargaNetHeader.toPrecision(2);
 
     updateDataJlhd(hargatotjlhd.value, discdHeader, dischHeader, discnHeader,
-        fixedTaxn, nominalService, fixedHrgNet);
+        fixedTaxn, convertServiceChargeNominal, fixedHrgNet);
   }
 
   void validasiCabangsdPelanggan(kodeCbArsip, gudangArsip, kodeSalesArsip) {
@@ -758,179 +768,6 @@ class DashbardController extends BaseController {
         var data = valueBody['data'];
       }
     });
-  }
-
-  void getAkhirNomorFaktur() {
-    Map<String, dynamic> body = {
-      'database': '${AppData.databaseSelected}',
-      'periode': '${AppData.periodeSelected}',
-      'stringTabel': 'JLHD',
-    };
-    var connect = Api.connectionApi("post", body, "get_last_faktur");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        var data = valueBody['data'];
-        var tanggalLastFaktur = data[0]['TANGGAL'];
-        var nomorAntriLastFaktur = data[0]['NOMORANTRI'];
-        var getfaktur = data[0]['NOMOR'];
-        var filter = getfaktur.substring(2);
-        var filter2 = int.parse(filter) + 1;
-        var lastFaktur = "SI$filter2";
-        var dt = DateTime.now();
-
-        var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
-        var inputDate = Utility.convertDate4(tanggalLastFaktur);
-        if (tanggalNow == inputDate) {
-          // print(nomorAntriLastFaktur);
-          if (nomorAntriLastFaktur == null || nomorAntriLastFaktur == "") {
-            print('nomor antri tidak valid');
-            nomorOrder.value = "${DateFormat('yyyyMMdd').format(dt)}001";
-          } else {
-            print('nomor antri valid');
-            var ft1 =
-                nomorAntriLastFaktur.substring(nomorAntriLastFaktur.length - 3);
-            var ft2 = int.parse(ft1) + 1;
-            if (ft2 <= 9) {
-              nomorOrder.value = "${DateFormat('yyyyMMdd').format(dt)}00$ft2";
-            } else if (ft2 <= 99) {
-              nomorOrder.value = "${DateFormat('yyyyMMdd').format(dt)}0$ft2";
-            } else if (ft2 < 999) {
-              nomorOrder.value = "${DateFormat('yyyyMMdd').format(dt)}$ft2";
-            }
-          }
-        } else {
-          nomorOrder.value = "${DateFormat('yyyyMMdd').format(dt)}001";
-        }
-        nomorOrder.refresh();
-        // print(getfaktur);
-        // print(filter2);
-        // print(lastFaktur);
-        getAkhirNomorCBJLHD(lastFaktur);
-      }
-    });
-  }
-
-  void getAkhirNomorCBJLHD(lastFaktur) {
-    Map<String, dynamic> body = {
-      'database': '${AppData.databaseSelected}',
-      'periode': '${AppData.periodeSelected}',
-      'stringTabel': 'JLHD',
-      'kode_cabang': '${cabangKodeSelected.value}',
-    };
-    var connect = Api.connectionApi("post", body, "get_last_nomorcb_jlhd");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        var data = valueBody['data'];
-        var getNomorCb = data[0]['NOMORCB'];
-        var filter = getNomorCb.substring(2);
-        var filter2 = int.parse(filter) + 1;
-        var lastNomorCB = "SI$filter2";
-        insertFakturBaru(lastFaktur, lastNomorCB);
-      }
-    });
-  }
-
-  void insertFakturBaru(lastFaktur, lastNomorCB) {
-    var dt = DateTime.now();
-    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
-    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
-    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
-    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
-
-    Map<String, dynamic> body = {
-      'database': '${AppData.databaseSelected}',
-      'periode': '${AppData.periodeSelected}',
-      'stringTabel': 'JLHD',
-      'jlhd_cabang': "01",
-      'jlhd_nomor': "$lastFaktur",
-      'jlhd_reff': "${reff.value.text}",
-      'jlhd_tanggal': "$tanggalNow",
-      'jlhd_tglinv': "$tanggalNow",
-      'jlhd_term': "0",
-      'jlhd_tgltjp': "$tanggalNow",
-      'jlhd_custom': "${customSelected.value}",
-      'jlhd_wilayah': "${wilayahCustomerSelected.value}",
-      'jlhd_salesm': "${kodePelayanSelected.value}",
-      'jlhd_uang': "RP",
-      'jlhd_kurs': "1",
-      'jlhd_ket1': "${keteranganInsertFaktur.value.text}",
-      'jlhd_cb': "${cabangKodeSelected.value}",
-      'jlhd_doe': tanggalDanJam,
-      'jlhd_toe': jamTransaksi,
-      'jlhd_loe': tanggalDanJam,
-      'jlhd_deo': dataInformasiSYSUSER[0],
-      'jlhd_nomorcb': "$lastNomorCB",
-      'jlhd_nomorantri': "${nomorOrder.value}",
-      'jlhd_taxp': "${ppnCabang.value}"
-    };
-    var connect = Api.connectionApi("post", body, "buat_faktur");
-    connect.then((dynamic res) {
-      if (res.statusCode == 200) {
-        var valueBody = jsonDecode(res.body);
-        if (valueBody['status'] == false) {
-          getAkhirNomorFaktur();
-        } else {
-          nomorFaktur.value = lastFaktur;
-          primaryKeyFaktur.value = "${valueBody['primaryKey']}";
-          nomorCbLastSelected.value = lastNomorCB;
-          reff.value.text = "";
-          keteranganInsertFaktur.value.text = "";
-          if (AppData.noFaktur != "") {
-            AppData.noFaktur =
-                "${AppData.noFaktur}|${nomorFaktur.value}-${primaryKeyFaktur.value}-$lastNomorCB-${nomorOrder.value}";
-          } else {
-            AppData.noFaktur =
-                "${nomorFaktur.value}-${primaryKeyFaktur.value}-$lastNomorCB-${nomorOrder.value}";
-          }
-          nomorFaktur.refresh();
-          primaryKeyFaktur.refresh();
-          print("nomor faktur ${nomorFaktur.value}");
-          print("key faktur ${primaryKeyFaktur.value}");
-          checkingJlhdArsip();
-          UtilsAlert.showToast("Berhasil buat faktur");
-          Get.back();
-          Get.back();
-        }
-      }
-    });
-  }
-
-  void logout() {
-    showGeneralDialog(
-      barrierDismissible: false,
-      context: Get.context!,
-      barrierColor: Colors.black54, // space around dialog
-      transitionDuration: Duration(milliseconds: 200),
-      transitionBuilder: (context, a1, a2, child) {
-        return ScaleTransition(
-          scale: CurvedAnimation(
-              parent: a1,
-              curve: Curves.elasticOut,
-              reverseCurve: Curves.easeOutCubic),
-          child: ModalPopup(
-            // our custom dialog
-            title: "Peringatan",
-            content: "Yakin Keluar Akun",
-            positiveBtnText: "Keluar",
-            negativeBtnText: "Kembali",
-            style: 1,
-            buttonStatus: 1,
-            positiveBtnPressed: () {
-              AppData.databaseSelected = "";
-              AppData.periodeSelected = "";
-              AppData.cabangSelected = "";
-              Get.offAll(Login());
-            },
-          ),
-        );
-      },
-      pageBuilder: (BuildContext context, Animation animation,
-          Animation secondaryAnimation) {
-        return null!;
-      },
-    );
   }
 
   void pencarianDataBarang(value) async {

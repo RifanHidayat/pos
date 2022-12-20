@@ -4,15 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/pos/buat_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
+import 'penjualan/dashboard_penjualan_controller.dart';
+
 class GlobalController extends GetxController
     with GetSingleTickerProviderStateMixin {
   var dashboardController = Get.put(DashbardController());
+  var buatFakturController = Get.put(BuatFakturController());
+  var sidebarCt = Get.put(SidebarController());
+  var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
 
   var cari = TextEditingController().obs;
 
@@ -263,27 +270,51 @@ class GlobalController extends GetxController
         dashboardController.serviceChargerCabang.refresh();
         dashboardController.pilihGudang(nama);
         dashboardController.aksiGetSalesman(kode, '', '');
-        Navigator.pop(Get.context!);
+        dashboardController.aksiPilihKategoriBarang();
+        Get.back();
       } else if (judul == "Pilih Kategori") {
         dashboardController.kategoriBarang.value = nama;
-        this.dashboardController.kategoriBarang.refresh();
+        dashboardController.kategoriBarang.refresh();
         dashboardController.aksiPilihKategoriBarang();
-        Navigator.pop(Get.context!);
+        Get.back();
       } else if (judul == "Pilih Pelayan" || judul == "Pilih Sales") {
         dashboardController.pelayanSelected.value = nama;
         dashboardController.kodePelayanSelected.value = kode;
-        this.dashboardController.pelayanSelected.refresh();
-        this.dashboardController.kodePelayanSelected.refresh();
+        dashboardController.pelayanSelected.refresh();
+        dashboardController.kodePelayanSelected.refresh();
         dashboardController.aksiGetCustomer(kode, '');
-        Navigator.pop(Get.context!);
+        Get.back();
       } else if (judul == "Pilih Pelanggan") {
         dashboardController.namaPelanggan.value = nama;
         dashboardController.customSelected.value = kode;
         dashboardController.wilayahCustomerSelected.value = wilayah;
-        this.dashboardController.namaPelanggan.refresh();
-        this.dashboardController.customSelected.refresh();
-        this.dashboardController.wilayahCustomerSelected.refresh();
-        Navigator.pop(Get.context!);
+        dashboardController.namaPelanggan.refresh();
+        dashboardController.customSelected.refresh();
+        dashboardController.wilayahCustomerSelected.refresh();
+        Get.back();
+      }
+    } else if (stringController == 'sidebar') {
+      if (judul == "Pilih Cabang") {
+        sidebarCt.cabangKodeSelectedSide.value = kode;
+        sidebarCt.cabangNameSelectedSide.value = nama;
+        sidebarCt.cabangKodeSelectedSide.refresh();
+        sidebarCt.cabangNameSelectedSide.refresh();
+        Get.back();
+      }
+    } else if (stringController == 'penjualan') {
+      if (judul == "Pilih Sales") {
+        dashboardPenjualanCt.selectedIdSales.value = kode;
+        dashboardPenjualanCt.selectedNameSales.value = nama;
+        dashboardPenjualanCt.selectedIdSales.refresh();
+        dashboardPenjualanCt.selectedNameSales.refresh();
+        dashboardPenjualanCt.getDataPelanggan();
+        Get.back();
+      } else if (judul == "Pilih Pelanggan") {
+        dashboardPenjualanCt.selectedIdPelanggan.value = kode;
+        dashboardPenjualanCt.selectedNamePelanggan.value = nama;
+        dashboardPenjualanCt.selectedIdPelanggan.refresh();
+        dashboardPenjualanCt.selectedNamePelanggan.refresh();
+        Get.back();
       }
     }
   }
@@ -389,7 +420,7 @@ class GlobalController extends GetxController
                     onTap: () {
                       UtilsAlert.loadingSimpanData(
                           context, "Membuat faktur...");
-                      dashboardController.getAkhirNomorFaktur();
+                      buatFakturController.getAkhirNomorFaktur();
                     }),
                 SizedBox(
                   height: Utility.large,

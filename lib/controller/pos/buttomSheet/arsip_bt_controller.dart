@@ -44,7 +44,17 @@ class ArsipButtomSheetController extends BaseController
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
-        detailArsipBarang(data);
+        if (data.isNotEmpty) {
+          detailArsipBarang(data);
+        } else {
+          UtilsAlert.showToast("Barang tidak tersedia");
+          bottomSheetPosController.validasiSebelumAksi(
+              "Hapus Faktur dan detail pembelian",
+              "Yakin hapus faktur dan detail pembelian ini ?",
+              "",
+              "hapus_faktur",
+              pk);
+        }
       } else {
         UtilsAlert.showToast("Terjadi kesalahan, check koneksi anda");
       }

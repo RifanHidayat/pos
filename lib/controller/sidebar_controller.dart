@@ -1,12 +1,15 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
-import 'package:siscom_pos/screen/penjualan/list_penjualan.dart';
+import 'package:siscom_pos/screen/auth/login.dart';
+import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
+import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
 class SidebarController extends BaseController {
   var sidebarMenuSelected = 1.obs;
@@ -54,9 +57,45 @@ class SidebarController extends BaseController {
       sidebarMenuSelected.refresh();
     } else if (value == "penjualan") {
       Get.back();
-      Get.offAll(ListPenjualan());
+      Get.offAll(DashboardPenjualan());
       sidebarMenuSelected.value = 2;
       sidebarMenuSelected.refresh();
     }
+  }
+
+  void logout() {
+    showGeneralDialog(
+      barrierDismissible: false,
+      context: Get.context!,
+      barrierColor: Colors.black54, // space around dialog
+      transitionDuration: Duration(milliseconds: 200),
+      transitionBuilder: (context, a1, a2, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+              parent: a1,
+              curve: Curves.elasticOut,
+              reverseCurve: Curves.easeOutCubic),
+          child: ModalPopup(
+            // our custom dialog
+            title: "Peringatan",
+            content: "Yakin Keluar Akun",
+            positiveBtnText: "Keluar",
+            negativeBtnText: "Kembali",
+            style: 1,
+            buttonStatus: 1,
+            positiveBtnPressed: () {
+              AppData.databaseSelected = "";
+              AppData.periodeSelected = "";
+              AppData.cabangSelected = "";
+              Get.offAll(Login());
+            },
+          ),
+        );
+      },
+      pageBuilder: (BuildContext context, Animation animation,
+          Animation secondaryAnimation) {
+        return null!;
+      },
+    );
   }
 }

@@ -40,6 +40,10 @@ class Utility {
   static Color greyDark = Color(0xff333B4A);
 
   static Color errorLight = Color(0xffFFE7D8);
+  static Color succesLight = Color(0xffE6FCE6);
+  static Color borderContainer = Color.fromARGB(255, 211, 205, 205);
+  static Color shadowColor =
+      Color.fromARGB(255, 190, 190, 190).withOpacity(0.3);
 
   // SIZE
   static double verySmall = 8.0;
@@ -49,8 +53,6 @@ class Utility {
   static double medium = 16.0;
   static double large = 20.0;
   static double extraLarge = 24.0;
-
-  
 
   // BORDER RADIUS
   static BorderRadius borderStyle1 = BorderRadius.only(
@@ -129,6 +131,13 @@ class Utility {
     var getBulan = nofaktur.substring(6, 8);
     var getNomor = nofaktur.substring(8, 12);
     return "$getPolaType-$getTahun/$getBulan-$getNomor";
+  }
+
+  static String convertNoFakturBuatOrderPenjualan(String nofaktur) {
+    var getPolaType = nofaktur.substring(0, 2);
+    var getTahun = nofaktur.substring(2, 6);
+    var getBulan = nofaktur.substring(6, 8);
+    return "$getPolaType-$getTahun/$getBulan-xxxx";
   }
 
   static double hitungTotalPembelianBarang(
