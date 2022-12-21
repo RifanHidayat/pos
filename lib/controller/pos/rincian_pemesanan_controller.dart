@@ -725,22 +725,24 @@ class RincianPemesananController extends BaseController
 
     // diskon header
     dashboardCt.persenDiskonPesanBarang.value.text =
-        dashboardCt.diskonHeader.value.toString();
+        dashboardCt.diskonHeader.value.toStringAsFixed(2);
     dashboardCt.hargaDiskonPesanBarang.value.text =
-        hitungDiskonHeader.toString();
+        hitungDiskonHeader.toStringAsFixed(2);
 
     // ppn header
-    dashboardCt.ppnPesan.value.text = dashboardCt.ppnCabang.value.toString();
+    dashboardCt.ppnPesan.value.text =
+        dashboardCt.ppnCabang.value.toStringAsFixed(2);
     var hitungNominalPPn = Utility.nominalPPNHeader(
         "$hargaSetelahDiskon", "${dashboardCt.ppnCabang.value}");
-    dashboardCt.ppnHarga.value.text = hitungNominalPPn.toString();
+    dashboardCt.ppnHarga.value.text = hitungNominalPPn.toStringAsFixed(2);
 
     // service header
     dashboardCt.serviceChargePesan.value.text =
-        dashboardCt.serviceChargerCabang.value.toString();
+        dashboardCt.serviceChargerCabang.value.toStringAsFixed(2);
     var hitungNominalService = Utility.nominalPPNHeader(
         "$hargaSetelahDiskon", "${dashboardCt.serviceChargerCabang.value}");
-    dashboardCt.serviceChargeHarga.value.text = hitungNominalService.toString();
+    dashboardCt.serviceChargeHarga.value.text =
+        hitungNominalService.toStringAsFixed(2);
 
     showRincianDiskon();
   }

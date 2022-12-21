@@ -304,11 +304,28 @@ class _DashboardState extends State<Dashboard> {
               flex: 15,
               child: Padding(
                 padding: const EdgeInsets.only(top: 14.0),
-                child: InkWell(
-                    onTap: () {
-                      Get.to(ArsipFaktur());
-                    },
-                    child: Icon(Iconsax.menu_board)),
+                child: Stack(
+                  children: [
+                    InkWell(
+                        onTap: () {
+                          Get.to(ArsipFaktur());
+                        },
+                        child: Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(bottom: 12.0),
+                            child: Icon(Iconsax.menu_board))),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6.0),
+                      child: Text(
+                        "${controller.jumlahArsipFaktur.value}",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: Utility.medium),
+                      ),
+                    )
+                  ],
+                ),
               )),
         ],
       ),

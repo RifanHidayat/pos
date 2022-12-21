@@ -4,10 +4,13 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/buat_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
+import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class BuatOrderPenjualan extends StatefulWidget {
@@ -21,10 +24,10 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
   var controller = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
+  var buatOrderCt = Get.put(BuatOrderPenjualanController());
 
   @override
   void initState() {
-    controller.getDataSales();
     controller.timeNow();
     super.initState();
   }
@@ -40,69 +43,104 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
       color: Colors.white,
       child: SafeArea(
         child: Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: Utility.baseColor2,
-          appBar: AppBar(
-              backgroundColor: Colors.white,
-              automaticallyImplyLeading: false,
-              elevation: 2,
-              flexibleSpace: AppbarMenu1(
-                title: "Buat Order Penjualan",
-                colorTitle: Utility.primaryDefault,
-                colorIcon: Utility.primaryDefault,
-                icon: 1,
-                onTap: () {
+            key: _scaffoldKey,
+            backgroundColor: Utility.baseColor2,
+            appBar: AppBar(
+                backgroundColor: Colors.white,
+                automaticallyImplyLeading: false,
+                elevation: 2,
+                flexibleSpace: AppbarMenu1(
+                  title: "Buat Order Penjualan",
+                  colorTitle: Utility.primaryDefault,
+                  colorIcon: Utility.primaryDefault,
+                  icon: 1,
+                  onTap: () {
+                    Get.back();
+                  },
+                )),
+            body: WillPopScope(
+                onWillPop: () async {
                   Get.back();
+                  return true;
                 },
-              )),
-          body: WillPopScope(
-              onWillPop: () async {
-                Get.back();
-                return true;
-              },
-              child: GestureDetector(
-                onTap: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                child: SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  child: Obx(
-                    () => Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          lineHeaderInfo(),
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          formRefrensi(),
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          formTanggal(),
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          formJatuhTempo(),
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          formPilihSales(),
-                          SizedBox(
-                            height: Utility.medium,
-                          ),
-                          formPilihPelanggan(),
-                        ],
+                child: GestureDetector(
+                  onTap: () {
+                    controller.checkGestureDetector();
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Obx(
+                      () => Padding(
+                        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            lineHeaderInfo(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formRefrensi(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formTanggal(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formJatuhTempo(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formPilihSales(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formPilihPelanggan(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            formKeterangan(),
+                            SizedBox(
+                              height: Utility.large,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )),
-        ),
+                )),
+            bottomNavigationBar: Padding(
+              padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 12),
+              child: Container(
+                  height: 50,
+                  child: Button2(
+                      textBtn: "Tambah item",
+                      colorBtn: Utility.primaryDefault,
+                      colorText: Colors.white,
+                      icon1: Icon(
+                        Iconsax.add,
+                        color: Utility.baseColor2,
+                      ),
+                      radius: 8.0,
+                      style: 2,
+                      onTap: () {
+                        if (controller.refrensiBuatOrderPenjualan.value.text ==
+                                "" ||
+                            controller
+                                    .jatuhTempoBuatOrderPenjualan.value.text ==
+                                "" ||
+                            controller.selectedNameSales.value == "" ||
+                            controller.selectedNamePelanggan.value == "") {
+                          UtilsAlert.showToast("Lengkapi form terlebih dahulu");
+                        } else {
+                          buatOrderCt.getAkhirNomorSo();
+                        }
+                      })),
+            )),
       ),
     );
   }
@@ -472,7 +510,202 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                   ),
                 )),
           ),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "Include PPN",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 25,
+                child: Checkbox(
+                  checkColor: Colors.white,
+                  activeColor: Utility.primaryDefault,
+                  value: controller.checkIncludePPN.value,
+                  onChanged: (value) {
+                    controller.checkIncludePPN.value =
+                        !controller.checkIncludePPN.value;
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget formKeterangan() {
+    return CardCustom(
+      colorBg: Colors.white,
+      radiusBorder: Utility.borderStyle1,
+      widgetCardCustom: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            controller.screenBuatSoKeterangan.value =
+                !controller.screenBuatSoKeterangan.value;
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 90,
+                    child: Text(
+                      "Keterangan",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 10,
+                    child: !controller.screenBuatSoKeterangan.value
+                        ? Icon(
+                            Iconsax.arrow_right_3,
+                            size: 18,
+                          )
+                        : Icon(
+                            Iconsax.arrow_down_1,
+                            size: 18,
+                          ),
+                  )
+                ],
+              ),
+              !controller.screenBuatSoKeterangan.value
+                  ? SizedBox()
+                  : SizedBox(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: Utility.medium,
+                          ),
+                          Container(
+                            height: 40,
+                            width: MediaQuery.of(Get.context!).size.width,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: Utility.borderStyle1,
+                                border: Border.all(
+                                    width: 1.0,
+                                    color: Utility.borderContainer)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                              ),
+                              child: TextField(
+                                cursorColor: Colors.black,
+                                controller: controller.keteranganSO1.value,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.done,
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Keterangan 1"),
+                                style: const TextStyle(
+                                    fontSize: 14.0, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: Utility.medium,
+                          ),
+                          Container(
+                            height: 40,
+                            width: MediaQuery.of(Get.context!).size.width,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: Utility.borderStyle1,
+                                border: Border.all(
+                                    width: 1.0,
+                                    color: Utility.borderContainer)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                              ),
+                              child: TextField(
+                                cursorColor: Colors.black,
+                                controller: controller.keteranganSO2.value,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.done,
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Keterangan 2"),
+                                style: const TextStyle(
+                                    fontSize: 14.0, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: Utility.medium,
+                          ),
+                          Container(
+                            height: 40,
+                            width: MediaQuery.of(Get.context!).size.width,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: Utility.borderStyle1,
+                                border: Border.all(
+                                    width: 1.0,
+                                    color: Utility.borderContainer)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                              ),
+                              child: TextField(
+                                cursorColor: Colors.black,
+                                controller: controller.keteranganSO3.value,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.done,
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Keterangan 3"),
+                                style: const TextStyle(
+                                    fontSize: 14.0, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: Utility.medium,
+                          ),
+                          Container(
+                            height: 40,
+                            width: MediaQuery.of(Get.context!).size.width,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: Utility.borderStyle1,
+                                border: Border.all(
+                                    width: 1.0,
+                                    color: Utility.borderContainer)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                              ),
+                              child: TextField(
+                                cursorColor: Colors.black,
+                                controller: controller.keteranganSO4.value,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.done,
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Keterangan 4"),
+                                style: const TextStyle(
+                                    fontSize: 14.0, color: Colors.black),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,15 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
-import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/screen/auth/login.dart';
 import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/widget/modal_popup.dart';
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SidebarController extends BaseController {
   var sidebarMenuSelected = 1.obs;
@@ -17,6 +19,8 @@ class SidebarController extends BaseController {
   var cabangKodeSelectedSide = "".obs;
   var cabangNameSelectedSide = "".obs;
   var gudangSelectedSide = "".obs;
+  var ipdevice = "".obs;
+  final NetworkInfo _networkInfo = NetworkInfo();
 
   var listCabang = [].obs;
 
@@ -49,7 +53,11 @@ class SidebarController extends BaseController {
     listCabang.refresh();
   }
 
-  void changeRoutePage(value) {
+  void changeRoutePage(value) async {
+    Future<String> checkLocalIp = getLocalIpAddress();
+    var ipLocal = await checkLocalIp;
+    ipdevice.value = ipLocal;
+    ipdevice.refresh();
     if (value == "pos") {
       Get.back();
       Get.offAll(Dashboard());
@@ -60,6 +68,34 @@ class SidebarController extends BaseController {
       Get.offAll(DashboardPenjualan());
       sidebarMenuSelected.value = 2;
       sidebarMenuSelected.refresh();
+    }
+  }
+
+  static Future<String> getLocalIpAddress() async {
+    final interfaces = await NetworkInterface.list(
+        type: InternetAddressType.IPv4, includeLinkLocal: true);
+
+    try {
+      // Try VPN connection first
+      NetworkInterface vpnInterface =
+          interfaces.firstWhere((element) => element.name == "tun0");
+      return vpnInterface.addresses.first.address;
+    } on StateError {
+      // Try wlan connection next
+      try {
+        NetworkInterface interface =
+            interfaces.firstWhere((element) => element.name == "wlan0");
+        return interface.addresses.first.address;
+      } catch (ex) {
+        // Try any other connection next
+        try {
+          NetworkInterface interface = interfaces.firstWhere((element) =>
+              !(element.name == "tun0" || element.name == "wlan0"));
+          return interface.addresses.first.address;
+        } catch (ex) {
+          return "";
+        }
+      }
     }
   }
 

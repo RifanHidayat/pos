@@ -24,6 +24,9 @@ class AppData {
   static set noFaktur(String value) =>
       LocalStorage.saveToDisk('noFaktur', value);
 
+  static set arsipOrderPenjualan(String value) =>
+      LocalStorage.saveToDisk('arsipOrderPenjualan', value);
+
   static set flagMember(String value) =>
       LocalStorage.saveToDisk('flagMember', value);
 
@@ -77,6 +80,13 @@ class AppData {
   static String get noFaktur {
     if (LocalStorage.getFromDisk('noFaktur') != null) {
       return LocalStorage.getFromDisk('noFaktur');
+    }
+    return "";
+  }
+
+  static String get arsipOrderPenjualan {
+    if (LocalStorage.getFromDisk('arsipOrderPenjualan') != null) {
+      return LocalStorage.getFromDisk('arsipOrderPenjualan');
     }
     return "";
   }

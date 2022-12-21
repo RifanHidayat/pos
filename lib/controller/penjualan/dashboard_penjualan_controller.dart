@@ -14,17 +14,31 @@ class DashbardPenjualanController extends GetxController {
   var cari = TextEditingController().obs;
   var refrensiBuatOrderPenjualan = TextEditingController().obs;
   var jatuhTempoBuatOrderPenjualan = TextEditingController().obs;
+  var keteranganSO1 = TextEditingController().obs;
+  var keteranganSO2 = TextEditingController().obs;
+  var keteranganSO3 = TextEditingController().obs;
+  var keteranganSO4 = TextEditingController().obs;
 
   var selectedIdSales = "".obs;
   var selectedNameSales = "".obs;
   var selectedIdPelanggan = "".obs;
   var selectedNamePelanggan = "".obs;
+  var wilayahCustomerSelected = "".obs;
   var periode = "".obs;
   var typeFocus = "".obs;
+  var nomorSoSelected = "".obs;
+
+  var checkIncludePPN = false.obs;
+  var screenBuatSoKeterangan = false.obs;
+
+  var jumlahArsipOrderPenjualan = 0.obs;
 
   var menuShowonTop = [].obs;
   var salesList = [].obs;
   var pelangganList = [].obs;
+  var dataAllSohd = [].obs;
+  var dataSohd = [].obs;
+  var dataSodt = [].obs;
 
   var dateSelectedBuatOrderPenjualan = DateTime.now().obs;
   var tanggalAkumulasiJatuhTempo = DateTime.now().obs;
@@ -39,6 +53,9 @@ class DashbardPenjualanController extends GetxController {
 
   void loadData() {
     getDataMenuPenjualan();
+    checkArsipOrderPenjualan();
+    getDataSales();
+    getDataAllSOHD();
   }
 
   void getDataMenuPenjualan() {
@@ -46,6 +63,24 @@ class DashbardPenjualanController extends GetxController {
       menuShowonTop.value.add(element);
     }
     menuShowonTop.refresh();
+  }
+
+  void checkGestureDetector() {
+    if (typeFocus.value == "jatuh_tempo") {
+      gantiJatuhTempoBuatOrderPenjualan(
+          jatuhTempoBuatOrderPenjualan.value.text);
+    }
+  }
+
+  void checkArsipOrderPenjualan() {
+    if (AppData.arsipOrderPenjualan != "") {
+      List tampung = AppData.arsipOrderPenjualan.split("|");
+      jumlahArsipOrderPenjualan.value = tampung.length;
+      jumlahArsipOrderPenjualan.refresh();
+    } else {
+      jumlahArsipOrderPenjualan.value = 0;
+      jumlahArsipOrderPenjualan.refresh();
+    }
   }
 
   void timeNow() {
@@ -127,6 +162,40 @@ class DashbardPenjualanController extends GetxController {
       selectedNamePelanggan.value = getFirst['NAMA'];
       selectedIdPelanggan.refresh();
       selectedNamePelanggan.refresh();
+    }
+  }
+
+  void getDataAllSOHD() async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SOHD',
+    };
+    var connect = Api.connectionApi("post", body, "all_sohd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    if (data.isNotEmpty) {
+      print('all data sohd $data');
+      dataAllSohd.value = data;
+      dataAllSohd.refresh();
+    }
+  }
+
+  void getDataSOHD() async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SOHD',
+      'nomor_sohd': nomorSoSelected.value,
+    };
+    var connect = Api.connectionApi("post", body, "get_once_sohd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    if (data.isNotEmpty) {
+      dataSodt.value = data;
+      dataSodt.refresh();
     }
   }
 }

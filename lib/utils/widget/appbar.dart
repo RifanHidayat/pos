@@ -58,7 +58,7 @@ class AppbarMenu1 extends StatelessWidget {
               ),
             )),
         Expanded(
-            flex: 70,
+            flex: 80,
             child: Center(
               child: Container(
                 alignment: Alignment.bottomCenter,
@@ -72,7 +72,7 @@ class AppbarMenu1 extends StatelessWidget {
                 ),
               ),
             )),
-        Expanded(flex: 15, child: SizedBox())
+        Expanded(flex: 10, child: SizedBox())
       ],
     );
   }

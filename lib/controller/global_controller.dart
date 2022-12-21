@@ -13,6 +13,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import 'penjualan/dashboard_penjualan_controller.dart';
+import 'penjualan/order_penjualan/item_order_penjualan_controller.dart';
 
 class GlobalController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -20,6 +21,7 @@ class GlobalController extends GetxController
   var buatFakturController = Get.put(BuatFakturController());
   var sidebarCt = Get.put(SidebarController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
+  var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
 
   var cari = TextEditingController().obs;
 
@@ -203,15 +205,20 @@ class GlobalController extends GetxController
                                   var charge = dataShow[index]['SCHARGE'];
                                   return InkWell(
                                     onTap: () {
-                                      checkingAksi(
-                                          stringController,
-                                          judul,
-                                          nama,
-                                          kode,
-                                          inisial,
-                                          wilayah,
-                                          ppn,
-                                          charge);
+                                      if (stringController ==
+                                          "pilih_barang_so_penjualan") {
+                                        pilihBarangSOPenjualan(dataShow[index]);
+                                      } else {
+                                        checkingAksi(
+                                            stringController,
+                                            judul,
+                                            nama,
+                                            kode,
+                                            inisial,
+                                            wilayah,
+                                            ppn,
+                                            charge);
+                                      }
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.only(
@@ -312,11 +319,23 @@ class GlobalController extends GetxController
       } else if (judul == "Pilih Pelanggan") {
         dashboardPenjualanCt.selectedIdPelanggan.value = kode;
         dashboardPenjualanCt.selectedNamePelanggan.value = nama;
+        dashboardPenjualanCt.wilayahCustomerSelected.value = wilayah;
         dashboardPenjualanCt.selectedIdPelanggan.refresh();
         dashboardPenjualanCt.selectedNamePelanggan.refresh();
         Get.back();
       }
     }
+  }
+
+  void pilihBarangSOPenjualan(dataTerpilih) {
+    itemOrderPenjualanCt.typeBarangSelected.value = dataTerpilih['SAT'];
+    itemOrderPenjualanCt.barangTerpilih.value = [dataTerpilih];
+    itemOrderPenjualanCt.barangTerpilih.refresh();
+    Get.back();
+    itemOrderPenjualanCt
+        .validasiSatuanBarang(itemOrderPenjualanCt.barangTerpilih.value);
+    // itemOrderPenjualanCt
+    //     .sheetButtomMenu(itemOrderPenjualanCt.barangTerpilih.value);
   }
 
   void buttomSheetInsertFaktur() {

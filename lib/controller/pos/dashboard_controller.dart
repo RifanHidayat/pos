@@ -48,6 +48,7 @@ class DashbardController extends BaseController {
   var serviceChargerCabang = 0.0.obs;
 
   var jumlahItemDikeranjang = 0.obs;
+  var jumlahArsipFaktur = 0.obs;
   var hargatotjlhd = 0.0.obs;
   var totalNominalDikeranjang = 0.0.obs;
   var allQtyJldt = 0.0.obs;
@@ -110,6 +111,7 @@ class DashbardController extends BaseController {
       getCabang(typeLoad);
       getKelompokBarang('first');
     }
+    checkArsipFaktur();
   }
 
   void mulaiScroll() {
@@ -121,6 +123,17 @@ class DashbardController extends BaseController {
     await Future.delayed(const Duration(seconds: 1));
     viewButtonKeranjang.value = true;
     viewButtonKeranjang.refresh();
+  }
+
+  void checkArsipFaktur() {
+    if (AppData.noFaktur != "") {
+      List tampung = AppData.noFaktur.split("|");
+      jumlahArsipFaktur.value = tampung.length;
+      jumlahArsipFaktur.refresh();
+    } else {
+      jumlahArsipFaktur.value = 0;
+      jumlahArsipFaktur.refresh();
+    }
   }
 
   void checkingData() {

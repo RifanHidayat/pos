@@ -114,7 +114,30 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                 ),
               ),
             ),
-          )
+          ),
+          // Expanded(
+          //   flex: 10,
+          //   child: Stack(
+          //     children: [
+          //       InkWell(
+          //           onTap: () {},
+          //           child: Container(
+          //               alignment: Alignment.center,
+          //               margin: EdgeInsets.only(bottom: 2.0),
+          //               child: Icon(Iconsax.menu_board))),
+          //       Padding(
+          //         padding: const EdgeInsets.only(left: 2.0),
+          //         child: Text(
+          //           "${controller.jumlahArsipOrderPenjualan.value}",
+          //           style: TextStyle(
+          //               fontWeight: FontWeight.bold,
+          //               color: Colors.red,
+          //               fontSize: Utility.medium),
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // )
         ],
       ),
     );
@@ -259,6 +282,47 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
   }
 
   Widget screenOrderPenjualan() {
-    return SizedBox();
+    return ListView.builder(
+        physics: controller.dataAllSohd.length <= 10
+            ? AlwaysScrollableScrollPhysics()
+            : BouncingScrollPhysics(),
+        itemCount: controller.dataAllSohd.length,
+        itemBuilder: (context, index) {
+          var nomor = controller.dataAllSohd[index]['NOMOR'];
+          var tanggal = controller.dataAllSohd[index]['TANGGAL'];
+          var ipStatus = controller.dataAllSohd[index]['IP'];
+          return Padding(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: CardCustomShadow(
+              colorBg: ipStatus == "" ? Colors.white : Utility.greyLight300,
+              radiusBorder: Utility.borderStyle1,
+              widgetCardCustom: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 70,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${Utility.convertNoFaktur(nomor)}",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: Utility.medium),
+                            ),
+                            Text(
+                              "${Utility.convertDate(tanggal)}",
+                              style: TextStyle(color: Utility.nonAktif),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
+            ),
+          );
+        });
   }
 }
