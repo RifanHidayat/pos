@@ -47,79 +47,26 @@ class RincianPemesananController extends BaseController
 
   void startLoad() {}
 
-  void gestureFunction() {
-    var persenDiskon = dashboardCt.persenDiskonPesanBarang.value.text;
-    var persenPpn = dashboardCt.ppnPesan.value.text;
-    var persenService = dashboardCt.serviceChargePesan.value.text;
-
-    var nominalDiskon = dashboardCt.hargaDiskonPesanBarang.value.text;
-    var nominalPpn = dashboardCt.ppnHarga.value.text;
-    var nominalService = dashboardCt.serviceChargeHarga.value.text;
-
-    // var typePpn = persenDiskon != ""
-    //     ? "diskon"
-    //     : persenPpn != ""
-    //         ? "ppn"
-    //         : persenService != ""
-    //             ? "service"
-    //             : "";
-    // var typeHarga = nominalDiskon != ""
-    //     ? "diskon"
-    //     : nominalPpn != ""
-    //         ? "ppn"
-    //         : nominalService != ""
-    //             ? "service"
-    //             : "";
-    // if (typePpn != "" || typeHarga != "") {
-    //   if (persenDiskon != "") {
-    //     aksiInputPersenDiskon(Get.context!, persenDiskon, typePpn);
-    //   } else if (nominalDiskon != "") {
-    //     aksiInputNominalDiskon(Get.context!, nominalDiskon, typeHarga);
-    //   }
-    //   if (persenPpn != "") {
-    //     aksiInputPersenDiskon(Get.context!, persenPpn, typePpn);
-    //   } else if (nominalPpn != "") {
-    //     aksiInputNominalDiskon(Get.context!, nominalPpn, typeHarga);
-    //   }
-    //   if (persenService != "") {
-    //     aksiInputPersenDiskon(Get.context!, persenService, typePpn);
-    //   } else if (nominalService != "") {
-    //     aksiInputNominalDiskon(Get.context!, nominalService, typeHarga);
-    //   }
-    // }
-
-    if (typeFocusEditRincian.value == "persen_header_diskon") {
-      aksiInputPersenDiskon(Get.context!, persenDiskon, "diskon");
-    } else if (typeFocusEditRincian.value == "nominal_header_diskon") {
-      aksiInputNominalDiskon(Get.context!, nominalDiskon, "diskon");
-    } else if (typeFocusEditRincian.value == "persen_header_ppn") {
-      aksiInputPersenDiskon(Get.context!, persenPpn, "ppn");
-    } else if (typeFocusEditRincian.value == "nominal_header_ppn") {
-      aksiInputNominalDiskon(Get.context!, nominalPpn, "ppn");
-    } else if (typeFocusEditRincian.value == "persen_header_service") {
-      aksiInputPersenDiskon(Get.context!, persenService, "service");
-    } else if (typeFocusEditRincian.value == "nominal_header_service") {
-      aksiInputNominalDiskon(Get.context!, nominalService, "service");
-    }
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
   void showRincianDiskon() {
     showModalBottomSheet(
         context: Get.context!,
         transitionAnimationController: animasiController,
         isScrollControlled: true,
+        isDismissible: false,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(20.0),
           ),
         ),
         builder: (context) {
-          return GestureDetector(
-            onTap: () => gestureFunction(),
-            child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-              return Padding(
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () {
+                gestureFunction();
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: Padding(
                 padding: EdgeInsets.only(
                     left: 16,
                     right: 16,
@@ -228,8 +175,12 @@ class RincianPemesananController extends BaseController
                                     child: FocusScope(
                                       child: Focus(
                                         onFocusChange: (focus) {
-                                          typeFocusEditRincian.value =
-                                              "persen_header_diskon";
+                                          setState(() {
+                                            if (focus) {
+                                              typeFocusEditRincian.value =
+                                                  "persen_header_diskon";
+                                            }
+                                          });
                                         },
                                         child: TextField(
                                           textAlign: TextAlign.center,
@@ -311,8 +262,11 @@ class RincianPemesananController extends BaseController
                                       child: FocusScope(
                                         child: Focus(
                                           onFocusChange: (focus) {
-                                            typeFocusEditRincian.value =
-                                                "nominal_header_diskon";
+                                            setState(() {
+                                              if (focus)
+                                                typeFocusEditRincian.value =
+                                                    "nominal_header_diskon";
+                                            });
                                           },
                                           child: TextField(
                                             inputFormatters: [
@@ -405,8 +359,11 @@ class RincianPemesananController extends BaseController
                                     child: FocusScope(
                                       child: Focus(
                                         onFocusChange: (focus) {
-                                          typeFocusEditRincian.value =
-                                              "persen_header_ppn";
+                                          setState(() {
+                                            if (focus)
+                                              typeFocusEditRincian.value =
+                                                  "persen_header_ppn";
+                                          });
                                         },
                                         child: TextField(
                                           textAlign: TextAlign.center,
@@ -488,8 +445,11 @@ class RincianPemesananController extends BaseController
                                       child: FocusScope(
                                         child: Focus(
                                           onFocusChange: (focus) {
-                                            typeFocusEditRincian.value =
-                                                "nominal_header_ppn";
+                                            setState(() {
+                                              if (focus)
+                                                typeFocusEditRincian.value =
+                                                    "nominal_header_ppn";
+                                            });
                                           },
                                           child: TextField(
                                             inputFormatters: [
@@ -565,8 +525,11 @@ class RincianPemesananController extends BaseController
                                     child: FocusScope(
                                       child: Focus(
                                         onFocusChange: (focus) {
-                                          typeFocusEditRincian.value =
-                                              "persen_header_service";
+                                          setState(() {
+                                            if (focus)
+                                              typeFocusEditRincian.value =
+                                                  "persen_header_service";
+                                          });
                                         },
                                         child: TextField(
                                           textAlign: TextAlign.center,
@@ -648,8 +611,11 @@ class RincianPemesananController extends BaseController
                                       child: FocusScope(
                                         child: Focus(
                                           onFocusChange: (focus) {
-                                            typeFocusEditRincian.value =
-                                                "nominal_header_service";
+                                            setState(() {
+                                              if (focus)
+                                                typeFocusEditRincian.value =
+                                                    "nominal_header_service";
+                                            });
                                           },
                                           child: TextField(
                                             inputFormatters: [
@@ -710,9 +676,9 @@ class RincianPemesananController extends BaseController
                     )
                   ],
                 ),
-              );
-            }),
-          );
+              ),
+            );
+          });
         });
   }
 
@@ -727,14 +693,17 @@ class RincianPemesananController extends BaseController
     dashboardCt.persenDiskonPesanBarang.value.text =
         dashboardCt.diskonHeader.value.toStringAsFixed(2);
     dashboardCt.hargaDiskonPesanBarang.value.text =
-        hitungDiskonHeader.toStringAsFixed(2);
+        currencyFormatter.format(hitungDiskonHeader);
+    // hitungDiskonHeader.toStringAsFixed(2);
 
     // ppn header
     dashboardCt.ppnPesan.value.text =
         dashboardCt.ppnCabang.value.toStringAsFixed(2);
     var hitungNominalPPn = Utility.nominalPPNHeader(
         "$hargaSetelahDiskon", "${dashboardCt.ppnCabang.value}");
-    dashboardCt.ppnHarga.value.text = hitungNominalPPn.toStringAsFixed(2);
+    dashboardCt.ppnHarga.value.text =
+        currencyFormatter.format(hitungNominalPPn);
+    // hitungNominalPPn.toStringAsFixed(2);
 
     // service header
     dashboardCt.serviceChargePesan.value.text =
@@ -742,9 +711,36 @@ class RincianPemesananController extends BaseController
     var hitungNominalService = Utility.nominalPPNHeader(
         "$hargaSetelahDiskon", "${dashboardCt.serviceChargerCabang.value}");
     dashboardCt.serviceChargeHarga.value.text =
-        hitungNominalService.toStringAsFixed(2);
+        currencyFormatter.format(hitungNominalService);
+    // hitungNominalService.toStringAsFixed(2);
 
     showRincianDiskon();
+  }
+
+  void gestureFunction() {
+    var persenDiskon = dashboardCt.persenDiskonPesanBarang.value.text;
+    var persenPpn = dashboardCt.ppnPesan.value.text;
+    var persenService = dashboardCt.serviceChargePesan.value.text;
+
+    var nominalDiskon = dashboardCt.hargaDiskonPesanBarang.value.text;
+    var nominalPpn = dashboardCt.ppnHarga.value.text;
+    var nominalService = dashboardCt.serviceChargeHarga.value.text;
+
+    print(typeFocusEditRincian.value);
+
+    if (typeFocusEditRincian.value == "persen_header_diskon") {
+      aksiInputPersenDiskon(Get.context!, persenDiskon, "diskon");
+    } else if (typeFocusEditRincian.value == "nominal_header_diskon") {
+      aksiInputNominalDiskon(Get.context!, nominalDiskon, "diskon");
+    } else if (typeFocusEditRincian.value == "persen_header_ppn") {
+      aksiInputPersenDiskon(Get.context!, persenPpn, "ppn");
+    } else if (typeFocusEditRincian.value == "nominal_header_ppn") {
+      aksiInputNominalDiskon(Get.context!, nominalPpn, "ppn");
+    } else if (typeFocusEditRincian.value == "persen_header_service") {
+      aksiInputPersenDiskon(Get.context!, persenService, "service");
+    } else if (typeFocusEditRincian.value == "nominal_header_service") {
+      aksiInputNominalDiskon(Get.context!, nominalService, "service");
+    }
   }
 
   void aksiInputPersenDiskon(context, value, type) {
@@ -756,26 +752,9 @@ class RincianPemesananController extends BaseController
       dashboardCt.hargaDiskonPesanBarang.refresh();
       validasiPpnDanService();
     } else if (type == "ppn") {
-      if (value == "") {
-        dashboardCt.ppnHarga.value.text = "";
-      } else {
-        validasiPpnDanService();
-      }
-      // double vld3 = Utility.validasiValueDouble(value);
-      // var hitung = (dashboardCt.totalNominalDikeranjang.value * vld3) / 100;
-      // dashboardCt.ppnHarga.value.text =
-      //     "${globalController.convertToIdr(hitung, 2)}";
-      // dashboardCt.ppnHarga.refresh();
+      validasiPpnDanService();
     } else if (type == "service") {
-      if (value == "") {
-        dashboardCt.serviceChargeHarga.value.text = "";
-      } else {
-        validasiPpnDanService();
-      }
-      // double vld3 = Utility.validasiValueDouble(value);
-      // var hitung = (dashboardCt.totalNominalDikeranjang.value * vld3) / 100;
-      // dashboardCt.serviceChargeHarga.value.text =
-      //     "${globalController.convertToIdr(hitung, 2)}";
+      validasiPpnDanService();
     }
   }
 
@@ -807,7 +786,7 @@ class RincianPemesananController extends BaseController
           dashboardCt.totalNominalDikeranjang.value - nominalDiskon;
 
       var hitung = (inputNominal / hitungHargaSetelahDiskon) * 100;
-      dashboardCt.serviceChargeHarga.value.text =
+      dashboardCt.serviceChargePesan.value.text =
           hitung.toPrecision(2).toString();
     }
   }

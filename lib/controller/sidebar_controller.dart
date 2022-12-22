@@ -53,6 +53,19 @@ class SidebarController extends BaseController {
     listCabang.refresh();
   }
 
+  Future<bool> pilihCabangSelected(kodeCabang) {
+    bool statusCabang = false;
+    for (var element in listCabang) {
+      if (element["KODE"] == kodeCabang) {
+        statusCabang = true;
+        cabangKodeSelectedSide.value = element["KODE"];
+        cabangNameSelectedSide.value = element["NAMA"];
+        gudangSelectedSide.value = element["GUDANG"];
+      }
+    }
+    return Future.value(statusCabang);
+  }
+
   void changeRoutePage(value) async {
     Future<String> checkLocalIp = getLocalIpAddress();
     var ipLocal = await checkLocalIp;

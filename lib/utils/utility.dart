@@ -233,6 +233,26 @@ class Utility {
     return pengurangan;
   }
 
+  static String rupiahFormat(String nominal, String type) {
+    NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: '',
+      decimalDigits: 2,
+    );
+    NumberFormat currencyFormatterRp = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 2,
+    );
+    String hasilFinal = "";
+    if (type == "with_rp") {
+      hasilFinal = currencyFormatterRp.format(int.parse(nominal));
+    } else {
+      hasilFinal = currencyFormatter.format(int.parse(nominal));
+    }
+    return hasilFinal;
+  }
+
   // SETTING
 
   static String hariIndo(String hari) {

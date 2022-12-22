@@ -113,7 +113,7 @@ class BuatOrderPenjualanController extends BaseController {
       dashboardSoCt.nomorSoSelected.value = nomorSoFinal;
       dashboardSoCt.nomorSoSelected.refresh();
       dashboardSoCt.getDataSOHD();
-      Get.to(ItemOrderPenjualan(),
+      Get.to(ItemOrderPenjualan(dataForm: false),
           duration: Duration(milliseconds: 500),
           transition: Transition.rightToLeftWithFade);
     } else {

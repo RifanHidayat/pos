@@ -334,8 +334,6 @@ class GlobalController extends GetxController
     Get.back();
     itemOrderPenjualanCt
         .validasiSatuanBarang(itemOrderPenjualanCt.barangTerpilih.value);
-    // itemOrderPenjualanCt
-    //     .sheetButtomMenu(itemOrderPenjualanCt.barangTerpilih.value);
   }
 
   void buttomSheetInsertFaktur() {

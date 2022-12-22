@@ -2,14 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
+import 'package:siscom_pos/utils/utility.dart';
+import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class DashbardPenjualanController extends GetxController {
   var sidebarCt = Get.put(SidebarController());
+  var getDataCt = Get.put(GetDataController());
 
   var cari = TextEditingController().obs;
   var refrensiBuatOrderPenjualan = TextEditingController().obs;
@@ -18,6 +25,7 @@ class DashbardPenjualanController extends GetxController {
   var keteranganSO2 = TextEditingController().obs;
   var keteranganSO3 = TextEditingController().obs;
   var keteranganSO4 = TextEditingController().obs;
+  var passwordBukaKunci = TextEditingController().obs;
 
   var selectedIdSales = "".obs;
   var selectedNameSales = "".obs;
@@ -30,6 +38,7 @@ class DashbardPenjualanController extends GetxController {
 
   var checkIncludePPN = false.obs;
   var screenBuatSoKeterangan = false.obs;
+  var showpassword = false.obs;
 
   var jumlahArsipOrderPenjualan = 0.obs;
 
@@ -57,6 +66,12 @@ class DashbardPenjualanController extends GetxController {
     getDataSales();
     getDataAllSOHD();
   }
+
+  NumberFormat currencyFormatter = NumberFormat.currency(
+    locale: 'id',
+    symbol: 'Rp ',
+    decimalDigits: 2,
+  );
 
   void getDataMenuPenjualan() {
     for (var element in menuDashboardPenjualan) {
@@ -119,16 +134,9 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void getDataSales() async {
-    Map<String, dynamic> body = {
-      'database': AppData.databaseSelected,
-      'periode': AppData.periodeSelected,
-      'stringTabel': 'SALESM',
-      'kode_cabang': sidebarCt.cabangKodeSelectedSide.value,
-    };
-    var connect = Api.connectionApi("post", body, "salesman");
-    var getValue = await connect;
-    var valueBody = jsonDecode(getValue.body);
-    List data = valueBody['data'];
+    Future<List> prosesGetSales =
+        getDataCt.getDataSales(sidebarCt.cabangKodeSelectedSide.value);
+    List data = await prosesGetSales;
     if (data.isNotEmpty) {
       data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
       salesList.value = data;
@@ -143,16 +151,9 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void getDataPelanggan() async {
-    Map<String, dynamic> body = {
-      'database': AppData.databaseSelected,
-      'periode': AppData.periodeSelected,
-      'stringTabel': 'CUSTOM',
-      'kode_sales': selectedIdSales.value,
-    };
-    var connect = Api.connectionApi("post", body, "pelanggan");
-    var getValue = await connect;
-    var valueBody = jsonDecode(getValue.body);
-    List data = valueBody['data'];
+    Future<List> prosesGetPelanggan =
+        getDataCt.getDataSales(sidebarCt.cabangKodeSelectedSide.value);
+    List data = await prosesGetPelanggan;
     if (data.isNotEmpty) {
       data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
       pelangganList.value = data;
@@ -166,36 +167,156 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void getDataAllSOHD() async {
-    Map<String, dynamic> body = {
-      'database': AppData.databaseSelected,
-      'periode': AppData.periodeSelected,
-      'stringTabel': 'SOHD',
-    };
-    var connect = Api.connectionApi("post", body, "all_sohd");
-    var getValue = await connect;
-    var valueBody = jsonDecode(getValue.body);
-    List data = valueBody['data'];
+    Future<List> prosesDataAllSOHD = getDataCt.getDataAllSOHD();
+    List data = await prosesDataAllSOHD;
     if (data.isNotEmpty) {
-      print('all data sohd $data');
       dataAllSohd.value = data;
       dataAllSohd.refresh();
     }
   }
 
   void getDataSOHD() async {
-    Map<String, dynamic> body = {
-      'database': AppData.databaseSelected,
-      'periode': AppData.periodeSelected,
-      'stringTabel': 'SOHD',
-      'nomor_sohd': nomorSoSelected.value,
-    };
-    var connect = Api.connectionApi("post", body, "get_once_sohd");
-    var getValue = await connect;
-    var valueBody = jsonDecode(getValue.body);
-    List data = valueBody['data'];
+    Future<List> prosesDataOnceSOHD =
+        getDataCt.getDataSOHD(nomorSoSelected.value);
+    List data = await prosesDataOnceSOHD;
     if (data.isNotEmpty) {
       dataSodt.value = data;
       dataSodt.refresh();
     }
+  }
+
+  void lanjutkanSoPenjualan(dataSelected) async {
+    if (dataSelected["IP"] == "") {
+      prosesLanjugkanSoPenjualan(dataSelected);
+    } else {
+      var emailUserLogin = AppData.informasiLoginUser.split("-");
+      var statusSysUser = AppData.sysuserInformasi.split("-");
+      var getUsLevel = statusSysUser[1];
+      Future<List> settingOtoritas = getDataCt.getSpesifikData(
+          "SYSDATA", "KODE", "019", "get_spesifik_data_master");
+      List hasilSetting = await settingOtoritas;
+      String fltr1 = hasilSetting[0]["NAMA"];
+      var kodeOtoritasBukaKunci = fltr1.substring(13, 14);
+      if (int.parse(getUsLevel) <= int.parse(kodeOtoritasBukaKunci)) {
+        passwordBukaKunci.value.text = "";
+        ButtonSheetController().validasiButtonSheet(
+            "Buka kunci", contentBukaKunciForm(), "order_penjualan", () {
+          validasiBukaKunci(emailUserLogin, dataSelected);
+        });
+      } else {
+        UtilsAlert.showToast("Maaf anda tidak memiliki akses");
+      }
+    }
+  }
+
+  void prosesLanjugkanSoPenjualan(dataSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
+    dataSodt.value = [dataSelected];
+    dataSodt.refresh();
+    Future<List> getSalesSpesifik = getDataCt.getSpesifikData(
+        "SALESM", "KODE", dataSelected["SALESM"], "get_spesifik_data_master");
+    List dataSales = await getSalesSpesifik;
+    Future<List> getPelangganSpesifik = getDataCt.getSpesifikData(
+        "CUSTOM", "KODE", dataSelected["CUSTOM"], "get_spesifik_data_master");
+    List dataPelanggan = await getPelangganSpesifik;
+
+    nomorSoSelected.value = dataSelected["NOMOR"];
+    nomorSoSelected.value = dataSelected["NOMOR"];
+    selectedIdSales.value = dataSales[0]["KODE"];
+    selectedNameSales.value = dataSales[0]["NAMA"];
+    selectedIdPelanggan.value = dataSelected["CUSTOM"];
+    selectedNamePelanggan.value = dataPelanggan[0]["NAMA"];
+    wilayahCustomerSelected.value = dataSelected["WILAYAH"];
+
+    nomorSoSelected.refresh();
+    selectedIdSales.refresh();
+    selectedNameSales.refresh();
+    selectedIdPelanggan.refresh();
+    selectedNamePelanggan.refresh();
+    wilayahCustomerSelected.refresh();
+
+    Future<bool> prosesPilihCabang =
+        sidebarCt.pilihCabangSelected(dataSelected["CB"]);
+    bool hasilPilihCabang = await prosesPilihCabang;
+
+    Future<bool> prosesDeviceIp =
+        getDataCt.closeSODH(sidebarCt.ipdevice.value, nomorSoSelected.value);
+    bool hasilProsesDevice = await prosesDeviceIp;
+    print("ip device $hasilProsesDevice");
+
+    if (dataSales.isEmpty) {
+      Get.back();
+      UtilsAlert.showToast("Data sales tidak valid");
+    } else if (dataPelanggan.isEmpty) {
+      Get.back();
+      UtilsAlert.showToast("Data pelanggan tidak valid");
+    } else if (hasilPilihCabang == false) {
+      Get.back();
+      UtilsAlert.showToast("Data cabang tidak valid");
+    } else {
+      Get.back();
+      Get.to(ItemOrderPenjualan(dataForm: true),
+          duration: Duration(milliseconds: 500),
+          transition: Transition.rightToLeftWithFade);
+    }
+  }
+
+  void validasiBukaKunci(emailUserLogin, dataSelected) async {
+    Future<bool> prosesValidasi =
+        getDataCt.validasiUser(emailUserLogin[0], passwordBukaKunci.value.text);
+    bool hasilValidasi = await prosesValidasi;
+    if (hasilValidasi) {
+      Get.back();
+      prosesLanjugkanSoPenjualan(dataSelected);
+    } else {
+      Get.back();
+      UtilsAlert.showToast("Password yang anda masukkan salah");
+    }
+  }
+
+  Widget contentBukaKunciForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Password",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: Utility.small,
+        ),
+        CardCustomForm(
+          colorBg: Utility.baseColor2,
+          tinggiCard: 50.0,
+          radiusBorder: Utility.borderStyle1,
+          widgetCardForm: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Obx(
+              () => TextField(
+                cursorColor: Utility.primaryDefault,
+                obscureText: !this.showpassword.value,
+                controller: passwordBukaKunci.value,
+                decoration: InputDecoration(
+                    border: InputBorder.none,
+                    prefixIcon: const Icon(Iconsax.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        showpassword.value ? Iconsax.eye : Iconsax.eye_slash,
+                        color: this.showpassword.value
+                            ? Utility.primaryDefault
+                            : Utility.nonAktif,
+                      ),
+                      onPressed: () {
+                        this.showpassword.value = !this.showpassword.value;
+                      },
+                    )),
+                style:
+                    TextStyle(fontSize: 14.0, height: 2.0, color: Colors.black),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
