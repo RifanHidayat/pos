@@ -25,8 +25,8 @@ class ButtonSheetController extends GetxController {
                 right: 16,
                 bottom: MediaQuery.of(context).viewInsets.bottom),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(

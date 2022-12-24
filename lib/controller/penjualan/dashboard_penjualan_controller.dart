@@ -47,7 +47,6 @@ class DashbardPenjualanController extends GetxController {
   var pelangganList = [].obs;
   var dataAllSohd = [].obs;
   var dataSohd = [].obs;
-  var dataSodt = [].obs;
 
   var dateSelectedBuatOrderPenjualan = DateTime.now().obs;
   var tanggalAkumulasiJatuhTempo = DateTime.now().obs;
@@ -180,8 +179,8 @@ class DashbardPenjualanController extends GetxController {
         getDataCt.getDataSOHD(nomorSoSelected.value);
     List data = await prosesDataOnceSOHD;
     if (data.isNotEmpty) {
-      dataSodt.value = data;
-      dataSodt.refresh();
+      dataSohd.value = data;
+      dataSohd.refresh();
     }
   }
 
@@ -211,8 +210,8 @@ class DashbardPenjualanController extends GetxController {
 
   void prosesLanjugkanSoPenjualan(dataSelected) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
-    dataSodt.value = [dataSelected];
-    dataSodt.refresh();
+    dataSohd.value = [dataSelected];
+    dataSohd.refresh();
     Future<List> getSalesSpesifik = getDataCt.getSpesifikData(
         "SALESM", "KODE", dataSelected["SALESM"], "get_spesifik_data_master");
     List dataSales = await getSalesSpesifik;

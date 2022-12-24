@@ -13,6 +13,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import 'penjualan/dashboard_penjualan_controller.dart';
+import 'penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'penjualan/order_penjualan/item_order_penjualan_controller.dart';
 
 class GlobalController extends GetxController
@@ -332,7 +333,7 @@ class GlobalController extends GetxController
     itemOrderPenjualanCt.barangTerpilih.value = [dataTerpilih];
     itemOrderPenjualanCt.barangTerpilih.refresh();
     Get.back();
-    itemOrderPenjualanCt
+    OrderPenjualanPesanBarangController()
         .validasiSatuanBarang(itemOrderPenjualanCt.barangTerpilih.value);
   }
 
