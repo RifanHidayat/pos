@@ -30,6 +30,9 @@ class AppData {
   static set flagMember(String value) =>
       LocalStorage.saveToDisk('flagMember', value);
 
+  static set includePPN(String value) =>
+      LocalStorage.saveToDisk('includePPN', value);
+
   static set bidUsaha(String value) =>
       LocalStorage.saveToDisk('bidUsaha', value);
 
@@ -94,6 +97,13 @@ class AppData {
   static String get flagMember {
     if (LocalStorage.getFromDisk('flagMember') != null) {
       return LocalStorage.getFromDisk('flagMember');
+    }
+    return "";
+  }
+
+  static String get includePPN {
+    if (LocalStorage.getFromDisk('includePPN') != null) {
+      return LocalStorage.getFromDisk('includePPN');
     }
     return "";
   }

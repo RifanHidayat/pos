@@ -330,11 +330,9 @@ class GlobalController extends GetxController
 
   void pilihBarangSOPenjualan(dataTerpilih) {
     itemOrderPenjualanCt.typeBarangSelected.value = dataTerpilih['SAT'];
-    itemOrderPenjualanCt.barangTerpilih.value = [dataTerpilih];
-    itemOrderPenjualanCt.barangTerpilih.refresh();
+    itemOrderPenjualanCt.statusEditBarang.value = false;
     Get.back();
-    OrderPenjualanPesanBarangController()
-        .validasiSatuanBarang(itemOrderPenjualanCt.barangTerpilih.value);
+    OrderPenjualanPesanBarangController().validasiSatuanBarang([dataTerpilih]);
   }
 
   void buttomSheetInsertFaktur() {

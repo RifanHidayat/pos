@@ -6,6 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -35,6 +36,7 @@ class DashbardPenjualanController extends GetxController {
   var periode = "".obs;
   var typeFocus = "".obs;
   var nomorSoSelected = "".obs;
+  var nomoCbSelected = "".obs;
 
   var checkIncludePPN = false.obs;
   var screenBuatSoKeterangan = false.obs;
@@ -151,7 +153,7 @@ class DashbardPenjualanController extends GetxController {
 
   void getDataPelanggan() async {
     Future<List> prosesGetPelanggan =
-        getDataCt.getDataSales(sidebarCt.cabangKodeSelectedSide.value);
+        getDataCt.getDataPelanggan(selectedIdSales.value);
     List data = await prosesGetPelanggan;
     if (data.isNotEmpty) {
       data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
@@ -185,8 +187,10 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void lanjutkanSoPenjualan(dataSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
     if (dataSelected["IP"] == "") {
-      prosesLanjugkanSoPenjualan(dataSelected);
+      Get.back();
+      prosesLanjutkanSoPenjualan(dataSelected);
     } else {
       var emailUserLogin = AppData.informasiLoginUser.split("-");
       var statusSysUser = AppData.sysuserInformasi.split("-");
@@ -197,18 +201,21 @@ class DashbardPenjualanController extends GetxController {
       String fltr1 = hasilSetting[0]["NAMA"];
       var kodeOtoritasBukaKunci = fltr1.substring(13, 14);
       if (int.parse(getUsLevel) <= int.parse(kodeOtoritasBukaKunci)) {
+        Get.back();
         passwordBukaKunci.value.text = "";
         ButtonSheetController().validasiButtonSheet(
-            "Buka kunci", contentBukaKunciForm(), "order_penjualan", () {
+            "Buka kunci", contentBukaKunciForm(), "order_penjualan", 'Buka',
+            () {
           validasiBukaKunci(emailUserLogin, dataSelected);
         });
       } else {
+        Get.back();
         UtilsAlert.showToast("Maaf anda tidak memiliki akses");
       }
     }
   }
 
-  void prosesLanjugkanSoPenjualan(dataSelected) async {
+  void prosesLanjutkanSoPenjualan(dataSelected) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
     dataSohd.value = [dataSelected];
     dataSohd.refresh();
@@ -220,12 +227,12 @@ class DashbardPenjualanController extends GetxController {
     List dataPelanggan = await getPelangganSpesifik;
 
     nomorSoSelected.value = dataSelected["NOMOR"];
-    nomorSoSelected.value = dataSelected["NOMOR"];
     selectedIdSales.value = dataSales[0]["KODE"];
     selectedNameSales.value = dataSales[0]["NAMA"];
     selectedIdPelanggan.value = dataSelected["CUSTOM"];
     selectedNamePelanggan.value = dataPelanggan[0]["NAMA"];
     wilayahCustomerSelected.value = dataSelected["WILAYAH"];
+    nomoCbSelected.value = "${dataSelected["CB"]}";
 
     nomorSoSelected.refresh();
     selectedIdSales.refresh();
@@ -233,6 +240,7 @@ class DashbardPenjualanController extends GetxController {
     selectedIdPelanggan.refresh();
     selectedNamePelanggan.refresh();
     wilayahCustomerSelected.refresh();
+    nomoCbSelected.refresh();
 
     Future<bool> prosesPilihCabang =
         sidebarCt.pilihCabangSelected(dataSelected["CB"]);
@@ -266,7 +274,7 @@ class DashbardPenjualanController extends GetxController {
     bool hasilValidasi = await prosesValidasi;
     if (hasilValidasi) {
       Get.back();
-      prosesLanjugkanSoPenjualan(dataSelected);
+      prosesLanjutkanSoPenjualan(dataSelected);
     } else {
       Get.back();
       UtilsAlert.showToast("Password yang anda masukkan salah");

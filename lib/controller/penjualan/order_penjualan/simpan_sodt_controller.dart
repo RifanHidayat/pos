@@ -8,6 +8,7 @@ import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
+import 'package:siscom_pos/utils/utility.dart';
 
 class SimpanSODTController extends GetxController {
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
@@ -61,10 +62,31 @@ class SimpanSODTController extends GetxController {
     var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
     var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
 
+    double hargaJualBarangFilter = 0.0;
+    double nominalDiskonFilter = 0.0;
+
+    if (itemOrderPenjualanCt.hargaJualPesanBarang.value.text != "") {
+      hargaJualBarangFilter = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.hargaJualPesanBarang.value.text);
+    }
+    if (itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text != "") {
+      nominalDiskonFilter = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text);
+    }
+
+    var disc1Final = 0.0;
+
+    if (itemOrderPenjualanCt.persenDiskonPesanBarang.value.text != "") {
+      var disc1Proses1 = itemOrderPenjualanCt.persenDiskonPesanBarang.value.text
+          .replaceAll(",", ".");
+      var disc1Proses2 = disc1Proses1.replaceAll(".", ".");
+      disc1Final = double.parse(disc1Proses2);
+    }
+
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
-      'stringTabel': 'SOHD',
+      'stringTabel': 'SODT',
       'sodt_pk': dataSohd['PK'],
       'sodt_cabang': "01",
       'sodt_nomor': dataSohd['NOMOR'],
@@ -83,30 +105,85 @@ class SimpanSODTController extends GetxController {
       'sodt_salesm': dataSohd['SALESM'],
       'sodt_gudang': sidebarCt.gudangSelectedSide.value,
       'sodt_group': produkSelected[0]['GROUP'],
-      'sodt_barang': produkSelected[0]['BARANG'],
+      'sodt_kode': produkSelected[0]['KODE'],
       'sodt_qty': itemOrderPenjualanCt.jumlahPesan.value.text,
       'sodt_sat': produkSelected[0]['SAT'],
       'sodt_uang': "RP",
       'sodt_kurs': "1",
-      'sodt_harga': itemOrderPenjualanCt.hargaJualPesanBarang.value.text,
-      'sodt_disc1': itemOrderPenjualanCt.persenDiskonPesanBarang.value.text,
-      'sodt_discd': itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text,
-      'sodt_disch': "",
-      'sodt_discn': "",
-      'sodt_biaya': "",
-      'sodt_taxn': "",
-      'sodt_lain': "",
+      'sodt_harga': hargaJualBarangFilter.toStringAsFixed(2),
+      'sodt_disc1': disc1Final.toStringAsFixed(2),
+      'sodt_discd': nominalDiskonFilter.toStringAsFixed(2),
       'sodt_doe': tanggalDanJam,
       'sodt_toe': jamTransaksi,
       'sodt_loe': tanggalDanJam,
       'sodt_deo': dataInformasiSYSUSER[0],
       'sodt_cb': sidebarCt.cabangKodeSelectedSide.value,
-      'sodt_htg': itemOrderPenjualanCt.pakBarangSelected.value,
+      'sodt_htg': itemOrderPenjualanCt.htgBarangSelected.value,
       'sodt_ptg': "1",
-      'sodt_pak': itemOrderPenjualanCt.htgBarangSelected.value,
-      'sodt_hgpak': itemOrderPenjualanCt.hargaJualPesanBarang.value.text,
+      'sodt_pak': itemOrderPenjualanCt.pakBarangSelected.value,
+      'sodt_hgpak': hargaJualBarangFilter.toStringAsFixed(0),
     };
     var connect = Api.connectionApi("post", body, "insert_sodt");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List hasil = [];
+    if (valueBody["status"] == true) {
+      hasil = [true, valueBody["data"]];
+    }
+    Get.back();
+    return Future.value(hasil);
+  }
+
+  Future<List> editSODT(produkSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Edit data...");
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    double hargaJualBarangFilter = 0.0;
+    double nominalDiskonFilter = 0.0;
+
+    if (itemOrderPenjualanCt.hargaJualPesanBarang.value.text != "") {
+      hargaJualBarangFilter = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.hargaJualPesanBarang.value.text);
+    }
+    if (itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text != "") {
+      nominalDiskonFilter = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text);
+    }
+
+    var disc1Final = 0.0;
+
+    if (itemOrderPenjualanCt.persenDiskonPesanBarang.value.text != "") {
+      var disc1Proses1 = itemOrderPenjualanCt.persenDiskonPesanBarang.value.text
+          .replaceAll(",", ".");
+      var disc1Proses2 = disc1Proses1.replaceAll(".", ".");
+      disc1Final = double.parse(disc1Proses2);
+    }
+
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'SODT',
+      'nomor_sohd': dashboardPenjualanCt.dataSohd[0]['NOMOR'],
+      'nomor_urut': produkSelected[0]['NOURUT'],
+      'sodt_edit_tanggal': tanggalNow,
+      'sodt_edit_tgl': tanggalNow,
+      'sodt_edit_qty': itemOrderPenjualanCt.jumlahPesan.value.text,
+      'sodt_edit_sat': produkSelected[0]['SAT'],
+      'sodt_edit_harga': hargaJualBarangFilter.toStringAsFixed(2),
+      'sodt_edit_disc1': disc1Final.toStringAsFixed(2),
+      'edit_discd': nominalDiskonFilter.toStringAsFixed(2),
+      'sodt_edit_doe': tanggalDanJam,
+      'sodt_edit_toe': jamTransaksi,
+      'sodt_edit_loe': tanggalDanJam,
+      'sodt_edit_deo': dataInformasiSYSUSER[0],
+      'sodt_edit_htg': itemOrderPenjualanCt.htgBarangSelected.value,
+      'sodt_edit_pak': itemOrderPenjualanCt.pakBarangSelected.value,
+    };
+    var connect = Api.connectionApi("post", body, "update_item_sodt");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     List hasil = [];

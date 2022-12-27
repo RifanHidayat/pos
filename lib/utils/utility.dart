@@ -149,8 +149,7 @@ class Utility {
   }
 
   static double persenDiskonHeader(String subtotal, String nominalDiskon) {
-    var hitung =
-        (double.parse("${nominalDiskon}") / double.parse("${subtotal}")) * 100;
+    var hitung = (double.parse(nominalDiskon) / double.parse(subtotal)) * 100;
     return hitung;
   }
 
@@ -246,9 +245,9 @@ class Utility {
     );
     String hasilFinal = "";
     if (type == "with_rp") {
-      hasilFinal = currencyFormatterRp.format(int.parse(nominal));
+      hasilFinal = currencyFormatterRp.format(double.parse(nominal));
     } else {
-      hasilFinal = currencyFormatter.format(int.parse(nominal));
+      hasilFinal = currencyFormatter.format(double.parse(nominal));
     }
     return hasilFinal;
   }

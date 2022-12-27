@@ -115,6 +115,50 @@ class PerhitunganCt extends GetxController {
     return Future.value(hasilFinal);
   }
 
+  Future<double> hitungNominalDiskonHeader(
+      String persenDiskon, String subtotal) {
+    var vld1 = persenDiskon.replaceAll(".", ".");
+    var vld2 = vld1.replaceAll(",", ".");
+    double vld3 = double.parse(vld2);
+    double hitungNominal =
+        Utility.nominalDiskonHeader(subtotal, "${vld3.toInt()}");
+
+    return Future.value(hitungNominal);
+  }
+
+  Future<String> hitungPersenDiskonHeader(
+      String nominalPersen, String subtotal) {
+    var inputNominal = nominalPersen.replaceAll(".", "");
+    var hitung = (double.parse(inputNominal) / double.parse(subtotal)) * 100;
+
+    String hitungNominal = hitung.toStringAsFixed(2);
+
+    return Future.value(hitungNominal);
+  }
+
+  Future<double> hitungNominalPPNHeader(
+      double persenPPN, double subtotal, double nominalDiskon) {
+    double hargaSetelahDiskon = subtotal - nominalDiskon;
+    double hitung1 =
+        Utility.nominalPPNHeader("$hargaSetelahDiskon", "$persenPPN");
+    return Future.value(hitung1);
+  }
+
+  Future<String> hitungPersenPPNHeader(
+      double nominalPPN, double subtotal, double nominalDiskon) {
+    double hargaSetelahDiskon = subtotal - nominalDiskon;
+    var hitung = (nominalPPN / hargaSetelahDiskon) * 100;
+    String hasilPersenPPN = hitung.toStringAsFixed(2);
+    return Future.value(hasilPersenPPN);
+  }
+
+  Future<double> hitungNettoOrderPenjualan(
+      double subtotal, double nominalDiskon, double ppn, double ongkos) {
+    double hitung1 = subtotal - nominalDiskon;
+    double hitung2 = hitung1 + ppn + ongkos;
+    return Future.value(hitung2);
+  }
+
   Future<double> jikaAdaDiskon(
     double totalPesan,
     String nominalDiskon,

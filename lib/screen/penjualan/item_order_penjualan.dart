@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_header_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/buat_order_penjualan.dart';
@@ -174,10 +176,11 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                         ),
                       ),
                       SizedBox(
-                        height: Utility.medium,
+                        height: Utility.large,
                       ),
                       Flexible(
-                          child: controller.barangTerpilih.isEmpty
+                          child: controller.barangTerpilih.isEmpty &&
+                                  controller.statusSODTKosong.value == true
                               ? Center(
                                   child: Column(
                                     crossAxisAlignment:
@@ -225,46 +228,74 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       ),
                     ]),
                 height: 85,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 60,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Netto",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Utility.medium),
-                            ),
-                            Text(
-                              "${Utility.rupiahFormat('${controller.totalNetto.value.toInt()}', 'with_rupiah')}",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: Utility.large),
-                            ),
-                          ],
+                child: Obx(
+                  () => Padding(
+                    padding: EdgeInsets.only(
+                        left: 16.0, right: 16.0, top: 12.0, bottom: 12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Netto",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: Utility.medium),
+                              ),
+                              Text(
+                                "${Utility.rupiahFormat('${controller.totalNetto.value}', 'with_rp')}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: Utility.large),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Expanded(
-                          flex: 40,
-                          child: Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Button1(
-                                textBtn: "Rincian",
-                                colorBtn: Utility.primaryDefault,
-                                colorText: Colors.white,
-                                onTap: () =>
-                                    controller.sheetButtomHeaderRincian(),
-                              ))),
-                    ],
+                        Expanded(
+                            child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: InkWell(
+                                            onTap: () {
+                                              HeaderRincianOrderPenjualanController()
+                                                  .sheetButtomHeaderRincian();
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Iconsax.receipt_2),
+                                                Text("Rincian")
+                                              ],
+                                            ))),
+                                    Expanded(
+                                        child: InkWell(
+                                            onTap: () {
+                                              controller.showDialog();
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Iconsax.add_circle),
+                                                Text("Simpan")
+                                              ],
+                                            ))),
+                                  ],
+                                ))),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -396,6 +427,268 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
   }
 
   Widget listPilihanBarang() {
-    return SizedBox();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        controller.barangTerpilih.value.isEmpty
+            ? Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Utility.primaryDefault,
+                    ),
+                    Text(
+                      "Sedang memuat",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              )
+            : ListView.builder(
+                physics: controller.barangTerpilih.value.length <= 10
+                    ? AlwaysScrollableScrollPhysics()
+                    : BouncingScrollPhysics(),
+                itemCount: controller.barangTerpilih.value.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  var namaBarang =
+                      controller.barangTerpilih.value[index]["NAMA"];
+                  var hargaJual =
+                      controller.barangTerpilih.value[index]["STDJUAL"];
+                  var qtyBeli =
+                      controller.barangTerpilih.value[index]["qty_beli"];
+                  var disc1 = controller.barangTerpilih.value[index]["DISC1"];
+                  var discd = controller.barangTerpilih.value[index]["DISCD"];
+                  var group = controller.barangTerpilih.value[index]["GROUP"];
+                  var kode = controller.barangTerpilih.value[index]["KODE"];
+                  var nourut = controller.barangTerpilih.value[index]["NOURUT"];
+                  double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
+                      "$hargaJual", "$qtyBeli", "$discd");
+                  int filterTotalBarang = hargaTotalBarang.toInt();
+                  return Slidable(
+                    endActionPane: ActionPane(
+                      extentRatio: 0.3,
+                      motion: ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          flex: 1,
+                          onPressed: (BuildContext context) {
+                            controller.editBarangSelected(group, kode);
+                          },
+                          backgroundColor: Utility.infoLight50,
+                          foregroundColor: Utility.infoDefault,
+                          icon: Iconsax.edit_2,
+                        ),
+                        SlidableAction(
+                          flex: 1,
+                          onPressed: (BuildContext context) {
+                            controller.hapusSODT(nourut);
+                          },
+                          backgroundColor: Color(0xffFFF2EB),
+                          foregroundColor: Colors.red,
+                          icon: Iconsax.trash,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "$namaBarang",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 70,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                          "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
+                                    ),
+                                    disc1 == 0
+                                        ? SizedBox()
+                                        : Expanded(
+                                            child: Text(
+                                              "Disc $disc1%",
+                                              style: TextStyle(
+                                                  color: Colors.green),
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                flex: 30,
+                                child: Text(
+                                  "${Utility.rupiahFormat('$filterTotalBarang', 'with_rp')}",
+                                  textAlign: TextAlign.end,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Divider(),
+                      ],
+                    ),
+                  );
+                }),
+        SizedBox(
+          height: Utility.medium,
+        ),
+        controller.barangTerpilih.value.isEmpty
+            ? SizedBox()
+            : detailNominalBayar()
+      ],
+    );
+  }
+
+  Widget detailNominalBayar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Text(
+                "Subtotal",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Utility.medium,
+                    color: Utility.grey900),
+              ),
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                "${Utility.rupiahFormat('${controller.subtotal.value.toInt()}', 'with_rp')}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Diskon",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 8.0),
+                    decoration: BoxDecoration(
+                        color: Color(0xffCEFBCF),
+                        borderRadius: Utility.borderStyle1),
+                    child: Padding(
+                      padding: EdgeInsets.all(3.0),
+                      child: Center(
+                        child: Text(
+                          "${controller.persenDiskonHeaderRincian.value.text}%",
+                          style: TextStyle(
+                              fontSize: Utility.small, color: Colors.green),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                "Rp${controller.nominalDiskonHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "PPN",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 8.0),
+                    decoration: BoxDecoration(
+                        color: Color(0xffFFE7D8),
+                        borderRadius: Utility.borderStyle1),
+                    child: Padding(
+                      padding: EdgeInsets.all(3.0),
+                      child: Center(
+                        child: Text(
+                          "${controller.persenPPNHeaderRincian.value.text} %",
+                          style: TextStyle(
+                              fontSize: Utility.small, color: Colors.red),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                // "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
+                "Rp${controller.nominalPPNHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Ongkos",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                // "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincian.value.text, 'with_rp')}",
+                "Rp${controller.nominalOngkosHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+      ],
+    );
   }
 }

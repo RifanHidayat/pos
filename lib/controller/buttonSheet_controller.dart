@@ -5,8 +5,8 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 
 class ButtonSheetController extends GetxController {
-  void validasiButtonSheet(
-      String pesan1, Widget content, String type, Function() onTap) {
+  void validasiButtonSheet(String pesan1, Widget content, String type,
+      String acc, Function() onTap) {
     showModalBottomSheet(
       context: Get.context!,
       isDismissible: false,
@@ -77,7 +77,7 @@ class ButtonSheetController extends GetxController {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 5),
                         child: Button1(
-                          textBtn: "Simpan",
+                          textBtn: acc,
                           colorBtn: Utility.primaryDefault,
                           onTap: () {
                             if (onTap != null) onTap();

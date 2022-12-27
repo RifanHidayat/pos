@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
+import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/simpan_sodt_controller.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
@@ -15,6 +16,7 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class OrderPenjualanPesanBarangController extends GetxController {
   var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
+  var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
 
   var valueFocus = "".obs;
 
@@ -25,9 +27,30 @@ class OrderPenjualanPesanBarangController extends GetxController {
     itemOrderPenjualanCt.jumlahPesan.value.text = "1";
     itemOrderPenjualanCt.persenDiskonPesanBarang.value.text = "";
     itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text = "";
-    itemOrderPenjualanCt.jumlahPesan.value.text = "1";
     itemOrderPenjualanCt.totalPesanBarang.value =
         double.parse("${produkSelected[0]['STDJUAL']}");
+    checkUkuran(produkSelected);
+  }
+
+  void validasiEditBarang(produkSelected) async {
+    itemOrderPenjualanCt.typeBarang.value.clear();
+    itemOrderPenjualanCt.hargaJualPesanBarang.value.text =
+        Utility.rupiahFormat("${produkSelected[0]['STDJUAL']}", "");
+    itemOrderPenjualanCt.jumlahPesan.value.text =
+        "${produkSelected[0]['qty_beli']}";
+    itemOrderPenjualanCt.persenDiskonPesanBarang.value.text =
+        "${produkSelected[0]['DISC1']}";
+    itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text =
+        Utility.rupiahFormat("${produkSelected[0]['DISCD']}", "");
+    itemOrderPenjualanCt.totalPesanBarang.value =
+        Utility.hitungTotalPembelianBarang(
+            "${produkSelected[0]['STDJUAL']}",
+            "${produkSelected[0]['qty_beli']}",
+            "${produkSelected[0]['DISCD']}");
+    checkUkuran(produkSelected);
+  }
+
+  void checkUkuran(produkSelected) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
     Future<List> prosesCheckUkuran = GetDataController()
         .checkUkuran(produkSelected[0]['GROUP'], produkSelected[0]['KODE']);
@@ -138,26 +161,45 @@ class OrderPenjualanPesanBarangController extends GetxController {
                           height: Utility.large,
                         ),
                         Button1(
-                          textBtn: "Tambah",
+                          textBtn: "Simpan",
                           colorBtn: Utility.primaryDefault,
                           onTap: () {
-                            ButtonSheetController().validasiButtonSheet(
-                                "Pesan Barang",
-                                contentOpPesanBarang(),
-                                "op_pesan_barang", () async {
-                              Future<List> prosesSimpanSODT =
-                                  SimpanSODTController()
-                                      .buatSodt(produkSelected);
-                              List hasilProses = await prosesSimpanSODT;
-                              if (hasilProses[0] == true) {
-                                Get.back();
-                                Get.back();
-                                itemOrderPenjualanCt.barangTerpilih
-                                    .add(produkSelected[0]);
-                                itemOrderPenjualanCt.barangTerpilih.refresh();
-                                UtilsAlert.showToast("Berhasil tambah barang");
-                              }
-                            });
+                            if (!itemOrderPenjualanCt.statusEditBarang.value) {
+                              ButtonSheetController().validasiButtonSheet(
+                                  "Pesan Barang",
+                                  contentOpPesanBarang(),
+                                  "op_pesan_barang",
+                                  'Tambah', () async {
+                                Future<List> prosesSimpanSODT =
+                                    SimpanSODTController()
+                                        .buatSodt(produkSelected);
+                                List hasilProses = await prosesSimpanSODT;
+                                if (hasilProses[0] == true) {
+                                  itemOrderPenjualanCt.loadDataSODT();
+                                  Get.back();
+                                  Get.back();
+                                  UtilsAlert.showToast(
+                                      "Berhasil tambah barang");
+                                }
+                              });
+                            } else {
+                              ButtonSheetController().validasiButtonSheet(
+                                  "Edit Barang",
+                                  contentOpEditBarang(),
+                                  "op_edit_barang",
+                                  'Edit', () async {
+                                Future<List> prosesEditSODT =
+                                    SimpanSODTController()
+                                        .editSODT(produkSelected);
+                                List hasilProses = await prosesEditSODT;
+                                if (hasilProses[0] == true) {
+                                  itemOrderPenjualanCt.loadDataSODT();
+                                  Get.back();
+                                  Get.back();
+                                  UtilsAlert.showToast("Berhasil edit barang");
+                                }
+                              });
+                            }
                           },
                         ),
                         SizedBox(
@@ -723,7 +765,7 @@ class OrderPenjualanPesanBarangController extends GetxController {
   }
 
   void inputPersenDiskon(setState, value) async {
-    if (value != "" || value != "0") {
+    if (value != "" || value != "0" || value != "0.00") {
       var filterHargaJual =
           itemOrderPenjualanCt.hargaJualPesanBarang.value.text.split(",");
       Future<dynamic> prosesInputPersen = PerhitunganCt().hitungPersenDiskon(
@@ -784,5 +826,146 @@ class OrderPenjualanPesanBarangController extends GetxController {
         )
       ],
     );
+  }
+
+  Widget contentOpEditBarang() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          "Apa kamu yakin edit barang ini ?",
+          textAlign: TextAlign.left,
+          style: TextStyle(fontSize: Utility.medium, color: Utility.greyDark),
+        )
+      ],
+    );
+  }
+
+  Future<bool> perhitunganMenyeluruhOrderPenjualan(List hasilSodt) async {
+    // Future<List> prosesGetDataSODT = GetDataController().getSpesifikData(
+    //     "SODT",
+    //     "NOMOR",
+    //     dashboardPenjualanCt.nomorSoSelected.value,
+    //     "get_spesifik_data_transaksi");
+    // List hasilSodt = await prosesGetDataSODT;
+
+    // Future<List> prosesGetSodt = GetDataController()
+    //     .getDataSODT(dashboardPenjualanCt.nomorSoSelected.value);
+    // List hasilSodt = await prosesGetSodt;
+
+    if (hasilSodt.isNotEmpty) {
+      // List hasilSodt = itemOrderPenjualanCt.sodtSelected;
+
+      double subtotalKeranjang = 0.0;
+      double hargaTotheader = 0.0;
+      double qtyallheader = 0.0;
+      double discdHeader = 0.0;
+      double dischHeader = 0.0;
+      double discnHeader = 0.0;
+      double taxnHeader = 0.0;
+      double biayaHeader = 0.0;
+
+      for (var element in hasilSodt) {
+        double hargaBarang = double.parse("${element['HARGA']}");
+        double discdBarang = double.parse("${element['DISCD']}");
+        double dischBarang = double.parse("${element['DISCH']}");
+        double qtyBarang = double.parse("${element['QTY']}");
+        var hitung1 = hargaBarang * qtyBarang;
+        var hitung2 = discdBarang * qtyBarang;
+        var finalHitung = hitung1 - hitung2;
+        var hitungDiscn = hitung2 + dischBarang;
+        var hitungDiscnJldt =
+            discdBarang.toPrecision(2) + dischBarang.toPrecision(2);
+
+        print('sodt taxn ${double.parse("${element['TAXN']}")}');
+        print('sodt biaya ${double.parse("${element['BIAYA']}")}');
+
+        subtotalKeranjang = subtotalKeranjang + finalHitung;
+        hargaTotheader = hargaTotheader + hitung1;
+        qtyallheader = qtyallheader + qtyBarang;
+        discdHeader = discdHeader + hitung2;
+        dischHeader = dischHeader + dischBarang;
+        discnHeader = discnHeader + hitungDiscn;
+        taxnHeader = taxnHeader + double.parse("${element['TAXN']}");
+        biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
+
+        // update SODT
+
+        double hrgSetelahDiskon = finalHitung - dischBarang;
+        double hitungPpnSodt = 0.0;
+
+        var ongkosSodt = double.parse("${element['BIAYA']}");
+        var discnSodt = hitungDiscnJldt.toPrecision(2);
+        var ppnSodt = double.parse("${element['TAXN']}");
+        GetDataController().updateSodt(element['NOMOR'], element['NOURUT'],
+            discnSodt, ppnSodt, ongkosSodt);
+      }
+
+      itemOrderPenjualanCt.subtotal.value = subtotalKeranjang;
+      itemOrderPenjualanCt.subtotal.refresh();
+
+      itemOrderPenjualanCt.hrgtotSohd.value = hargaTotheader;
+      itemOrderPenjualanCt.hrgtotSohd.refresh();
+
+      itemOrderPenjualanCt.allQtyBeli.value = qtyallheader;
+      itemOrderPenjualanCt.allQtyBeli.refresh();
+
+      // perhitungan diskon header
+
+      var fltr1 =
+          Utility.persenDiskonHeader("$subtotalKeranjang", "$dischHeader");
+
+      itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text =
+          fltr1.toStringAsFixed(2);
+      itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+
+      itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text =
+          "${Utility.rupiahFormat("$dischHeader", '')}";
+      itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+
+      var hargaSetelahDiskonHeader = subtotalKeranjang - dischHeader;
+
+      // perhitungan ppn header
+
+      var hitungPersenPPN = Utility.persenDiskonHeader(
+          "$hargaSetelahDiskonHeader", "$taxnHeader");
+
+      itemOrderPenjualanCt.persenPPNHeaderRincian.value.text =
+          hitungPersenPPN.toStringAsFixed(2);
+      itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
+          "${Utility.rupiahFormat("$taxnHeader", '')}";
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+
+      // print('persen ppn $hitungPersenPPN');
+      // print('nominal ppn $taxnHeader');
+
+      // perhitungan biaya ongkos
+
+      itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text =
+          "${Utility.rupiahFormat("$biayaHeader", '')}";
+
+      var hargaNetHeader = hargaSetelahDiskonHeader + taxnHeader + biayaHeader;
+
+      itemOrderPenjualanCt.totalNetto.value = hargaNetHeader;
+      itemOrderPenjualanCt.totalNetto.refresh();
+
+      var fixedTaxn = taxnHeader.toPrecision(2);
+      var fixedHrgNet = hargaNetHeader.toPrecision(2);
+
+      GetDataController().updateSohd(
+          dashboardPenjualanCt.nomorSoSelected.value,
+          hargaTotheader,
+          qtyallheader,
+          discdHeader,
+          dischHeader,
+          discnHeader,
+          fixedTaxn,
+          fixedHrgNet);
+    }
+
+    return Future.value(true);
   }
 }

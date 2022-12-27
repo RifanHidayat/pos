@@ -6,8 +6,11 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -16,6 +19,7 @@ import 'package:siscom_pos/utils/widget/modal_popup.dart';
 class ItemOrderPenjualanController extends BaseController {
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var getDataCt = Get.put(GetDataController());
+  var sidebarCt = Get.put(SidebarController());
 
   var jumlahPesan = TextEditingController().obs;
   var hargaJualPesanBarang = TextEditingController().obs;
@@ -39,9 +43,14 @@ class ItemOrderPenjualanController extends BaseController {
 
   var statusBack = false.obs;
   var statusInformasiSo = false.obs;
+  var statusEditBarang = false.obs;
+  var statusSODTKosong = false.obs;
 
   var totalPesanBarang = 0.0.obs;
   var totalNetto = 0.0.obs;
+  var hrgtotSohd = 0.0.obs;
+  var subtotal = 0.0.obs;
+  var allQtyBeli = 0.0.obs;
 
   var typeFocus = "".obs;
   var typeBarangSelected = "".obs;
@@ -49,6 +58,12 @@ class ItemOrderPenjualanController extends BaseController {
   var pakBarangSelected = "".obs;
 
   void getDataBarang(status) async {
+    listBarang.value.clear();
+    barangTerpilih.value.clear();
+    sodtSelected.value.clear();
+    listBarang.refresh();
+    barangTerpilih.refresh();
+    sodtSelected.refresh();
     Future<List> prosesGetDataBarang = getDataCt.getAllBarang();
     List data = await prosesGetDataBarang;
     if (data.isNotEmpty) {
@@ -61,6 +76,10 @@ class ItemOrderPenjualanController extends BaseController {
   }
 
   void loadDataSODT() async {
+    sodtSelected.value.clear();
+    listBarang.refresh();
+    barangTerpilih.refresh();
+    sodtSelected.refresh();
     Future<List> prosesGetDataSODT = getDataCt.getSpesifikData(
         "SODT",
         "NOMOR",
@@ -73,24 +92,53 @@ class ItemOrderPenjualanController extends BaseController {
       List groupKodeBarang = [];
       for (var element in hasilData) {
         var data = {
-          'group': element['GROUP'],
-          'kode': element['BARANG'],
+          'GROUP': element['GROUP'],
+          'KODE': element['BARANG'],
+          'NOURUT': element['NOURUT'],
+          'qty_beli': element['QTY'],
+          'DISC1': element['DISC1'],
+          'DISCD': element['DISCD'],
         };
         groupKodeBarang.add(data);
       }
       if (groupKodeBarang.isNotEmpty) {
+        var tampung = [];
         for (var element in listBarang) {
           for (var element1 in groupKodeBarang) {
             if ("${element['GROUP']}${element['KODE']}" ==
                 "${element1['GROUP']}${element1['KODE']}") {
-              barangTerpilih.add(element);
+              var data = {
+                "GROUP": element["GROUP"],
+                "KODE": element["KODE"],
+                "NOURUT": element1["NOURUT"],
+                "INISIAL": element["INISIAL"],
+                "INGROUP": element["INGROUP"],
+                "NAMA": element["NAMA"],
+                "BARCODE": element["BARCODE"],
+                "TIPE": element["TIPE"],
+                "SAT": element["SAT"],
+                "STDJUAL": element["STDJUAL"],
+                "qty_beli": element1["qty_beli"],
+                "DISC1": element1["DISC1"],
+                "DISCD": element1["DISCD"],
+              };
+              tampung.add(data);
             }
           }
         }
+        tampung = tampung.toSet().toList();
+        barangTerpilih.value = tampung;
         barangTerpilih.refresh();
+        Future<bool> prosesHitungMenyeluruh =
+            OrderPenjualanPesanBarangController()
+                .perhitunganMenyeluruhOrderPenjualan(sodtSelected);
+        bool hasilProsesHitung = await prosesHitungMenyeluruh;
+        if (hasilProsesHitung) statusSODTKosong.value = false;
+        // hitungSubtotal();
       }
     } else {
       UtilsAlert.showToast("Tidak ada item yang terpilih");
+      statusSODTKosong.value = true;
     }
   }
 
@@ -109,7 +157,7 @@ class ItemOrderPenjualanController extends BaseController {
             child: ModalPopupPeringatan(
               title: "Order Penjualan",
               content: "Yakin simpan data ini ?",
-              positiveBtnText: "Batal",
+              positiveBtnText: "Simpan",
               negativeBtnText: "Urungkan",
               positiveBtnPressed: () {
                 backValidasi();
@@ -124,6 +172,7 @@ class ItemOrderPenjualanController extends BaseController {
   }
 
   void backValidasi() async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Loading...");
     Future<bool> prosesClose =
         getDataCt.closeSODH("", dashboardPenjualanCt.nomorSoSelected.value);
     bool hasilClose = await prosesClose;
@@ -131,472 +180,51 @@ class ItemOrderPenjualanController extends BaseController {
       dashboardPenjualanCt.getDataAllSOHD();
       Get.back();
       Get.back();
+      Get.back();
       statusBack.value = true;
       statusBack.refresh();
     }
   }
 
-  void sheetButtomHeaderRincian() {
-    NumberFormat currencyFormatter = NumberFormat.currency(
-      locale: 'id',
-      symbol: 'Rp ',
-      decimalDigits: 2,
-    );
-    showModalBottomSheet(
-        context: Get.context!,
-        isScrollControlled: true,
-        isDismissible: false,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20.0),
-          ),
-        ),
-        builder: (context) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-            return GestureDetector(
-                onTap: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: SingleChildScrollView(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        headLineRincian(setState),
-                        Divider(),
-                        Text(
-                          "Diskon",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        diskonWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Text(
-                          "PPN %",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        ppnWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Text(
-                          "Ongkos",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        ongkosWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Button1(
-                          textBtn: "Tambah",
-                          colorBtn: Utility.primaryDefault,
-                          onTap: () {},
-                        ),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                      ])),
-                ));
-          });
-        });
+  void editBarangSelected(group, kode) {
+    List editData = barangTerpilih.value
+        .where((element) =>
+            "${element['GROUP']}${element['KODE']}" == "$group$kode")
+        .toList();
+    if (editData.isNotEmpty) {
+      statusEditBarang.value = true;
+      OrderPenjualanPesanBarangController().validasiEditBarang(editData);
+    } else {
+      UtilsAlert.showToast("Gagal edit data");
+    }
   }
 
-  Widget headLineRincian(setState) {
-    return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 90,
-              child: Text(
-                "Rincian Order Penjualan",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: Utility.medium),
-              ),
-            ),
-            Expanded(
-              flex: 10,
-              child: InkWell(
-                onTap: () => Get.back(),
-                child: Center(
-                  child: Icon(
-                    Iconsax.close_circle,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+  void hapusSODT(nourut) {
+    ButtonSheetController().validasiButtonSheet(
+        "Hapus Barang", contentOpHapusBarang(), "op_hapus_barang", 'Hapus',
+        () async {
+      UtilsAlert.loadingSimpanData(Get.context!, "Hapus data...");
+      Future<bool> prosesHapusSODT = getDataCt.hapusSODT(
+          dashboardPenjualanCt.nomorSoSelected.value, nourut);
+      bool hasilHapus = await prosesHapusSODT;
+      if (hasilHapus) {
+        loadDataSODT();
+        Get.back();
+        Get.back();
+        UtilsAlert.showToast("Berhasil hapus barang");
+      }
+    });
   }
 
-  Widget diskonWidgetRincian(setState) {
-    return Row(
+  Widget contentOpHapusBarang() {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 30,
-          child: Container(
-            height: 50,
-            margin: EdgeInsets.only(right: 6.0),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: Utility.borderStyle2,
-                border: Border.all(
-                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: FocusScope(
-                      child: Focus(
-                        onFocusChange: (focus) {
-                          typeFocus.value = "persen_diskon_rincian";
-                        },
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          cursorColor: Colors.black,
-                          controller: persenDiskonHeaderRincian.value,
-                          keyboardType:
-                              TextInputType.numberWithOptions(signed: true),
-                          textInputAction: TextInputAction.done,
-                          decoration: new InputDecoration(
-                              border: InputBorder.none, hintText: "Persentase"),
-                          style: TextStyle(
-                              fontSize: 14.0, height: 1.0, color: Colors.black),
-                          onSubmitted: (value) {
-                            // aksiInputPersenDiskon(Get.context!, value);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                    flex: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Utility.grey100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16),
-                          )),
-                      child: Center(
-                        child: Text("%"),
-                      ),
-                    )),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 70,
-          child: Container(
-            height: 50,
-            margin: EdgeInsets.only(left: 6.0),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: Utility.borderStyle2,
-                border: Border.all(
-                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Utility.grey100,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            bottomLeft: Radius.circular(16),
-                          )),
-                      child: Center(
-                        child: Text("Rp"),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 70,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: FocusScope(
-                        child: Focus(
-                          onFocusChange: (focus) {
-                            typeFocus.value = "nominal_diskon_rincian";
-                          },
-                          child: TextField(
-                            inputFormatters: [
-                              CurrencyTextInputFormatter(
-                                locale: 'id',
-                                symbol: '',
-                                decimalDigits: 0,
-                              )
-                            ],
-                            cursorColor: Colors.black,
-                            controller: nominalDiskonHeaderRincian.value,
-                            keyboardType:
-                                TextInputType.numberWithOptions(signed: true),
-                            textInputAction: TextInputAction.done,
-                            decoration: new InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Nominal Diskon"),
-                            style: TextStyle(
-                                fontSize: 14.0,
-                                height: 1.0,
-                                color: Colors.black),
-                            onSubmitted: (value) {
-                              // aksiInputNominalDiskon(Get.context!, value);
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget ppnWidgetRincian(setState) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 30,
-          child: Container(
-            height: 50,
-            margin: EdgeInsets.only(right: 6.0),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: Utility.borderStyle2,
-                border: Border.all(
-                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: FocusScope(
-                      child: Focus(
-                        onFocusChange: (focus) {
-                          typeFocus.value = "persen_ppn_rincian";
-                        },
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          cursorColor: Colors.black,
-                          controller: persenPPNHeaderRincian.value,
-                          keyboardType:
-                              TextInputType.numberWithOptions(signed: true),
-                          textInputAction: TextInputAction.done,
-                          decoration: new InputDecoration(
-                              border: InputBorder.none, hintText: "Persentase"),
-                          style: TextStyle(
-                              fontSize: 14.0, height: 1.0, color: Colors.black),
-                          onSubmitted: (value) {
-                            // aksiInputPersenDiskon(Get.context!, value);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                    flex: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Utility.grey100,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16),
-                          )),
-                      child: Center(
-                        child: Text("%"),
-                      ),
-                    )),
-              ],
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 70,
-          child: Container(
-            height: 50,
-            margin: EdgeInsets.only(left: 6.0),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: Utility.borderStyle2,
-                border: Border.all(
-                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Utility.grey100,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            bottomLeft: Radius.circular(16),
-                          )),
-                      child: Center(
-                        child: Text("Rp"),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 70,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: FocusScope(
-                        child: Focus(
-                          onFocusChange: (focus) {
-                            typeFocus.value = "nominal_ppn_rincian";
-                          },
-                          child: TextField(
-                            inputFormatters: [
-                              CurrencyTextInputFormatter(
-                                locale: 'id',
-                                symbol: '',
-                                decimalDigits: 0,
-                              )
-                            ],
-                            cursorColor: Colors.black,
-                            controller: nominalPPNHeaderRincian.value,
-                            keyboardType:
-                                TextInputType.numberWithOptions(signed: true),
-                            textInputAction: TextInputAction.done,
-                            decoration: new InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Nominal Diskon"),
-                            style: TextStyle(
-                                fontSize: 14.0,
-                                height: 1.0,
-                                color: Colors.black),
-                            onSubmitted: (value) {
-                              // aksiInputNominalDiskon(Get.context!, value);
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget ongkosWidgetRincian(setState) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: Utility.borderStyle2,
-                border: Border.all(
-                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Utility.grey100,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            bottomLeft: Radius.circular(16),
-                          )),
-                      child: Center(
-                        child: Text("Rp"),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 70,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: FocusScope(
-                        child: Focus(
-                          onFocusChange: (focus) {
-                            typeFocus.value = "nominal_ongkos_rincian";
-                          },
-                          child: TextField(
-                            inputFormatters: [
-                              CurrencyTextInputFormatter(
-                                locale: 'id',
-                                symbol: '',
-                                decimalDigits: 0,
-                              )
-                            ],
-                            cursorColor: Colors.black,
-                            controller: nominalOngkosHeaderRincian.value,
-                            keyboardType:
-                                TextInputType.numberWithOptions(signed: true),
-                            textInputAction: TextInputAction.done,
-                            decoration: new InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Nominal Ongkos"),
-                            style: TextStyle(
-                                fontSize: 14.0,
-                                height: 1.0,
-                                color: Colors.black),
-                            onSubmitted: (value) {
-                              // aksiInputNominalDiskon(Get.context!, value);
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        Text(
+          "Apa kamu yakin hapus barang ini ?",
+          textAlign: TextAlign.left,
+          style: TextStyle(fontSize: Utility.medium, color: Utility.greyDark),
         )
       ],
     );
