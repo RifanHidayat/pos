@@ -109,6 +109,25 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
+  Future<List> getDataAllDOHD() async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'DOHD',
+    };
+    var connect = Api.connectionApi("post", body, "all_dohd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
   Future<List> getAllBarang() async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
@@ -137,6 +156,48 @@ class GetDataController extends GetxController {
       'kode_barang': kode,
     };
     var connect = Api.connectionApi("post", body, "spesifik_barang");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
+  Future<List> cariBarangNotaPengiriman(List tampungGroupKode) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PROD1',
+      'list_group_barang': tampungGroupKode
+    };
+    var connect = Api.connectionApi("post", body, "pencarian_barang_multiple");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
+  Future<List> sohdSelectedNotaPengiriman(String custom, String sales) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SOHD',
+      'custom': custom,
+      'salesm': sales,
+    };
+    var connect =
+        Api.connectionApi("post", body, "sohd_selected_nota_pengiriman");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     List data = valueBody['data'];
@@ -189,15 +250,90 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
+  Future<List> getSysdataCabang() async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SYSDATA',
+    };
+    var connect = Api.connectionApi("post", body, "get_sysdata_cabang");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
+  Future<List> informasiCetak(String tabel, String nomor) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': tabel,
+      'nomor': nomor,
+    };
+    var connect =
+        Api.connectionApi("post", body, "informasi_cetak_datatransaksi");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
+  Future<List> informasiCetakDetail(String tabel, String nomor) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': tabel,
+      'nomor': nomor,
+    };
+    var connect =
+        Api.connectionApi("post", body, "informasi_cetak_detailtransaksi");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = data;
+    } else {
+      dataFinal = [];
+    }
+    return Future.value(dataFinal);
+  }
+
   Future<bool> closeSODH(String ipDevice, String nomoSODH) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'SOHD',
       'ip_device': ipDevice,
-      'nomor_sohd': nomoSODH,
+      'nomor': nomoSODH,
     };
     var connect = Api.connectionApi("post", body, "close_sohd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    return Future.value(valueBody['status']);
+  }
+
+  Future<bool> closeDODH(String ipDevice, String nomoDODH) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'DOHD',
+      'ip_device': ipDevice,
+      'nomor': nomoDODH,
+    };
+    var connect = Api.connectionApi("post", body, "close_dohd");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     return Future.value(valueBody['status']);
@@ -270,6 +406,53 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
+  Future<bool> hapusSOHD(String nomorSohd) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "hapus order penjualan...");
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SOHD',
+      'nomor_sohd': nomorSohd,
+    };
+    var connect = Api.connectionApi("post", body, "hapus_sohd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print('hasil hapus sodt $valueBody');
+    return Future.value(valueBody['status']);
+  }
+
+  Future<bool> updateFakturVoid(List dataSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Void faktur...");
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'JLHD',
+      'key_faktur': dataSelected[0],
+      'keterangan_void': dataSelected[1],
+    };
+    var connect = Api.connectionApi("post", body, "update_void_faktur");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print('hasil void faktur $valueBody');
+    return Future.value(valueBody['status']);
+  }
+
+  Future<bool> validPenjualan(String statusValid, String nomor_shod) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Valid penjualan...");
+    String valueValid = statusValid == "Valid" ? "V" : "";
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'SOHD',
+      'value_valid': valueValid,
+      'nomor_sohd': nomor_shod,
+    };
+    var connect = Api.connectionApi("post", body, "update_valid_penjualan");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    return Future.value(valueBody['status']);
+  }
+
   Future<bool> hitungRincianOrderPenjualan(List dataRincian) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang menyimpan...");
     // convert nominal diskon
@@ -290,6 +473,11 @@ class GetDataController extends GetxController {
     var np1 = dataRincian[5].replaceAll('.', '');
     var np2 = np1.replaceAll(',', '.');
     var np3 = double.parse('$np2');
+
+    // print('nominal diskon $nd3');
+    // print('nominal ongkos $no3');
+    print('persen diskon ${dataRincian[4]}');
+    // print('nominal ppn $np3');
 
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,

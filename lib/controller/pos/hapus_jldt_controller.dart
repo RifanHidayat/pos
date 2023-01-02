@@ -33,57 +33,7 @@ class HapusJldtController extends BaseController {
 
     if (valueBody['status'] == true) {
       prosesHapusJlhdjldt = valueBody['status'];
-      List tampung = [];
-      var getValue1 = AppData.noFaktur.split("|");
-      for (var element in getValue1) {
-        var listFilter = element.split("-");
-        var data = {
-          "no_faktur": listFilter[0],
-          "key": listFilter[1],
-          "no_cabang": listFilter[2],
-          "nomor_antrian": listFilter[3],
-        };
-        tampung.add(data);
-      }
-      print('hasil filter nofaktur $tampung');
-      print('keyfaktur $keyFaktur');
-      if (tampung.isNotEmpty) {
-        var filter = "";
-        for (var element in tampung) {
-          if ("${element['key']}" != "$keyFaktur") {
-            if (filter == "") {
-              filter =
-                  "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
-            } else {
-              filter =
-                  "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
-            }
-          }
-        }
-        print('hasil filter setelah di hapus $filter');
-        AppData.noFaktur = filter;
-      }
-
-      if (AppData.noFaktur != "") {
-        dashboardCt.checkingData();
-      } else {
-        dashboardCt.nomorFaktur.value = "-";
-        dashboardCt.primaryKeyFaktur.value = "";
-        dashboardCt.kodePelayanSelected.value = "";
-        dashboardCt.customSelected.value = "";
-        dashboardCt.jumlahItemDikeranjang.value = 0;
-        dashboardCt.totalNominalDikeranjang.value = 0;
-        dashboardCt.persenDiskonPesanBarang.value.text = "";
-        dashboardCt.hargaDiskonPesanBarang.value.text = "";
-        dashboardCt.diskonHeader.value = 0.0;
-        dashboardCt.allQtyJldt.value = 0;
-        dashboardCt.listKeranjang.value.clear();
-        dashboardCt.listKeranjangArsip.value.clear();
-        refrehVariabel();
-        dashboardCt.getKelompokBarang('');
-        // dashboardCt.arsipController.startLoad();
-      }
-      dashboardCt.startLoad('hapus_faktur');
+      validasi(keyFaktur);
       Get.back();
       Get.back();
       Get.back();
@@ -146,6 +96,60 @@ class HapusJldtController extends BaseController {
       }
     }
     return Future.value(prosesHapusJldt);
+  }
+
+  void validasi(keyFaktur) {
+    List tampung = [];
+    var getValue1 = AppData.noFaktur.split("|");
+    for (var element in getValue1) {
+      var listFilter = element.split("-");
+      var data = {
+        "no_faktur": listFilter[0],
+        "key": listFilter[1],
+        "no_cabang": listFilter[2],
+        "nomor_antrian": listFilter[3],
+      };
+      tampung.add(data);
+    }
+    print('hasil filter nofaktur $tampung');
+    print('keyfaktur $keyFaktur');
+    if (tampung.isNotEmpty) {
+      var filter = "";
+      for (var element in tampung) {
+        if ("${element['key']}" != "$keyFaktur") {
+          if (filter == "") {
+            filter =
+                "${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+          } else {
+            filter =
+                "$filter|${element['no_faktur']}-${element['key']}-${element['no_cabang']}-${element['nomor_antrian']}";
+          }
+        }
+      }
+      print('hasil filter setelah di hapus $filter');
+      AppData.noFaktur = filter;
+    }
+
+    if (AppData.noFaktur != "") {
+      dashboardCt.checkingData();
+    } else {
+      dashboardCt.nomorFaktur.value = "-";
+      dashboardCt.primaryKeyFaktur.value = "";
+      dashboardCt.kodePelayanSelected.value = "";
+      dashboardCt.customSelected.value = "";
+      dashboardCt.jumlahItemDikeranjang.value = 0;
+      dashboardCt.totalNominalDikeranjang.value = 0;
+      dashboardCt.persenDiskonPesanBarang.value.text = "";
+      dashboardCt.hargaDiskonPesanBarang.value.text = "";
+      dashboardCt.diskonHeader.value = 0.0;
+      dashboardCt.allQtyJldt.value = 0;
+      dashboardCt.listKeranjang.value.clear();
+      dashboardCt.listKeranjangArsip.value.clear();
+      refrehVariabel();
+      dashboardCt.getKelompokBarang('');
+      // dashboardCt.arsipController.startLoad();
+    }
+    dashboardCt.startLoad('hapus_faktur');
   }
 
   void refrehVariabel() {

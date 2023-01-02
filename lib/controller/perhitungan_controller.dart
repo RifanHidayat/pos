@@ -120,8 +120,7 @@ class PerhitunganCt extends GetxController {
     var vld1 = persenDiskon.replaceAll(".", ".");
     var vld2 = vld1.replaceAll(",", ".");
     double vld3 = double.parse(vld2);
-    double hitungNominal =
-        Utility.nominalDiskonHeader(subtotal, "${vld3.toInt()}");
+    double hitungNominal = Utility.nominalDiskonHeader(subtotal, "$vld3");
 
     return Future.value(hitungNominal);
   }

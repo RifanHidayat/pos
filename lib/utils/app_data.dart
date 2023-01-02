@@ -1,10 +1,17 @@
+import 'dart:convert';
+
+import 'package:siscom_pos/model/global_model.dart';
 import 'package:siscom_pos/utils/loca_storage.dart';
 
 class AppData {
   // SET
 
+  // BOOL
+
   static set statusOnboard(bool value) =>
       LocalStorage.saveToDisk('statusOnboard', value);
+
+  // STRING
 
   static set informasiLoginUser(String value) =>
       LocalStorage.saveToDisk('informasiLoginUser', value);
@@ -36,7 +43,20 @@ class AppData {
   static set bidUsaha(String value) =>
       LocalStorage.saveToDisk('bidUsaha', value);
 
+  // LIST
+
+  static set infosysdatacabang(List<SysdataModel>? value) {
+    if (value != null) {
+      List<String> listString = value.map((e) => e.toJson()).toList();
+      LocalStorage.saveToDisk('infosysdatacabang', listString);
+    } else {
+      LocalStorage.saveToDisk('infosysdatacabang', null);
+    }
+  }
+
   // // GET
+
+  // BOOL
 
   static bool get statusOnboard {
     if (LocalStorage.getFromDisk('statusOnboard') != null) {
@@ -44,6 +64,8 @@ class AppData {
     }
     return false;
   }
+
+  // STRING
 
   static String get informasiLoginUser {
     if (LocalStorage.getFromDisk('informasiLoginUser') != null) {
@@ -113,6 +135,16 @@ class AppData {
       return LocalStorage.getFromDisk('bidUsaha');
     }
     return "";
+  }
+
+  // LIST
+
+  static List<SysdataModel>? get infosysdatacabang {
+    if (LocalStorage.getFromDisk('infosysdatacabang') != null) {
+      List<String> listData = LocalStorage.getFromDisk('infosysdatacabang');
+      return listData.map((e) => SysdataModel.fromMap(jsonDecode(e))).toList();
+    }
+    return null;
   }
 
   // CLEAR ALL DATA

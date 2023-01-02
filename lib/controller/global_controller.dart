@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/pos/buat_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
@@ -13,6 +14,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import 'penjualan/dashboard_penjualan_controller.dart';
+import 'penjualan/nota_pengiriman_barang/memilih_sohd_controller.dart';
 import 'penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'penjualan/order_penjualan/item_order_penjualan_controller.dart';
 
@@ -42,6 +44,7 @@ class GlobalController extends GetxController
 
   void buttomSheet1(List dataList, String judul, String stringController,
       String namaSelected) {
+    cari.value.text = "";
     showModalBottomSheet(
         context: Get.context!,
         transitionAnimationController: animasiController,
@@ -139,19 +142,36 @@ class GlobalController extends GetxController
                                           textInputAction: TextInputAction.done,
                                           onChanged: (value) {
                                             setState(() {
-                                              var textCari =
-                                                  value.toLowerCase();
-                                              var filter = dataAll
-                                                  .where((filterOnchange) {
-                                                var namaCari =
-                                                    filterOnchange['NAMA']
-                                                        .toLowerCase();
+                                              if (stringController ==
+                                                  "pilih_so_nota_pengiriman") {
+                                                var textCari =
+                                                    value.toLowerCase();
+                                                var filter = dataAll
+                                                    .where((filterOnchange) {
+                                                  var nomorCari =
+                                                      filterOnchange['NOMOR']
+                                                          .toLowerCase();
 
-                                                return namaCari
-                                                    .contains(textCari);
-                                              }).toList();
-                                              statusCari = true;
-                                              dataShow = filter;
+                                                  return nomorCari
+                                                      .contains(textCari);
+                                                }).toList();
+                                                statusCari = true;
+                                                dataShow = filter;
+                                              } else {
+                                                var textCari =
+                                                    value.toLowerCase();
+                                                var filter = dataAll
+                                                    .where((filterOnchange) {
+                                                  var namaCari =
+                                                      filterOnchange['NAMA']
+                                                          .toLowerCase();
+
+                                                  return namaCari
+                                                      .contains(textCari);
+                                                }).toList();
+                                                statusCari = true;
+                                                dataShow = filter;
+                                              }
                                             });
                                           },
                                           onSubmitted: (value) {
@@ -198,6 +218,7 @@ class GlobalController extends GetxController
                                 physics: BouncingScrollPhysics(),
                                 itemCount: dataShow.length,
                                 itemBuilder: (context, index) {
+                                  var nomor = dataShow[index]['NOMOR'];
                                   var nama = dataShow[index]['NAMA'];
                                   var kode = dataShow[index]['KODE'];
                                   var inisial = dataShow[index]['INISIAL'];
@@ -207,8 +228,11 @@ class GlobalController extends GetxController
                                   return InkWell(
                                     onTap: () {
                                       if (stringController ==
-                                          "pilih_barang_so_penjualan") {
-                                        pilihBarangSOPenjualan(dataShow[index]);
+                                              "pilih_barang_so_penjualan" ||
+                                          stringController ==
+                                              "pilih_so_nota_pengiriman") {
+                                        aksiPenjualan(
+                                            dataShow[index], stringController);
                                       } else {
                                         checkingAksi(
                                             stringController,
@@ -225,25 +249,45 @@ class GlobalController extends GetxController
                                       padding: const EdgeInsets.only(
                                           top: 5, bottom: 5),
                                       child: Container(
-                                        decoration: BoxDecoration(
-                                            color: namaSelected == nama
-                                                ? Utility.primaryDefault
-                                                : Colors.transparent,
-                                            borderRadius: Utility.borderStyle1,
-                                            border: Border.all(
-                                                color: Utility.nonAktif)),
+                                        decoration: stringController ==
+                                                "pilih_so_nota_pengiriman"
+                                            ? BoxDecoration(
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    Utility.borderStyle1,
+                                                border: Border.all(
+                                                    color: Utility.nonAktif))
+                                            : BoxDecoration(
+                                                color: namaSelected == nama
+                                                    ? Utility.primaryDefault
+                                                    : Colors.transparent,
+                                                borderRadius:
+                                                    Utility.borderStyle1,
+                                                border: Border.all(
+                                                    color: Utility.nonAktif)),
                                         child: Padding(
                                           padding: const EdgeInsets.only(
                                               top: 10, bottom: 10),
                                           child: Center(
-                                            child: Text(
-                                              "$nama",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: namaSelected == nama
-                                                      ? Colors.white
-                                                      : Colors.black),
-                                            ),
+                                            child: stringController ==
+                                                    "pilih_so_nota_pengiriman"
+                                                ? Text(
+                                                    "${Utility.convertNoFaktur(nomor)}",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  )
+                                                : Text(
+                                                    "$nama",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color:
+                                                            namaSelected == nama
+                                                                ? Colors.white
+                                                                : Colors.black),
+                                                  ),
                                           ),
                                         ),
                                       ),
@@ -328,11 +372,29 @@ class GlobalController extends GetxController
     }
   }
 
-  void pilihBarangSOPenjualan(dataTerpilih) {
-    itemOrderPenjualanCt.typeBarangSelected.value = dataTerpilih['SAT'];
-    itemOrderPenjualanCt.statusEditBarang.value = false;
-    Get.back();
-    OrderPenjualanPesanBarangController().validasiSatuanBarang([dataTerpilih]);
+  void aksiPenjualan(dataTerpilih, stringController) {
+    if (stringController == "pilih_barang_so_penjualan") {
+      itemOrderPenjualanCt.typeBarangSelected.value = dataTerpilih['SAT'];
+      itemOrderPenjualanCt.statusEditBarang.value = false;
+      Get.back();
+      OrderPenjualanPesanBarangController()
+          .validasiSatuanBarang([dataTerpilih]);
+    } else if (stringController == "pilih_so_nota_pengiriman") {
+      ButtonSheetController().validasiButtonSheet(
+          "Pilih SO",
+          contentValidasiPilihSO(dataTerpilih),
+          "validasi_pilih_so",
+          'Pilih', () {
+        MemilihSOHDController().mencariDataSODT([dataTerpilih]);
+      });
+    }
+  }
+
+  Widget contentValidasiPilihSO(dataTerpilih) {
+    return Text(
+      "Yakin memilih Order penjualan nomor - ${Utility.convertNoFaktur(dataTerpilih['NOMOR'])}",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    );
   }
 
   void buttomSheetInsertFaktur() {

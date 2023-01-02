@@ -3,7 +3,9 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/model/global_model.dart';
 import 'package:siscom_pos/screen/auth/pilih_database.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -106,7 +108,24 @@ class AuthController extends GetxController {
     });
   }
 
+  void checkSysdata() async {
+    Future<List> dataSysdata = GetDataController().getSysdataCabang();
+    List hasilSysdata = await dataSysdata;
+    if (hasilSysdata.isNotEmpty) {
+      List<SysdataModel> tampungData = [];
+      for (var element in hasilSysdata) {
+        var data = SysdataModel(
+          kode: element["KODE"],
+          nama: element["NAMA"],
+        );
+        tampungData.add(data);
+      }
+      AppData.infosysdatacabang = tampungData;
+    }
+  }
+
   void checkinfoSysUser(email) {
+    checkSysdata();
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',

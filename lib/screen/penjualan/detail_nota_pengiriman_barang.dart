@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/detail_nota__pengiriman_controller.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_header_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
@@ -14,25 +15,28 @@ import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
-class ItemOrderPenjualan extends StatefulWidget {
+class DetailNotaPengirimanBarang extends StatefulWidget {
   bool dataForm;
-  ItemOrderPenjualan({Key? key, required this.dataForm}) : super(key: key);
+  DetailNotaPengirimanBarang({Key? key, required this.dataForm})
+      : super(key: key);
   @override
-  _ItemOrderPenjualanState createState() => _ItemOrderPenjualanState();
+  _DetailNotaPengirimanBarangState createState() =>
+      _DetailNotaPengirimanBarangState();
 }
 
-class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
+class _DetailNotaPengirimanBarangState
+    extends State<DetailNotaPengirimanBarang> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  var controller = Get.put(ItemOrderPenjualanController());
+  var controller = Get.put(DetailNotaPenjualanController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
 
   @override
   void initState() {
-    dashboardPenjualanCt.loadSOHDSelected();
-    controller.getDataBarang(widget.dataForm);
+    dashboardPenjualanCt.loadDOHDSelected();
+    controller.startload(widget.dataForm);
     super.initState();
   }
 
@@ -53,7 +57,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                 automaticallyImplyLeading: false,
                 elevation: 2,
                 flexibleSpace: AppbarMenu1(
-                  title: "Buat Order Penjualan",
+                  title: "Buat Nota Pengiriman",
                   colorTitle: Utility.primaryDefault,
                   colorIcon: Utility.primaryDefault,
                   icon: 1,
@@ -85,9 +89,9 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  controller.statusInformasiSo.value =
-                                      !controller.statusInformasiSo.value;
-                                  controller.statusInformasiSo.refresh();
+                                  controller.statusInformasiDo.value =
+                                      !controller.statusInformasiDo.value;
+                                  controller.statusInformasiDo.refresh();
                                 },
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,14 +99,14 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                     Expanded(
                                       flex: 90,
                                       child: Text(
-                                        "INFORMASI SO",
+                                        "INFORMASI DO",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     Expanded(
                                       flex: 10,
-                                      child: !controller.statusInformasiSo.value
+                                      child: !controller.statusInformasiDo.value
                                           ? Icon(
                                               Iconsax.arrow_right_3,
                                               size: 18,
@@ -115,7 +119,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                   ],
                                 ),
                               ),
-                              !controller.statusInformasiSo.value
+                              !controller.statusInformasiDo.value
                                   ? SizedBox()
                                   : SizedBox(
                                       child: Column(
@@ -138,14 +142,12 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       ),
                       InkWell(
                         onTap: () {
-                          if (controller.listBarang.isNotEmpty) {
-                            globalCt.buttomSheet1(
-                                controller.listBarang,
-                                "Pilih Barang",
-                                "pilih_barang_so_penjualan",
+                          if (controller.sohdTerpilih.isNotEmpty) {
+                            GlobalController().buttomSheet1(
+                                controller.sohdTerpilih.value,
+                                "Pilih SO",
+                                "pilih_so_nota_pengiriman",
                                 "");
-                          } else {
-                            controller.getDataBarang(false);
                           }
                         },
                         child: CardCustom(
@@ -159,7 +161,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                 Expanded(
                                   flex: 90,
                                   child: Text(
-                                    "Pilih Barang",
+                                    "Pilih SO",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -181,7 +183,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       ),
                       Flexible(
                           child: controller.barangTerpilih.isEmpty &&
-                                  controller.statusSODTKosong.value == true
+                                  controller.statusDODTKosong.value == true
                               ? Center(
                                   child: Column(
                                     crossAxisAlignment:
@@ -324,11 +326,11 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Nomor SO",
+                          "Nomor DO",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          "${Utility.convertNoFaktur('${dashboardPenjualanCt.nomorSoSelected.value}')}",
+                          "${Utility.convertNoFaktur('${dashboardPenjualanCt.nomorDoSelected.value}')}",
                           style: TextStyle(color: Utility.grey600),
                         )
                       ],
@@ -477,21 +479,13 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                         SlidableAction(
                           flex: 1,
                           onPressed: (BuildContext context) {
-                            controller.editBarangSelected(group, kode);
+                            // controller.editBarangSelected(group, kode);
                           },
                           backgroundColor: Utility.infoLight50,
                           foregroundColor: Utility.infoDefault,
                           icon: Iconsax.edit_2,
                         ),
-                        SlidableAction(
-                          flex: 1,
-                          onPressed: (BuildContext context) {
-                            controller.hapusSODT(nourut);
-                          },
-                          backgroundColor: Color(0xffFFF2EB),
-                          foregroundColor: Colors.red,
-                          icon: Iconsax.trash,
-                        ),
+                        
                       ],
                     ),
                     child: Column(
@@ -552,162 +546,144 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
   }
 
   Widget detailNominalBayar() {
-    return controller.barangTerpilih.value.isEmpty
-        ? Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Utility.primaryDefault,
-                ),
-                Text(
-                  "Sedang memuat",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Text(
+                "Subtotal",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Utility.medium,
+                    color: Utility.grey900),
+              ),
             ),
-          )
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 70,
-                    child: Text(
-                      "Subtotal",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: Utility.medium,
-                          color: Utility.grey900),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 30,
-                    child: Text(
-                      "${Utility.rupiahFormat('${controller.subtotal.value.toInt()}', 'with_rp')}",
-                      textAlign: TextAlign.right,
-                    ),
-                  )
-                ],
+            Expanded(
+              flex: 30,
+              child: Text(
+                "${Utility.rupiahFormat('${controller.subtotal.value.toInt()}', 'with_rp')}",
+                textAlign: TextAlign.right,
               ),
-              Row(
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 70,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Diskon",
+                  Text(
+                    "Diskon",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 8.0),
+                    decoration: BoxDecoration(
+                        color: Color(0xffCEFBCF),
+                        borderRadius: Utility.borderStyle1),
+                    child: Padding(
+                      padding: EdgeInsets.all(3.0),
+                      child: Center(
+                        child: Text(
+                          "${controller.persenDiskonHeaderRincian.value.text}%",
                           style: TextStyle(
-                              fontSize: Utility.semiMedium,
-                              color: Utility.greyLight300),
+                              fontSize: Utility.small, color: Colors.green),
                         ),
-                        Container(
-                          margin: EdgeInsets.only(left: 8.0),
-                          decoration: BoxDecoration(
-                              color: Color(0xffCEFBCF),
-                              borderRadius: Utility.borderStyle1),
-                          child: Padding(
-                            padding: EdgeInsets.all(3.0),
-                            child: Center(
-                              child: Text(
-                                "${controller.persenDiskonHeaderRincian.value.text}%",
-                                style: TextStyle(
-                                    fontSize: Utility.small,
-                                    color: Colors.green),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 30,
-                    child: Text(
-                      "Rp${controller.nominalDiskonHeaderRincian.value.text}",
-                      textAlign: TextAlign.right,
+                      ),
                     ),
                   )
                 ],
               ),
-              Row(
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                "Rp${controller.nominalDiskonHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 70,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "PPN",
-                          style: TextStyle(
-                              fontSize: Utility.semiMedium,
-                              color: Utility.greyLight300),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(left: 8.0),
-                          decoration: BoxDecoration(
-                              color: Color(0xffFFE7D8),
-                              borderRadius: Utility.borderStyle1),
-                          child: Padding(
-                            padding: EdgeInsets.all(3.0),
-                            child: Center(
-                              child: Text(
-                                "${controller.persenPPNHeaderRincian.value.text} %",
-                                style: TextStyle(
-                                    fontSize: Utility.small, color: Colors.red),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
+                  Text(
+                    "PPN",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
                   ),
-                  Expanded(
-                    flex: 30,
-                    child: Text(
-                      // "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
-                      "Rp${controller.nominalPPNHeaderRincian.value.text}",
-                      textAlign: TextAlign.right,
+                  Container(
+                    margin: EdgeInsets.only(left: 8.0),
+                    decoration: BoxDecoration(
+                        color: Color(0xffFFE7D8),
+                        borderRadius: Utility.borderStyle1),
+                    child: Padding(
+                      padding: EdgeInsets.all(3.0),
+                      child: Center(
+                        child: Text(
+                          "${controller.persenPPNHeaderRincian.value.text} %",
+                          style: TextStyle(
+                              fontSize: Utility.small, color: Colors.red),
+                        ),
+                      ),
                     ),
                   )
                 ],
               ),
-              Row(
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                // "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
+                "Rp${controller.nominalPPNHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 70,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 70,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Ongkos",
-                          style: TextStyle(
-                              fontSize: Utility.semiMedium,
-                              color: Utility.greyLight300),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    "Ongkos",
+                    style: TextStyle(
+                        fontSize: Utility.semiMedium,
+                        color: Utility.greyLight300),
                   ),
-                  Expanded(
-                    flex: 30,
-                    child: Text(
-                      // "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincian.value.text, 'with_rp')}",
-                      "Rp${controller.nominalOngkosHeaderRincian.value.text}",
-                      textAlign: TextAlign.right,
-                    ),
-                  )
                 ],
               ),
-            ],
-          );
+            ),
+            Expanded(
+              flex: 30,
+              child: Text(
+                // "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincian.value.text, 'with_rp')}",
+                "Rp${controller.nominalOngkosHeaderRincian.value.text}",
+                textAlign: TextAlign.right,
+              ),
+            )
+          ],
+        ),
+      ],
+    );
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/edit_keranjang_controller.dart';
@@ -200,11 +201,22 @@ class BottomSheetPos extends BaseController
         if (type != "edit_keranjang") {
           dashboardCt.jumlahPesan.value.text =
               produkSelected[0]["TIPE"] == "1" ? "0" : "1";
-          dashboardCt.totalPesan.value =
-              double.parse("${getFirst['STDJUAL']}").toPrecision(2);
-          dashboardCt.totalPesanNoEdit.value =
-              double.parse("${getFirst['STDJUAL']}").toPrecision(2);
-          dashboardCt.hargaJualPesanBarang.value.text = jual;
+          // validasi harga standar jual jika global include ppn
+          var cabangSelected = dashboardCt.listCabang.firstWhere(
+              (el) => el["KODE"] == dashboardCt.cabangKodeSelected.value);
+          double hargaJualFinal = 0.0;
+          if (dashboardCt.includePPN.value == "Y") {
+            double hitung1 = double.parse("${getFirst['STDJUAL']}") *
+                (100 / (100 + double.parse("${cabangSelected['PPN']}")));
+            hargaJualFinal = hitung1;
+          } else {
+            hargaJualFinal = double.parse("${getFirst['STDJUAL']}");
+          }
+
+          dashboardCt.totalPesan.value = hargaJualFinal;
+          dashboardCt.totalPesanNoEdit.value = hargaJualFinal;
+          dashboardCt.hargaJualPesanBarang.value.text =
+              hargaJualFinal.toStringAsFixed(2);
           Get.back();
         } else {
           dashboardCt.jumlahPesan.value.text = "$qtyProduk";
@@ -1217,8 +1229,10 @@ class BottomSheetPos extends BaseController
     double hargaProduk = hrgJualEdit;
 
     var hasill = hargaProduk * vld2;
-    dashboardCt.totalPesan.value = hasill.toPrecision(2);
-    dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+    // dashboardCt.totalPesan.value = hasill.toPrecision(2);
+    // dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+    dashboardCt.totalPesan.value = hasill;
+    dashboardCt.totalPesanNoEdit.value = hasill;
     dashboardCt.totalPesan.refresh();
     dashboardCt.jumlahPesan.refresh();
   }
@@ -1297,7 +1311,9 @@ class BottomSheetPos extends BaseController
                                   ? "Hapus"
                                   : type == "transaksi_baru"
                                       ? "Transaksi Baru"
-                                      : "Simpan",
+                                      : type == "void_faktur"
+                                          ? "Void"
+                                          : "Simpan",
                               colorBtn: Utility.primaryDefault,
                               onTap: () {
                                 setState(() {
@@ -1307,6 +1323,8 @@ class BottomSheetPos extends BaseController
                                   } else if (type == "hapus_faktur") {
                                     hapusJldtCt
                                         .hapusFakturDanJldt(dataSelected);
+                                  } else if (type == "void_faktur") {
+                                    voidFaktur(dataSelected);
                                   } else if (type == "arsip_faktur") {
                                     simpanFakturCt.simpanFakturSebagaiArsip('');
                                   } else if (type == "hapus_barang_once") {
@@ -1522,10 +1540,13 @@ class BottomSheetPos extends BaseController
       var hrgJualEdit = double.parse(filter3);
       double hargaProduk = hrgJualEdit;
       double hitungJumlahPesan = vld2 - 1;
-      dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
+      // dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
+      dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toString();
       var hasill = hargaProduk * hitungJumlahPesan;
-      dashboardCt.totalPesan.value = hasill.toPrecision(2);
-      dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+      // dashboardCt.totalPesan.value = hasill.toPrecision(2);
+      // dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+      dashboardCt.totalPesan.value = hasill;
+      dashboardCt.totalPesanNoEdit.value = hasill;
       dashboardCt.totalPesan.refresh();
       dashboardCt.jumlahPesan.refresh();
       if (dashboardCt.persenDiskonPesanBarang.value.text != "" ||
@@ -1540,7 +1561,8 @@ class BottomSheetPos extends BaseController
     var vld2 = vld1.replaceAll(",", ".");
     double vld3 = double.parse(vld2);
     var vld4 = vld3 == 0.0 || vld3 < 0.0 ? 1.0 : vld3;
-    dashboardCt.jumlahPesan.value.text = "${vld4.toStringAsFixed(2)}";
+    // dashboardCt.jumlahPesan.value.text = "${vld4.toStringAsFixed(2)}";
+    dashboardCt.jumlahPesan.value.text = vld4.toString();
 
     var filter1 =
         dashboardCt.hargaJualPesanBarang.value.text.replaceAll("Rp", "");
@@ -1548,7 +1570,8 @@ class BottomSheetPos extends BaseController
     var filter3 = filter2.replaceAll(".", "");
     var filterFinal = double.parse(filter3);
     var hitung = filterFinal * vld4;
-    var flt1 = hitung.toStringAsFixed(2);
+    // var flt1 = hitung.toStringAsFixed(2);
+    var flt1 = hitung.toString();
     dashboardCt.totalPesan.value = double.parse(flt1);
     dashboardCt.totalPesanNoEdit.value = double.parse(flt1);
     dashboardCt.totalPesan.refresh();
@@ -1570,10 +1593,13 @@ class BottomSheetPos extends BaseController
     var hrgJualEdit = double.parse(filter3);
     double hargaProduk = hrgJualEdit;
     double hitungJumlahPesan = vld2 + 1;
-    dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
+    // dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
+    dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toString();
     var hasill = hargaProduk * hitungJumlahPesan;
-    dashboardCt.totalPesan.value = hasill.toPrecision(2);
-    dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+    // dashboardCt.totalPesan.value = hasill.toPrecision(2);
+    // dashboardCt.totalPesanNoEdit.value = hasill.toPrecision(2);
+    dashboardCt.totalPesan.value = hasill;
+    dashboardCt.totalPesanNoEdit.value = hasill;
     dashboardCt.totalPesan.refresh();
     dashboardCt.jumlahPesan.refresh();
     if (dashboardCt.persenDiskonPesanBarang.value.text != "" ||
@@ -1590,8 +1616,10 @@ class BottomSheetPos extends BaseController
       double hrgJualEdit = double.parse(filter3);
       double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
       double perhitungan = hrgJualEdit * vld1;
-      dashboardCt.totalPesan.value = perhitungan.toPrecision(2);
-      dashboardCt.totalPesanNoEdit.value = perhitungan.toPrecision(2);
+      // dashboardCt.totalPesan.value = perhitungan.toPrecision(2);
+      // dashboardCt.totalPesanNoEdit.value = perhitungan.toPrecision(2);
+      dashboardCt.totalPesan.value = perhitungan;
+      dashboardCt.totalPesanNoEdit.value = perhitungan;
       dashboardCt.hargaJualPesanBarang.value.text = value;
       dashboardCt.hargaJualPesanBarang.refresh();
       dashboardCt.totalPesan.refresh();
@@ -1644,7 +1672,8 @@ class BottomSheetPos extends BaseController
           inputNominal * double.parse(dashboardCt.jumlahPesan.value.text);
 
       dashboardCt.persenDiskonPesanBarang.value.text =
-          hitung.toStringAsFixed(2);
+          // hitung.toStringAsFixed(2);
+          hitung.toString();
       dashboardCt.totalPesan.value = dashboardCt.totalPesan.value - hitungFinal;
       dashboardCt.totalPesan.refresh();
     }
@@ -1674,6 +1703,8 @@ class BottomSheetPos extends BaseController
     UtilsAlert.loadingSimpanData(Get.context!, "Proses simpan data...");
     var getNominalDiskonHeader = Utility.convertStringRpToDouble(
         dashboardCt.hargaDiskonPesanBarang.value.text);
+    var getNominalPpn =
+        Utility.convertStringRpToDouble(dashboardCt.ppnHarga.value.text);
     var getNominalSeviceCharge = Utility.convertStringRpToDouble(
         dashboardCt.serviceChargeHarga.value.text);
 
@@ -1685,6 +1716,7 @@ class BottomSheetPos extends BaseController
       'key_faktur': dashboardCt.primaryKeyFaktur.value,
       'qty_all': '${dashboardCt.allQtyJldt.value}',
       'nominal_diskon_header': '$getNominalDiskonHeader',
+      'nominal_ppn': '$getNominalPpn',
       'nominal_servicecharge': '$getNominalSeviceCharge',
     };
     var connect = Api.connectionApi("post", body, "setting_diskon_header");
@@ -1699,15 +1731,16 @@ class BottomSheetPos extends BaseController
       dashboardCt.serviceChargerCabang.value = serviceChargePersen;
       dashboardCt.diskonHeader.refresh();
       dashboardCt.serviceChargerCabang.refresh();
-
+      dashboardCt.statusHitungHeader.value = true;
+      dashboardCt.statusHitungHeader.refresh();
+      dashboardCt
+          .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
       UtilsAlert.showToast("${valueBody['message']}");
       Get.back();
       Get.back();
       Get.back();
       Get.back();
       Get.to(RincianPemesanan());
-      dashboardCt
-          .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
     } else {
       UtilsAlert.showToast("Gagal simpan data rincian pemesanan");
       Get.back();
@@ -1825,6 +1858,22 @@ class BottomSheetPos extends BaseController
     Get.back();
     Get.back();
     Get.back();
+  }
+
+  void voidFaktur(dataSelected) async {
+    Future<bool> prosesVoidFaktur =
+        GetDataController().updateFakturVoid(dataSelected);
+    bool hasilVoid = await prosesVoidFaktur;
+    if (hasilVoid) {
+      HapusJldtController().validasi(dataSelected[0]);
+      Get.back();
+      Get.back();
+      Get.back();
+      Get.back();
+      Get.back();
+    } else {
+      UtilsAlert.showToast("Gagal void faktur");
+    }
   }
 
   void refrehVariabel() {

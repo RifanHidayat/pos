@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
@@ -200,7 +201,32 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                 SizedBox(
                                   height: Utility.small,
                                 ),
-                                detailNominalBayar(),
+                                Obx(
+                                  () => dashboardCt.statusHitungHeader.value
+                                      ? Center(
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 40,
+                                                width: 40,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 3,
+                                                  color: Utility.primaryDefault,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Sedang memuat...",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        Utility.primaryDefault),
+                                              )
+                                            ],
+                                          ),
+                                        )
+                                      : detailNominalBayar(),
+                                ),
                                 SizedBox(
                                   height: Utility.medium,
                                 ),
@@ -345,29 +371,25 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                       children: [
                                         Expanded(
                                           flex: 30,
-                                          child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 8.0),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Total Tagihan",
-                                                  style: TextStyle(
-                                                      color:
-                                                          Utility.greyLight300,
-                                                      fontSize: Utility.small),
-                                                ),
-                                                Text(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Total Tagihan",
+                                                style: TextStyle(
+                                                    color: Utility.greyLight300,
+                                                    fontSize:
+                                                        Utility.semiMedium),
+                                              ),
+                                              Text(
                                                   "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
                                                   style: TextStyle(
                                                       color: Utility.grey900,
                                                       fontWeight:
-                                                          FontWeight.bold),
-                                                )
-                                              ],
-                                            ),
+                                                          FontWeight.w800,
+                                                      fontSize: Utility.medium))
+                                            ],
                                           ),
                                         ),
                                         Expanded(
@@ -990,7 +1012,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.diskonHeader.value}%",
+                            "${dashboardCt.diskonHeader.value.toStringAsFixed(2)}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.green),
                           ),
@@ -1035,7 +1057,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.ppnCabang.value}%",
+                            "${dashboardCt.ppnCabang.value.toStringAsFixed(2)}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.red),
                           ),
@@ -1080,7 +1102,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.serviceChargerCabang.value}%",
+                            "${dashboardCt.serviceChargerCabang.value.toStringAsFixed(2)}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.red),
                           ),

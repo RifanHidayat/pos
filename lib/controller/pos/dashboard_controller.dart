@@ -24,8 +24,10 @@ class DashbardController extends BaseController {
 
   var persenDiskonPesanBarang = TextEditingController().obs;
   var hargaDiskonPesanBarang = TextEditingController().obs;
+
   var ppnPesan = TextEditingController().obs;
   var ppnHarga = TextEditingController().obs;
+
   var serviceChargePesan = TextEditingController().obs;
   var serviceChargeHarga = TextEditingController().obs;
 
@@ -35,6 +37,7 @@ class DashbardController extends BaseController {
 
   var statusCari = false.obs;
   var screenList = false.obs;
+  var statusHitungHeader = false.obs;
   var viewButtonKeranjang = true.obs;
 
   var pageLoad = 12.obs;
@@ -86,6 +89,7 @@ class DashbardController extends BaseController {
   var nomorKey = "".obs;
   var nomorOrder = "".obs;
   var nomorMeja = "".obs;
+  var includePPN = "".obs;
   var loadingString = "Sedang Memuat".obs;
 
   var listCabang = [].obs;
@@ -105,6 +109,7 @@ class DashbardController extends BaseController {
       var getValue1 = AppData.noFaktur.split("|");
       var getValue2 = getValue1[0].split("-");
       checkingJlhdArsip();
+      getCabangJikaAdaArsip();
     } else {
       // arsipController.startLoad();
       var typeLoad = type == "hapus_faktur" ? "hapus_faktur" : "noarsip";
@@ -112,6 +117,7 @@ class DashbardController extends BaseController {
       getKelompokBarang('first');
     }
     checkArsipFaktur();
+    checkSysdata();
   }
 
   void mulaiScroll() {
@@ -133,6 +139,19 @@ class DashbardController extends BaseController {
     } else {
       jumlahArsipFaktur.value = 0;
       jumlahArsipFaktur.refresh();
+    }
+  }
+
+  void checkSysdata() {
+    List dataSysdata = AppData.infosysdatacabang!;
+    if (dataSysdata.isNotEmpty) {
+      for (var element in dataSysdata) {
+        if (element.kode == "037") {
+          print('sysdata terpilih ${element.nama}');
+          includePPN.value = element.nama;
+          includePPN.refresh();
+        }
+      }
     }
   }
 
@@ -256,6 +275,32 @@ class DashbardController extends BaseController {
         }
       }
     });
+  }
+
+  void getCabangJikaAdaArsip() async {
+    Map<String, dynamic> body = {
+      'database': '${AppData.databaseSelected}',
+      'periode': '${AppData.periodeSelected}',
+      'stringTabel': 'CABANG',
+    };
+    var connect = Api.connectionApi("post", body, "cabang");
+    var valuConnect = await connect;
+    var valueBody = jsonDecode(valuConnect.body);
+    List data = valueBody['data'];
+    if (data.isNotEmpty) {
+      var sysUser = AppData.sysuserInformasi.split("-");
+      var hakAksesCabang = sysUser[3].split(" ");
+      List filter = [];
+      for (var element in data) {
+        for (var element1 in hakAksesCabang) {
+          if (element1 == element["KODE"]) {
+            filter.add(element);
+          }
+        }
+      }
+      listCabang.value = filter;
+      listCabang.refresh();
+    }
   }
 
   void pilihGudang(nama) {
@@ -613,6 +658,7 @@ class DashbardController extends BaseController {
     double discdHeader = 0.0;
     double dischHeader = 0.0;
     double discnHeader = 0.0;
+    double ppnHeader = 0.0;
     double biayaHeader = 0.0;
 
     for (var element in listKeranjangArsip.value) {
@@ -624,8 +670,7 @@ class DashbardController extends BaseController {
       var hitung2 = discdBarang * qtyBarang;
       var finalHitung = hitung1 - hitung2;
       var hitungDiscn = hitung2 + dischBarang;
-      var hitungDiscnJldt =
-          discdBarang.toPrecision(2) + dischBarang.toPrecision(2);
+      var hitungDiscnJldt = discdBarang + dischBarang;
 
       subtotalKeranjang = subtotalKeranjang + finalHitung;
       hargaTotheader = hargaTotheader + hitung1;
@@ -633,15 +678,18 @@ class DashbardController extends BaseController {
       discdHeader = discdHeader + hitung2;
       dischHeader = dischHeader + dischBarang;
       discnHeader = discnHeader + hitungDiscn;
+      ppnHeader = ppnHeader + double.parse("${element['TAXN']}");
       biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
 
       // update jldt
       double hrgSetelahDiskon = finalHitung - dischBarang;
-      var hitungPpnJldt =
-          Utility.nominalPPNHeader('$hrgSetelahDiskon', '${ppnCabang.value}');
+      // var hitungPpnJldt =
+      //     Utility.nominalPPNHeader('$hrgSetelahDiskon', '${ppnCabang.value}');
+      var hitungPpnJldt = double.parse("${element['TAXN']}");
       var hitungServiceJldt = double.parse("${element['BIAYA']}");
-      var valueFinalDiscnJldt = hitungDiscnJldt.toPrecision(2);
-      var valueFinalPpnJldt = hitungPpnJldt.toPrecision(2);
+      // var valueFinalDiscnJldt = hitungDiscnJldt.toPrecision(2);
+      var valueFinalDiscnJldt = hitungDiscnJldt;
+      var valueFinalPpnJldt = hitungPpnJldt;
       updateJldt(element['NOKEY'], valueFinalDiscnJldt, valueFinalPpnJldt,
           hitungServiceJldt);
     }
@@ -658,16 +706,6 @@ class DashbardController extends BaseController {
     allQtyJldt.value = qtyallheader;
     allQtyJldt.refresh();
 
-    // print('hasil perhitungan keranjang');
-    // print(jumlahItemDikeranjang.value);
-    // print(hargatotjlhd.value);
-    // print("discd headerr $discdHeader");
-    // print("discn header $discnHeader");
-    // print("total nominal subtotal ${totalNominalDikeranjang.value}");
-    // print("DISKON header ${diskonHeader.value}");
-    // print("TAXP header ${ppnCabang.value}");
-    // print("charge header ${serviceChargerCabang.value}");
-
     // perhitungan diskon header
 
     if (diskonHeader.value == 0.0) {
@@ -675,7 +713,7 @@ class DashbardController extends BaseController {
       var fltr1 = Utility.persenDiskonHeader("${totalNominalDikeranjang.value}",
           "${informasiJlhd.value[0]['DISCH']}");
 
-      diskonHeader.value = fltr1.toPrecision(2);
+      diskonHeader.value = fltr1;
       diskonHeader.refresh();
     }
 
@@ -683,10 +721,11 @@ class DashbardController extends BaseController {
 
     // perhitungan ppn header
 
-    var nominalPpn = Utility.nominalPPNHeader(
-        '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
+    var persenPPN =
+        Utility.persenDiskonHeader('$hargaSetelahDiskonHeader', '$ppnHeader');
+    // '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
 
-    ppnCabang.value = double.parse('${informasiJlhd.value[0]['TAXP']}');
+    ppnCabang.value = persenPPN;
     ppnCabang.refresh();
 
     // perhitungan service charge
@@ -694,8 +733,7 @@ class DashbardController extends BaseController {
     var convertPersenServiceCharge =
         Utility.persenDiskonHeader("$hargaSetelahDiskonHeader", "$biayaHeader");
 
-    var precisionPersenServiceCharge =
-        convertPersenServiceCharge.toPrecision(2);
+    var precisionPersenServiceCharge = convertPersenServiceCharge;
 
     serviceChargerCabang.value = precisionPersenServiceCharge;
 
@@ -704,13 +742,14 @@ class DashbardController extends BaseController {
     var nominalService = Utility.nominalPPNHeader(
         '$hargaSetelahDiskonHeader', '${serviceChargerCabang.value}');
 
-    var convertServiceChargeNominal = nominalService.toPrecision(2);
+    var convertServiceChargeNominal = nominalService;
 
     var hargaNetHeader =
-        hargaSetelahDiskonHeader + nominalPpn + convertServiceChargeNominal;
+        hargaSetelahDiskonHeader + ppnHeader + convertServiceChargeNominal;
 
-    var fixedTaxn = nominalPpn.toPrecision(2);
-    var fixedHrgNet = hargaNetHeader.toPrecision(2);
+    // var fixedTaxn = ppnHeader.toPrecision(2);
+    var fixedTaxn = ppnHeader;
+    var fixedHrgNet = hargaNetHeader;
 
     updateDataJlhd(hargatotjlhd.value, discdHeader, dischHeader, discnHeader,
         fixedTaxn, convertServiceChargeNominal, fixedHrgNet);
@@ -759,6 +798,8 @@ class DashbardController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
+        statusHitungHeader.value = false;
+        statusHitungHeader.refresh();
       }
     });
   }

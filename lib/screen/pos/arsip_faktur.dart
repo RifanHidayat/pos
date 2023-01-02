@@ -185,7 +185,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
           var totalFaktur = controller.listArsipFaktur.value[index]['TOTAL'];
           return InkWell(
             onTap: () {
-              buttomSheetArsip.checkDetailTransaksi(pk);
+              buttomSheetArsip.checkDetailTransaksi(pk, controller.listArsipFaktur.value[index]);
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +230,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "$nomor",
+                              "${Utility.convertNoFaktur(nomor)}",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Utility.grey900),
@@ -256,7 +256,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                                "${globalController.convertToIdr(totalFaktur, 0)}"),
+                                "Rp${globalController.convertToIdr(totalFaktur, 2)}"),
                             // Text("$totalFaktur"),
                             Text(
                               "$jam",

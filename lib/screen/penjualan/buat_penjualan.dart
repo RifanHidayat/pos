@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
-import 'package:siscom_pos/controller/penjualan/order_penjualan/buat_order_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/buat_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -14,6 +14,9 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class BuatOrderPenjualan extends StatefulWidget {
+  List dataBuatPenjualan;
+  BuatOrderPenjualan({Key? key, required this.dataBuatPenjualan})
+      : super(key: key);
   @override
   _BuatOrderPenjualanState createState() => _BuatOrderPenjualanState();
 }
@@ -24,11 +27,12 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
   var controller = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
-  var buatOrderCt = Get.put(BuatOrderPenjualanController());
+  var buatPenjualanCt = Get.put(BuatPenjualanController());
 
   @override
   void initState() {
     controller.timeNow();
+    controller.clearAllBuatOrderPenjualan();
     super.initState();
   }
 
@@ -50,7 +54,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                 automaticallyImplyLeading: false,
                 elevation: 2,
                 flexibleSpace: AppbarMenu1(
-                  title: "Buat Order Penjualan",
+                  title: "Buat ${widget.dataBuatPenjualan[1]}",
                   colorTitle: Utility.primaryDefault,
                   colorIcon: Utility.primaryDefault,
                   icon: 1,
@@ -118,7 +122,11 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
               child: Container(
                   height: 50,
                   child: Button2(
-                      textBtn: "Tambah item",
+                      textBtn: widget.dataBuatPenjualan[0] == 1
+                          ? "Tambah item"
+                          : widget.dataBuatPenjualan[0] == 2
+                              ? "Detail Nota"
+                              : "",
                       colorBtn: Utility.primaryDefault,
                       colorText: Colors.white,
                       icon1: Icon(
@@ -137,7 +145,11 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                             controller.selectedNamePelanggan.value == "") {
                           UtilsAlert.showToast("Lengkapi form terlebih dahulu");
                         } else {
-                          buatOrderCt.getAkhirNomorSo();
+                          if (widget.dataBuatPenjualan[0] == 1) {
+                            buatPenjualanCt.getAkhirNomorSo();
+                          } else {
+                            buatPenjualanCt.getAkhirNomorDo();
+                          }
                         }
                       })),
             )),
@@ -166,7 +178,8 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                     ),
                     Text(
                       "${Utility.convertNoFakturBuatOrderPenjualan('${controller.periode}')}",
-                      style: TextStyle(color: Utility.grey600),
+                      style: TextStyle(
+                          color: Utility.grey600, fontSize: Utility.normal),
                     )
                   ],
                 ),
@@ -194,7 +207,8 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                       ),
                       Text(
                         "${Utility.convertNoFakturBuatOrderPenjualan('${controller.periode}')}",
-                        style: TextStyle(color: Utility.grey600),
+                        style: TextStyle(
+                            color: Utility.grey600, fontSize: Utility.normal),
                       )
                     ],
                   ),
@@ -357,7 +371,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 70,
+                  flex: 50,
                   child: Container(
                     height: 40,
                     width: MediaQuery.of(Get.context!).size.width,
@@ -373,7 +387,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              flex: 85,
+                              flex: 70,
                               child: FocusScope(
                                 child: Focus(
                                   onFocusChange: (focus) {
@@ -399,13 +413,17 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                               ),
                             ),
                             Expanded(
-                              flex: 15,
+                              flex: 30,
                               child: Center(
-                                child: Text(
-                                  "Hari",
-                                  style: TextStyle(
-                                      color: Utility.grey600,
-                                      fontSize: Utility.normal),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 3, right: 3),
+                                  child: Text(
+                                    "Hari",
+                                    style: TextStyle(
+                                        color: Utility.grey600,
+                                        fontSize: Utility.normal),
+                                  ),
                                 ),
                               ),
                             )
@@ -416,7 +434,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                   ),
                 ),
                 Expanded(
-                  flex: 30,
+                  flex: 50,
                   child: Container(
                     margin: EdgeInsets.only(left: 8.0, right: 8.0),
                     decoration: BoxDecoration(
@@ -513,28 +531,30 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
           SizedBox(
             height: Utility.medium,
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                "Include PPN",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 25,
-                child: Checkbox(
-                  checkColor: Colors.white,
-                  activeColor: Utility.primaryDefault,
-                  value: controller.checkIncludePPN.value,
-                  onChanged: (value) {
-                    controller.checkIncludePPN.value =
-                        !controller.checkIncludePPN.value;
-                  },
+          controller.includePPN.value == "Y"
+              ? SizedBox()
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Include PPN",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 25,
+                      child: Checkbox(
+                        checkColor: Colors.white,
+                        activeColor: Utility.primaryDefault,
+                        value: controller.checkIncludePPN.value,
+                        onChanged: (value) {
+                          controller.checkIncludePPN.value =
+                              !controller.checkIncludePPN.value;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ],
       ),
     );

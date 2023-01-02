@@ -70,43 +70,46 @@ class ButtonSheetController extends GetxController {
                 SizedBox(
                   height: Utility.medium,
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: Button1(
-                          textBtn: acc,
-                          colorBtn: Utility.primaryDefault,
-                          onTap: () {
-                            if (onTap != null) onTap();
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => Get.back(),
-                        child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: Utility.borderStyle1,
-                                border:
-                                    Border.all(color: Utility.primaryDefault)),
-                            child: Center(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 12, bottom: 12),
-                                child: Text(
-                                  "Urungkan",
-                                  style:
-                                      TextStyle(color: Utility.primaryDefault),
-                                ),
+                type == "validasi_lanjutkan_orderpenjualan" || type == "cetak_faktur_penjualan"
+                    ? SizedBox()
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 5),
+                              child: Button1(
+                                textBtn: acc,
+                                colorBtn: Utility.primaryDefault,
+                                onTap: () {
+                                  if (onTap != null) onTap();
+                                },
                               ),
-                            )),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => Get.back(),
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: Utility.borderStyle1,
+                                      border: Border.all(
+                                          color: Utility.primaryDefault)),
+                                  child: Center(
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.only(top: 12, bottom: 12),
+                                      child: Text(
+                                        "Urungkan",
+                                        style: TextStyle(
+                                            color: Utility.primaryDefault),
+                                      ),
+                                    ),
+                                  )),
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
-                ),
                 SizedBox(
                   height: 16,
                 )

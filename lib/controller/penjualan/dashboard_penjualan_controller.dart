@@ -6,13 +6,17 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
+import 'package:siscom_pos/controller/penjualan/cetak_penjualan.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/screen/penjualan/buat_penjualan.dart';
+import 'package:siscom_pos/screen/penjualan/detail_nota_pengiriman_barang.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
+import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class DashbardPenjualanController extends GetxController {
@@ -35,20 +39,32 @@ class DashbardPenjualanController extends GetxController {
   var wilayahCustomerSelected = "".obs;
   var periode = "".obs;
   var typeFocus = "".obs;
+  var includePPN = "".obs;
+  // ORDER PENJUALAN
   var nomorSoSelected = "".obs;
   var nomoCbSelected = "".obs;
+  // NOTA PENGIRIMAN BARANG
+  var nomorDoSelected = "".obs;
+  var nomoDoCbSelected = "".obs;
 
   var checkIncludePPN = false.obs;
   var screenBuatSoKeterangan = false.obs;
   var showpassword = false.obs;
+
+  var screenStatusOrderPenjualan = true.obs;
+  var screenStatusNotaPengiriman = true.obs;
 
   var jumlahArsipOrderPenjualan = 0.obs;
 
   var menuShowonTop = [].obs;
   var salesList = [].obs;
   var pelangganList = [].obs;
+  // ORDER PENJUALAN
   var dataAllSohd = [].obs;
   var dataSohd = [].obs;
+  // NOTA PENGIRIMAN BARANG
+  var dataAllDohd = [].obs;
+  var dohdSelected = [].obs;
 
   var dateSelectedBuatOrderPenjualan = DateTime.now().obs;
   var tanggalAkumulasiJatuhTempo = DateTime.now().obs;
@@ -66,6 +82,7 @@ class DashbardPenjualanController extends GetxController {
     checkArsipOrderPenjualan();
     getDataSales();
     getDataAllSOHD();
+    checkSysdata();
   }
 
   NumberFormat currencyFormatter = NumberFormat.currency(
@@ -75,9 +92,11 @@ class DashbardPenjualanController extends GetxController {
   );
 
   void getDataMenuPenjualan() {
+    List tampungMenu = [];
     for (var element in menuDashboardPenjualan) {
-      menuShowonTop.value.add(element);
+      tampungMenu.add(element);
     }
+    menuShowonTop.value = tampungMenu;
     menuShowonTop.refresh();
   }
 
@@ -86,6 +105,64 @@ class DashbardPenjualanController extends GetxController {
       gantiJatuhTempoBuatOrderPenjualan(
           jatuhTempoBuatOrderPenjualan.value.text);
     }
+  }
+
+  void changeMenu(id) {
+    if (id == 1) {
+      getDataAllSOHD();
+    } else if (id == 2) {
+      getDataAllDOHD();
+    }
+    for (var element in menuShowonTop) {
+      if (element['id_menu'] == id) {
+        element['status'] = true;
+      } else {
+        element['status'] = false;
+      }
+    }
+    screenAktif.value = id;
+    screenAktif.refresh();
+    menuShowonTop.refresh();
+  }
+
+  void addPenjualan() {
+    if (screenAktif.value == 1) {
+      Get.to(
+          BuatOrderPenjualan(
+            dataBuatPenjualan: [1, "Order Penjualan"],
+          ),
+          duration: Duration(milliseconds: 500),
+          transition: Transition.rightToLeftWithFade);
+    } else if (screenAktif.value == 2) {
+      Get.to(
+          BuatOrderPenjualan(
+            dataBuatPenjualan: [2, "Nota Pengiriman"],
+          ),
+          duration: Duration(milliseconds: 500),
+          transition: Transition.rightToLeftWithFade);
+    }
+  }
+
+  void checkSysdata() {
+    List dataSysdata = AppData.infosysdatacabang!;
+    if (dataSysdata.isNotEmpty) {
+      for (var element in dataSysdata) {
+        if (element.kode == "037") {
+          print('sysdata terpilih ${element.nama}');
+          includePPN.value = element.nama;
+          includePPN.refresh();
+        }
+      }
+    }
+  }
+
+  void clearAllBuatOrderPenjualan() {
+    refrensiBuatOrderPenjualan.value.text = "";
+    jatuhTempoBuatOrderPenjualan.value.text = "";
+    keteranganSO1.value.text = "";
+    keteranganSO2.value.text = "";
+    keteranganSO3.value.text = "";
+    keteranganSO4.value.text = "";
   }
 
   void checkArsipOrderPenjualan() {
@@ -103,7 +180,11 @@ class DashbardPenjualanController extends GetxController {
     var dt = DateTime.now();
     var year = "${DateFormat('yyyy').format(dt)}";
     var bulan = "${DateFormat('MM').format(dt)}";
-    periode.value = "SI$year$bulan";
+    if (screenAktif.value == 1) {
+      periode.value = "SO$year$bulan";
+    } else if (screenAktif.value == 2) {
+      periode.value = "DO$year$bulan";
+    }
   }
 
   void gantiTanggalBuatOrderPenjualan(date) {
@@ -167,30 +248,82 @@ class DashbardPenjualanController extends GetxController {
     }
   }
 
-  void getDataAllSOHD() async {
+  Future<bool> getDataAllSOHD() async {
+    print("get all sohd running");
+    dataAllSohd.clear();
+    dataAllSohd.refresh();
+    screenStatusOrderPenjualan.value = false;
+    screenStatusOrderPenjualan.refresh();
     Future<List> prosesDataAllSOHD = getDataCt.getDataAllSOHD();
     List data = await prosesDataAllSOHD;
+    bool hasil = false;
     if (data.isNotEmpty) {
+      hasil = true;
       dataAllSohd.value = data;
       dataAllSohd.refresh();
+      screenStatusOrderPenjualan.value = true;
+      screenStatusOrderPenjualan.refresh();
+    } else {
+      hasil = false;
+      screenStatusOrderPenjualan.value = true;
+      screenStatusOrderPenjualan.refresh();
     }
+    return Future.value(hasil);
   }
 
-  void getDataSOHD() async {
-    Future<List> prosesDataOnceSOHD =
-        getDataCt.getDataSOHD(nomorSoSelected.value);
-    List data = await prosesDataOnceSOHD;
+  Future<bool> getDataAllDOHD() async {
+    print("get all dohd running");
+    dataAllDohd.clear();
+    dataAllDohd.refresh();
+    screenStatusNotaPengiriman.value = false;
+    screenStatusNotaPengiriman.refresh();
+    Future<List> prosesDataAllDOHD = getDataCt.getDataAllDOHD();
+    List data = await prosesDataAllDOHD;
+    bool hasil = false;
     if (data.isNotEmpty) {
-      dataSohd.value = data;
-      dataSohd.refresh();
+      hasil = true;
+      dataAllDohd.value = data;
+      dataAllDohd.refresh();
+      screenStatusNotaPengiriman.value = true;
+      screenStatusNotaPengiriman.refresh();
+    } else {
+      hasil = false;
+      screenStatusNotaPengiriman.value = true;
+      screenStatusNotaPengiriman.refresh();
     }
+    return Future.value(hasil);
   }
 
-  void lanjutkanSoPenjualan(dataSelected) async {
+  void loadSOHDSelected() {
+    dataSohd.value = dataAllSohd
+        .where((ele) => ele['NOMOR'] == nomorSoSelected.value)
+        .toList();
+    dataSohd.refresh();
+  }
+
+  void loadDOHDSelected() {
+    dohdSelected.value = dataAllDohd
+        .where((ele) => ele['NOMOR'] == nomorDoSelected.value)
+        .toList();
+    dohdSelected.refresh();
+  }
+
+  void lanjutkanSoPenjualan(dataSelected, statusOutStand) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
+    print('status outs $statusOutStand');
     if (dataSelected["IP"] == "") {
       Get.back();
-      prosesLanjutkanSoPenjualan(dataSelected);
+      String judul = screenAktif.value == 1
+          ? "Order Penjualan"
+          : screenAktif.value == 2
+              ? "Nota Pengiriman Barang"
+              : "";
+      ButtonSheetController().validasiButtonSheet(
+          judul,
+          contentValidasiLanjutkan(dataSelected, statusOutStand),
+          "validasi_lanjutkan_orderpenjualan",
+          '',
+          () {});
     } else {
       var emailUserLogin = AppData.informasiLoginUser.split("-");
       var statusSysUser = AppData.sysuserInformasi.split("-");
@@ -206,7 +339,7 @@ class DashbardPenjualanController extends GetxController {
         ButtonSheetController().validasiButtonSheet(
             "Buka kunci", contentBukaKunciForm(), "order_penjualan", 'Buka',
             () {
-          validasiBukaKunci(emailUserLogin, dataSelected);
+          validasiBukaKunci(emailUserLogin, dataSelected, statusOutStand);
         });
       } else {
         Get.back();
@@ -215,10 +348,297 @@ class DashbardPenjualanController extends GetxController {
     }
   }
 
+  Widget contentValidasiLanjutkan(dataSelected, statusOutStand) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Button1(
+                    textBtn: "Hapus",
+                    colorBtn: Colors.red,
+                    colorText: Colors.white,
+                    onTap: () {
+                      ButtonSheetController().validasiButtonSheet(
+                          "Hapus Order Penjualan",
+                          contenthapusOrderPenjualan(dataSelected),
+                          "hapus_order_penjualan",
+                          'Hapus', () async {
+                        if (screenAktif.value == 1) {
+                          Future<bool> prosesHapusSOHD = GetDataController()
+                              .hapusSOHD(dataSelected['NOMOR']);
+                          bool hasilHapusSOHD = await prosesHapusSOHD;
+                          if (hasilHapusSOHD) {
+                            UtilsAlert.showToast(
+                                "Berhasil hapus order penjualan");
+                            Get.back();
+                            Get.back();
+                            Get.back();
+                            loadData();
+                          }
+                        } else if (screenAktif.value == 2) {
+                        } else if (screenAktif.value == 3) {}
+                      });
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Button1(
+                    textBtn: "Edit",
+                    colorBtn: Utility.primaryDefault,
+                    colorText: Colors.white,
+                    onTap: () {
+                      if (statusOutStand == false) {
+                        Get.back();
+                        prosesLanjutkanSoPenjualan(dataSelected);
+                      } else {
+                        UtilsAlert.showToast("Penjualan tidak dapat di edit");
+                      }
+                    },
+                  ),
+                ),
+              )
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Button1(
+                    textBtn: "Cetak",
+                    colorBtn: Utility.primaryDefault,
+                    colorText: Colors.white,
+                    onTap: () {
+                      ButtonSheetController().validasiButtonSheet(
+                          "Cetak Faktur",
+                          contentCetakPenjualan(dataSelected),
+                          "cetak_faktur_penjualan",
+                          'Cetak',
+                          () async {});
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Button1(
+                    textBtn: dataSelected['POSJ'] == '' ||
+                            dataSelected['POSJ'] == null
+                        ? "Valid"
+                        : "Unvalid",
+                    colorBtn: Utility.primaryDefault,
+                    colorText: Colors.white,
+                    onTap: () {
+                      var stringJudul = dataSelected['POSJ'] == '' ||
+                              dataSelected['POSJ'] == null
+                          ? "Valid"
+                          : "Unvalid";
+                      ButtonSheetController().validasiButtonSheet(
+                          "Validasi valid penjualan",
+                          Text(
+                            "Yakin $stringJudul penjualan ini ?",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          "validasi_valid_penjualan",
+                          stringJudul, () async {
+                        Future<bool> prosesValid = GetDataController()
+                            .validPenjualan(stringJudul, dataSelected['NOMOR']);
+                        bool hasilProses = await prosesValid;
+                        if (hasilProses) {
+                          Get.back();
+                          Get.back();
+                          Get.back();
+                          loadData();
+                        } else {
+                          UtilsAlert.showToast("Gagal valid penjualan");
+                        }
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget contenthapusOrderPenjualan(dataSelected) {
+    return Text(
+        "Apa kamu yakin hapus order penjualan ${Utility.convertNoFaktur(dataSelected['NOMOR'])}");
+  }
+
+  Widget contentCetakPenjualan(dataSelected) {
+    String? jenisCetak;
+    bool statusTampilHarga = false;
+    bool statusTTDDigital = false;
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RadioListTile(
+                    title: Text(
+                      "Netto",
+                      style: TextStyle(fontSize: Utility.normal),
+                    ),
+                    value: "netto",
+                    groupValue: jenisCetak,
+                    onChanged: (value) {
+                      setState(() {
+                        jenisCetak = value.toString();
+                      });
+                    },
+                  ),
+                  RadioListTile(
+                    title: Text(
+                      "Gross",
+                      style: TextStyle(fontSize: Utility.normal),
+                    ),
+                    value: "gross",
+                    groupValue: jenisCetak,
+                    onChanged: (value) {
+                      setState(() {
+                        jenisCetak = value.toString();
+                      });
+                    },
+                  ),
+                ],
+              )),
+              Expanded(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text(
+                      "Tampil Harga",
+                      style: TextStyle(fontSize: Utility.normal),
+                    ),
+                    leading: Checkbox(
+                      value: statusTampilHarga,
+                      onChanged: (value) {
+                        setState(() {
+                          statusTampilHarga = !statusTampilHarga;
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      setState(() {
+                        statusTampilHarga = !statusTampilHarga;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: Text(
+                      "TTD Digital",
+                      style: TextStyle(fontSize: Utility.normal),
+                    ),
+                    leading: Checkbox(
+                      value: statusTTDDigital,
+                      onChanged: (value) {
+                        setState(() {
+                          statusTTDDigital = !statusTTDDigital;
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      setState(() {
+                        statusTTDDigital = !statusTTDDigital;
+                      });
+                    },
+                  )
+                ],
+              )),
+            ],
+          ),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => Get.back(),
+                  child: Container(
+                      margin: const EdgeInsets.only(left: 3, right: 3),
+                      decoration: BoxDecoration(
+                          borderRadius: Utility.borderStyle4,
+                          border: Border.all(color: Utility.primaryDefault)),
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 12, bottom: 12),
+                          child: Text(
+                            "Urungkan",
+                            style: TextStyle(color: Utility.primaryDefault),
+                          ),
+                        ),
+                      )),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 3.0, right: 3.0),
+                  child: Button1(
+                    colorBtn: Utility.primaryDefault,
+                    colorText: Colors.white,
+                    textBtn: "Cetak",
+                    onTap: () {
+                      var menu = screenAktif.value == 1
+                          ? "Order Penjualan"
+                          : screenAktif.value == 2
+                              ? "Nota Pengiriman Barang"
+                              : "";
+                      CetakPenjualanController().checkingSeluruhKontenCetak(
+                          "SOHD",
+                          "SODT",
+                          dataSelected['NOMOR'],
+                          menu,
+                          jenisCetak,
+                          statusTampilHarga,
+                          statusTTDDigital);
+                    },
+                  ),
+                ),
+              )
+            ],
+          )
+        ],
+      );
+    });
+  }
+
   void prosesLanjutkanSoPenjualan(dataSelected) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
-    dataSohd.value = [dataSelected];
-    dataSohd.refresh();
+
     Future<List> getSalesSpesifik = getDataCt.getSpesifikData(
         "SALESM", "KODE", dataSelected["SALESM"], "get_spesifik_data_master");
     List dataSales = await getSalesSpesifik;
@@ -226,21 +646,35 @@ class DashbardPenjualanController extends GetxController {
         "CUSTOM", "KODE", dataSelected["CUSTOM"], "get_spesifik_data_master");
     List dataPelanggan = await getPelangganSpesifik;
 
-    nomorSoSelected.value = dataSelected["NOMOR"];
+    if (screenAktif.value == 1) {
+      dataSohd.value = [dataSelected];
+      nomorSoSelected.value = dataSelected["NOMOR"];
+      nomoCbSelected.value = "${dataSelected["CB"]}";
+
+      dataSohd.refresh();
+      nomorSoSelected.refresh();
+      nomoCbSelected.refresh();
+    } else if (screenAktif.value == 2) {
+      dohdSelected.value = [dataSelected];
+      nomorDoSelected.value = dataSelected["NOMOR"];
+      nomoDoCbSelected.value = "${dataSelected["CB"]}";
+
+      dohdSelected.refresh();
+      nomorDoSelected.refresh();
+      nomoDoCbSelected.refresh();
+    }
+
     selectedIdSales.value = dataSales[0]["KODE"];
     selectedNameSales.value = dataSales[0]["NAMA"];
     selectedIdPelanggan.value = dataSelected["CUSTOM"];
     selectedNamePelanggan.value = dataPelanggan[0]["NAMA"];
     wilayahCustomerSelected.value = dataSelected["WILAYAH"];
-    nomoCbSelected.value = "${dataSelected["CB"]}";
 
-    nomorSoSelected.refresh();
     selectedIdSales.refresh();
     selectedNameSales.refresh();
     selectedIdPelanggan.refresh();
     selectedNamePelanggan.refresh();
     wilayahCustomerSelected.refresh();
-    nomoCbSelected.refresh();
 
     Future<bool> prosesPilihCabang =
         sidebarCt.pilihCabangSelected(dataSelected["CB"]);
@@ -262,19 +696,39 @@ class DashbardPenjualanController extends GetxController {
       UtilsAlert.showToast("Data cabang tidak valid");
     } else {
       Get.back();
-      Get.to(ItemOrderPenjualan(dataForm: true),
-          duration: Duration(milliseconds: 500),
-          transition: Transition.rightToLeftWithFade);
+      if (screenAktif.value == 1) {
+        Get.to(ItemOrderPenjualan(dataForm: true),
+            duration: Duration(milliseconds: 500),
+            transition: Transition.rightToLeftWithFade);
+      } else if (screenAktif.value == 2) {
+        Get.to(DetailNotaPengirimanBarang(dataForm: true),
+            duration: Duration(milliseconds: 500),
+            transition: Transition.rightToLeftWithFade);
+      }
     }
   }
 
-  void validasiBukaKunci(emailUserLogin, dataSelected) async {
+  void validasiBukaKunci(emailUserLogin, dataSelected, statusOutStand) async {
     Future<bool> prosesValidasi =
         getDataCt.validasiUser(emailUserLogin[0], passwordBukaKunci.value.text);
     bool hasilValidasi = await prosesValidasi;
     if (hasilValidasi) {
       Get.back();
-      prosesLanjutkanSoPenjualan(dataSelected);
+      if (statusOutStand == false) {
+        prosesLanjutkanSoPenjualan(dataSelected);
+      } else {
+        String judul = screenAktif.value == 1
+            ? "Order Penjualan"
+            : screenAktif.value == 2
+                ? "Nota Pengiriman Barang"
+                : "";
+        ButtonSheetController().validasiButtonSheet(
+            judul,
+            contentValidasiLanjutkan(dataSelected, statusOutStand),
+            "validasi_lanjutkan_orderpenjualan",
+            '',
+            () {});
+      }
     } else {
       Get.back();
       UtilsAlert.showToast("Password yang anda masukkan salah");

@@ -72,15 +72,19 @@ class SidebarController extends BaseController {
     ipdevice.value = ipLocal;
     ipdevice.refresh();
     if (value == "pos") {
-      Get.back();
-      Get.offAll(Dashboard());
-      sidebarMenuSelected.value = 1;
-      sidebarMenuSelected.refresh();
+      if (sidebarMenuSelected.value != 1) {
+        Get.back();
+        Get.offAll(Dashboard());
+        sidebarMenuSelected.value = 1;
+        sidebarMenuSelected.refresh();
+      }
     } else if (value == "penjualan") {
-      Get.back();
-      Get.offAll(DashboardPenjualan());
-      sidebarMenuSelected.value = 2;
-      sidebarMenuSelected.refresh();
+      if (sidebarMenuSelected.value != 2) {
+        Get.back();
+        Get.offAll(DashboardPenjualan());
+        sidebarMenuSelected.value = 2;
+        sidebarMenuSelected.refresh();
+      }
     }
   }
 
@@ -136,6 +140,8 @@ class SidebarController extends BaseController {
               AppData.databaseSelected = "";
               AppData.periodeSelected = "";
               AppData.cabangSelected = "";
+              sidebarMenuSelected.value = 1;
+              sidebarMenuSelected.refresh();
               Get.offAll(Login());
             },
           ),

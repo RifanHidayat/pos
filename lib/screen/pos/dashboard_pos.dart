@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
@@ -17,7 +16,6 @@ import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -634,54 +632,6 @@ class _DashboardState extends State<Dashboard> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Expanded(
-              //   flex: 20,
-              //   child: Padding(
-              //     padding: const EdgeInsets.only(right: 3),
-              //     child: InkWell(
-              //       onTap: () {
-              //         controller.aktifButton.value = 1;
-              //         this.controller.aktifButton.refresh();
-              //       },
-              //       child: CardCustom(
-              //         colorBg: controller.aktifButton.value == 1
-              //             ? Utility.infoLight100
-              //             : Colors.white,
-              //         radiusBorder: Utility.borderStyle1,
-              //         widgetCardCustom: Padding(
-              //           padding: const EdgeInsets.all(6.0),
-              //           child: Center(
-              //             child: Icon(Iconsax.heart),
-              //           ),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // Expanded(
-              //   flex: 20,
-              //   child: Padding(
-              //     padding: const EdgeInsets.only(left: 3, right: 3),
-              //     child: InkWell(
-              //       onTap: () {
-              //         controller.aktifButton.value = 2;
-              //         this.controller.aktifButton.refresh();
-              //       },
-              //       child: CardCustom(
-              //         colorBg: controller.aktifButton.value == 2
-              //             ? Utility.infoLight100
-              //             : Colors.white,
-              //         radiusBorder: Utility.borderStyle1,
-              //         widgetCardCustom: Padding(
-              //           padding: const EdgeInsets.all(6.0),
-              //           child: Center(
-              //             child: Icon(Iconsax.discount_shape),
-              //           ),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 3),

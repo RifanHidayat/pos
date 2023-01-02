@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:siscom_pos/utils/utility.dart';
 
 class UtilsAlert {
   static showToast(message) {
@@ -31,7 +32,10 @@ class UtilsAlert {
                   Row(
                     children: [
                       Padding(
-                          child: CircularProgressIndicator(strokeWidth: 3),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Utility.primaryDefault,
+                          ),
                           padding: EdgeInsets.all(8)),
                       Padding(
                           child: Text(
@@ -64,7 +68,10 @@ class UtilsAlert {
                       Expanded(
                         flex: 20,
                         child: Padding(
-                            child: CircularProgressIndicator(strokeWidth: 3),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              color: Utility.primaryDefault,
+                            ),
                             padding: EdgeInsets.all(8)),
                       ),
                       Expanded(

@@ -26,12 +26,12 @@ class ScanBarangController extends BaseController {
   void getBarcodeImei(type, code) {
     var imeiSelected = "";
     for (var element in buttomSheetProduk.listDataImei.value) {
-      // if (element["IMEI"] == code) {
-      //   imeiSelected = element["IMEI"];
-      // }
-      if (element["IMEI"] == "S03") {
+      if (element["IMEI"] == code) {
         imeiSelected = element["IMEI"];
       }
+      // if (element["IMEI"] == "S03") {
+      //   imeiSelected = element["IMEI"];
+      // }
     }
     if (imeiSelected != "") {
       buttomSheetProduk.imeiSelected.value = imeiSelected;
@@ -52,13 +52,13 @@ class ScanBarangController extends BaseController {
 
   void periksaBarang(code) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Proses periksa barang");
-    var codeDummy = "1019000177484";
+    // var codeDummy = "1019000177484";
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'PROD1',
       'cari': 'barcode',
-      'value': codeDummy,
+      'value': code,
     };
     var connect = Api.connectionApi("post", body, "get_once_prod1");
     var getValue = await connect;
@@ -66,10 +66,12 @@ class ScanBarangController extends BaseController {
     List data = valueBody['data'];
     if (valueBody['status'] == true) {
       barangSelect.value = data;
+      barangSelect.refresh();
+    } else {
+      UtilsAlert.showToast("Barang tidak ditemukan");
     }
     scannerValue.value = true;
     scannerValue.refresh();
-    barangSelect.refresh();
     Get.back();
   }
 

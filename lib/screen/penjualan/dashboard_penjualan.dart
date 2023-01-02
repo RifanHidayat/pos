@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
-import 'package:siscom_pos/screen/penjualan/buat_order_penjualan.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
@@ -68,7 +67,9 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                     onRefresh: refreshData,
                     child: controller.screenAktif.value == 1
                         ? screenOrderPenjualan()
-                        : SizedBox(),
+                        : controller.screenAktif.value == 2
+                            ? screenNotaPengirimanBarang()
+                            : SizedBox(),
                   ))
                 ],
               ),
@@ -111,9 +112,9 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
           Expanded(
             flex: 20,
             child: InkWell(
-              onTap: () => Get.to(BuatOrderPenjualan(),
-                  duration: Duration(milliseconds: 500),
-                  transition: Transition.rightToLeftWithFade),
+              onTap: () {
+                controller.addPenjualan();
+              },
               child: Container(
                 alignment: Alignment.centerRight,
                 padding: EdgeInsets.only(right: 16.0),
@@ -261,29 +262,34 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
           scrollDirection: Axis.horizontal,
           itemCount: controller.menuShowonTop.value.length,
           itemBuilder: (context, index) {
-            var id = controller.menuShowonTop.value[index]['id'];
-            var nama_menu = controller.menuShowonTop.value[index]['nama_menu'];
+            var id = controller.menuShowonTop.value[index]['id_menu'];
+            var namaMenu = controller.menuShowonTop.value[index]['nama_menu'];
             var status = controller.menuShowonTop.value[index]['status'];
-            return Container(
-              margin: EdgeInsets.only(left: 16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: status == true
-                        ? Utility.primaryDefault
-                        : Utility.greyLight50,
-                    width: 3.0,
+            return InkWell(
+              onTap: () {
+                controller.changeMenu(id);
+              },
+              child: Container(
+                margin: EdgeInsets.only(left: 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: status == true
+                          ? Utility.primaryDefault
+                          : Utility.greyLight50,
+                      width: 3.0,
+                    ),
                   ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 18.0, right: 18.0, top: 8.0, bottom: 8.0),
-                child: Center(
-                    child: Text(
-                  "$nama_menu",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 18.0, right: 18.0, top: 8.0, bottom: 8.0),
+                  child: Center(
+                      child: Text(
+                    "$namaMenu",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+                ),
               ),
             );
           }),
@@ -291,114 +297,311 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
   }
 
   Widget screenOrderPenjualan() {
-    return controller.dataAllSohd.isEmpty
+    return controller.dataAllSohd.isEmpty &&
+            controller.screenStatusOrderPenjualan.value == false
         ? Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Utility.primaryDefault,
-                ),
-                SizedBox(
-                  height: Utility.medium,
-                ),
-                Text(
-                  "Memuat data...",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )
-              ],
-            ),
-          )
-        : ListView.builder(
-            physics: controller.dataAllSohd.length <= 10
-                ? AlwaysScrollableScrollPhysics()
-                : BouncingScrollPhysics(),
-            itemCount: controller.dataAllSohd.length,
-            itemBuilder: (context, index) {
-              var nomor = controller.dataAllSohd[index]['NOMOR'];
-              var tanggal = controller.dataAllSohd[index]['TANGGAL'];
-              var ipStatus = controller.dataAllSohd[index]['IP'];
-              var hargaNet = controller.dataAllSohd[index]['HRGNET'] == null ||
-                      controller.dataAllSohd[index]['HRGNET'] == ""
-                  ? 0
-                  : controller.dataAllSohd[index]['HRGNET'];
-              return Padding(
-                padding: EdgeInsets.only(left: 16, right: 16),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Utility.primaryDefault,
+              ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              Text(
+                "Memuat data...",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ))
+        : controller.dataAllSohd.isEmpty &&
+                controller.screenStatusOrderPenjualan.value == true
+            ? Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    InkWell(
-                      onTap: () => controller
-                          .lanjutkanSoPenjualan(controller.dataAllSohd[index]),
-                      child: IntrinsicHeight(
-                          child: Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: Utility.borderStyle1,
-                              color: ipStatus == ""
-                                  ? Colors.white
-                                  : Utility.greyLight300,
-                            ),
-                            child: ipStatus == ""
-                                ? SizedBox()
-                                : Center(
-                                    child: Icon(
-                                      Iconsax.lock,
-                                      color: Utility.primaryDefault,
-                                    ),
-                                  ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 60,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${Utility.convertNoFaktur(nomor)}",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: Utility.medium),
-                                      ),
-                                      Text(
-                                        "${Utility.convertDate(tanggal)}",
-                                        style:
-                                            TextStyle(color: Utility.nonAktif),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 40,
-                                  child: Text(
-                                    "${controller.currencyFormatter.format(hargaNet)}",
-                                    textAlign: TextAlign.right,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      )),
+                    Image.asset(
+                      "assets/empty.png",
+                      height: 200,
                     ),
-                    Divider(),
                     SizedBox(
-                      height: Utility.small,
+                      height: Utility.medium,
+                    ),
+                    Text(
+                      "Data order penjualan kosong",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-              );
-            });
+              )
+            : ListView.builder(
+                physics: controller.dataAllSohd.length <= 10
+                    ? AlwaysScrollableScrollPhysics()
+                    : BouncingScrollPhysics(),
+                itemCount: controller.dataAllSohd.length,
+                itemBuilder: (context, index) {
+                  var nomor = controller.dataAllSohd[index]['NOMOR'];
+                  var tanggal = controller.dataAllSohd[index]['TANGGAL'];
+                  var qty = controller.dataAllSohd[index]['QTY'];
+                  var qtz = controller.dataAllSohd[index]['QTZ'];
+                  var namaPelanggan =
+                      controller.dataAllSohd[index]['nama_pelanggan'];
+                  var ipStatus = controller.dataAllSohd[index]['IP'];
+                  var hargaNet =
+                      controller.dataAllSohd[index]['HRGNET'] == null ||
+                              controller.dataAllSohd[index]['HRGNET'] == ""
+                          ? 0
+                          : controller.dataAllSohd[index]['HRGNET'];
+                  var outstanding = qty - qtz;
+                  var statusOutStand = outstanding < qty ? true : false;
+                  return Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: () => controller.lanjutkanSoPenjualan(
+                              controller.dataAllSohd[index], statusOutStand),
+                          child: IntrinsicHeight(
+                              child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: Utility.borderStyle1,
+                                  color: ipStatus == ""
+                                      ? Colors.white
+                                      : Utility.greyLight300,
+                                ),
+                                child: ipStatus == ""
+                                    ? SizedBox()
+                                    : Center(
+                                        child: Icon(
+                                          Iconsax.lock,
+                                          color: Utility.primaryDefault,
+                                        ),
+                                      ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 60,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "${Utility.convertNoFaktur(nomor)}",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: Utility.medium),
+                                          ),
+                                          Text(
+                                            "$namaPelanggan",
+                                          ),
+                                          Text(
+                                            "${Utility.convertDate(tanggal)}",
+                                            style: TextStyle(
+                                                color: Utility.nonAktif),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 40,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${controller.currencyFormatter.format(hargaNet)}",
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            "Qty - ${Utility.rupiahFormat('$qty', '')}",
+                                          ),
+                                          Text(
+                                            "Outs - ${Utility.rupiahFormat('$outstanding', '')}",
+                                            style: TextStyle(
+                                                color: outstanding < qty
+                                                    ? Color.fromARGB(
+                                                        255, 235, 133, 0)
+                                                    : Colors.black),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )),
+                        ),
+                        Divider(),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                      ],
+                    ),
+                  );
+                });
+  }
+
+  Widget screenNotaPengirimanBarang() {
+    return controller.dataAllDohd.isEmpty &&
+            controller.screenStatusNotaPengiriman.value == false
+        ? Center(
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Utility.primaryDefault,
+              ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              Text(
+                "Memuat data...",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ))
+        : controller.dataAllDohd.isEmpty &&
+                controller.screenStatusNotaPengiriman.value == true
+            ? Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/empty.png",
+                      height: 200,
+                    ),
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Text(
+                      "Data Nota Pengiriman Barang kosong",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                physics: controller.dataAllDohd.length <= 10
+                    ? AlwaysScrollableScrollPhysics()
+                    : BouncingScrollPhysics(),
+                itemCount: controller.dataAllDohd.length,
+                itemBuilder: (context, index) {
+                  var nomor = controller.dataAllDohd[index]['NOMOR'];
+                  var tanggal = controller.dataAllDohd[index]['TANGGAL'];
+                  var ipStatus = controller.dataAllDohd[index]['IP'];
+                  var qty = controller.dataAllDohd[index]['QTY'];
+                  var hargaNet =
+                      controller.dataAllDohd[index]['HRGNET'] == null ||
+                              controller.dataAllDohd[index]['HRGNET'] == ""
+                          ? 0
+                          : controller.dataAllDohd[index]['HRGNET'];
+                  return Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: () => controller.lanjutkanSoPenjualan(
+                              controller.dataAllDohd[index], false),
+                          child: IntrinsicHeight(
+                              child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: Utility.borderStyle1,
+                                  color: ipStatus == ""
+                                      ? Colors.white
+                                      : Utility.greyLight300,
+                                ),
+                                child: ipStatus == ""
+                                    ? SizedBox()
+                                    : Center(
+                                        child: Icon(
+                                          Iconsax.lock,
+                                          color: Utility.primaryDefault,
+                                        ),
+                                      ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 60,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "${Utility.convertNoFaktur(nomor)}",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: Utility.medium),
+                                          ),
+                                          Text(
+                                            "${Utility.convertDate(tanggal)}",
+                                            style: TextStyle(
+                                                color: Utility.nonAktif),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 40,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${controller.currencyFormatter.format(hargaNet)}",
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            "Qty - $qty",
+                                            textAlign: TextAlign.right,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )),
+                        ),
+                        Divider(),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                      ],
+                    ),
+                  );
+                });
   }
 }

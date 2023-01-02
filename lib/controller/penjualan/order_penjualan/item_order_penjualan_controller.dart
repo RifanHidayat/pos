@@ -44,6 +44,7 @@ class ItemOrderPenjualanController extends BaseController {
   var statusBack = false.obs;
   var statusInformasiSo = false.obs;
   var statusEditBarang = false.obs;
+  var statusAksiItemOrderPenjualan = false.obs;
   var statusSODTKosong = false.obs;
 
   var totalPesanBarang = 0.0.obs;
@@ -64,6 +65,8 @@ class ItemOrderPenjualanController extends BaseController {
     listBarang.refresh();
     barangTerpilih.refresh();
     sodtSelected.refresh();
+    statusAksiItemOrderPenjualan.value = status;
+    statusAksiItemOrderPenjualan.refresh();
     Future<List> prosesGetDataBarang = getDataCt.getAllBarang();
     List data = await prosesGetDataBarang;
     if (data.isNotEmpty) {
@@ -71,13 +74,16 @@ class ItemOrderPenjualanController extends BaseController {
       listBarang.refresh();
       if (status == true) {
         loadDataSODT();
+      } else {
+        statusSODTKosong.value = true;
+        statusSODTKosong.refresh();
       }
     }
   }
 
   void loadDataSODT() async {
+    barangTerpilih.value.clear();
     sodtSelected.value.clear();
-    listBarang.refresh();
     barangTerpilih.refresh();
     sodtSelected.refresh();
     Future<List> prosesGetDataSODT = getDataCt.getSpesifikData(
@@ -178,11 +184,20 @@ class ItemOrderPenjualanController extends BaseController {
     bool hasilClose = await prosesClose;
     if (hasilClose == true) {
       dashboardPenjualanCt.getDataAllSOHD();
-      Get.back();
-      Get.back();
-      Get.back();
-      statusBack.value = true;
-      statusBack.refresh();
+      if (statusAksiItemOrderPenjualan.value) {
+        Get.back();
+        Get.back();
+        Get.back();
+        statusBack.value = true;
+        statusBack.refresh();
+      } else {
+        Get.back();
+        Get.back();
+        Get.back();
+        Get.back();
+        statusBack.value = true;
+        statusBack.refresh();
+      }
     }
   }
 

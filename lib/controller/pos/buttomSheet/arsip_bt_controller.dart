@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
+import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -12,11 +14,14 @@ import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
+import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class ArsipButtomSheetController extends BaseController
     with GetSingleTickerProviderStateMixin {
   var dashboardController = Get.put(DashbardController());
   var bottomSheetPosController = Get.put(BottomSheetPos());
+
+  var alasanVoidFaktur = TextEditingController().obs;
 
   AnimationController? animasiController;
   @override
@@ -32,7 +37,7 @@ class ArsipButtomSheetController extends BaseController
     );
   }
 
-  void checkDetailTransaksi(pk) {
+  void checkDetailTransaksi(pk, dataList) {
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -45,7 +50,7 @@ class ArsipButtomSheetController extends BaseController
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
         if (data.isNotEmpty) {
-          detailArsipBarang(data);
+          detailArsipBarang(data, dataList);
         } else {
           UtilsAlert.showToast("Barang tidak tersedia");
           bottomSheetPosController.validasiSebelumAksi(
@@ -61,7 +66,7 @@ class ArsipButtomSheetController extends BaseController
     });
   }
 
-  void detailArsipBarang(data) {
+  void detailArsipBarang(data, dataList) {
     NumberFormat currencyFormatter = NumberFormat.currency(
       locale: 'id',
       symbol: 'Rp ',
@@ -143,7 +148,7 @@ class ArsipButtomSheetController extends BaseController
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          "${data[0]['NOMOR']}",
+                                          "${Utility.convertNoFaktur('${data[0]['NOMOR']}')}",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: Utility.semiMedium,
@@ -364,7 +369,25 @@ class ArsipButtomSheetController extends BaseController
                         colorSideborder: Utility.primaryDefault,
                         overlayColor: Color.fromARGB(255, 247, 157, 150),
                         colorText: Utility.primaryDefault,
-                        onTap: () {},
+                        onTap: () {
+                          ButtonSheetController().validasiButtonSheet(
+                              "Void Faktur",
+                              contentVoidFaktur(dataList),
+                              "pos_void_faktur",
+                              'Void', () async {
+                            if (alasanVoidFaktur.value.text == "") {
+                              UtilsAlert.showToast(
+                                  "Isi alasan void terlebih dahulu");
+                            } else {
+                              bottomSheetPosController.validasiSebelumAksi(
+                                  "Void Faktur",
+                                  "Yakin void faktur pembelian ini ?",
+                                  "",
+                                  "void_faktur",
+                                  [data[0]['PK'], alasanVoidFaktur.value.text]);
+                            }
+                          });
+                        },
                       ),
                       SizedBox(
                         height: 5,
@@ -383,5 +406,71 @@ class ArsipButtomSheetController extends BaseController
                     ]));
           });
         });
+  }
+
+  Widget contentVoidFaktur(dataList) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CardCustom(
+            colorBg: Colors.white,
+            radiusBorder: Utility.borderStyle1,
+            widgetCardCustom: Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      "${Utility.convertNoFaktur(dataList['NOMOR'])}",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "Rp${GlobalController().convertToIdr(dataList['TOTAL'], 2)}",
+                      textAlign: TextAlign.right,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          Text(
+            "Alasan void",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle1,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: TextField(
+                cursorColor: Colors.black,
+                controller: alasanVoidFaktur.value,
+                maxLines: null,
+                maxLength: 225,
+                decoration: new InputDecoration(
+                    border: InputBorder.none, hintText: "Alasan void "),
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.done,
+                style:
+                    TextStyle(fontSize: 12.0, height: 2.0, color: Colors.black),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: Utility.large,
+          )
+        ],
+      ),
+    );
   }
 }
