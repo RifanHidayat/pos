@@ -398,9 +398,9 @@ class _DashboardState extends State<Dashboard> {
                                           Text(
                                             "${controller.cabangNameSelected.value}"
                                                         .length >
-                                                    8
+                                                    5
                                                 ? "${controller.cabangNameSelected.value}"
-                                                        .substring(0, 8) +
+                                                        .substring(0, 5) +
                                                     '..'
                                                 : "${controller.cabangNameSelected.value}",
                                             style: TextStyle(
@@ -498,9 +498,9 @@ class _DashboardState extends State<Dashboard> {
                                           Text(
                                             "${controller.pelayanSelected.value}"
                                                         .length >
-                                                    8
+                                                    5
                                                 ? "${controller.pelayanSelected.value}"
-                                                        .substring(0, 8) +
+                                                        .substring(0, 5) +
                                                     '..'
                                                 : "${controller.pelayanSelected.value}",
                                             style: TextStyle(
@@ -592,9 +592,9 @@ class _DashboardState extends State<Dashboard> {
                                           Text(
                                             "${controller.namaPelanggan.value}"
                                                         .length >
-                                                    8
+                                                    5
                                                 ? "${controller.namaPelanggan.value}"
-                                                        .substring(0, 8) +
+                                                        .substring(0, 5) +
                                                     '..'
                                                 : "${controller.namaPelanggan.value}",
                                             style: TextStyle(
@@ -859,7 +859,7 @@ class _DashboardState extends State<Dashboard> {
                             Stack(
                               children: [
                                 Container(
-                                  height: 90,
+                                  height: 80,
                                   alignment: Alignment.bottomLeft,
                                   width: MediaQuery.of(context).size.width,
                                   decoration: BoxDecoration(
@@ -873,22 +873,27 @@ class _DashboardState extends State<Dashboard> {
                                           // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
                                           fit: BoxFit.fill)),
                                 ),
-                                Container(
-                                  height: 20,
-                                  width: 20,
-                                  decoration: BoxDecoration(
-                                      color: Utility.primaryDefault,
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                      )),
-                                  child: Center(
-                                    child: Text(
-                                      "$stokWare",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: Utility.small),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Utility.primaryDefault,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(6),
+                                          )),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(3),
+                                        child: Text(
+                                          "$stokWare",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: Utility.small),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 )
                               ],
                             ),
@@ -903,7 +908,7 @@ class _DashboardState extends State<Dashboard> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Expanded(
-                                    flex: 70,
+                                    flex: 50,
                                     child: Text(
                                       "$namaBarang",
                                       textAlign: TextAlign.center,
@@ -913,13 +918,16 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 30,
-                                    child: Text(
-                                      "${globalController.convertToIdr(hargaJual, 0)}",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Utility.grey600,
-                                          fontSize: Utility.semiMedium),
+                                    flex: 50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "${globalController.convertToIdr(hargaJual, 0)}",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Utility.grey600,
+                                            fontSize: Utility.semiMedium),
+                                      ),
                                     ),
                                   )
                                 ],

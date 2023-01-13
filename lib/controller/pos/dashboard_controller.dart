@@ -683,11 +683,10 @@ class DashbardController extends BaseController {
 
       // update jldt
       double hrgSetelahDiskon = hitungSubtotal - dischBarang;
-      // var hitungPpnJldt =
-      //     Utility.nominalPPNHeader('$hrgSetelahDiskon', '${ppnCabang.value}');
+
       var hitungPpnJldt = double.parse("${element['TAXN']}");
       var hitungServiceJldt = double.parse("${element['BIAYA']}");
-      // var valueFinalDiscnJldt = hitungDiscnJldt.toPrecision(2);
+
       var valueFinalDiscnJldt = hitungDiscnJldt;
       var valueFinalPpnJldt = hitungPpnJldt;
       updateJldt(element['NOKEY'], valueFinalDiscnJldt, valueFinalPpnJldt,
@@ -719,12 +718,16 @@ class DashbardController extends BaseController {
 
     // perhitungan ppn header
 
-    var persenPPN =
-        Utility.persenDiskonHeader('$hargaSetelahDiskonHeader', '$ppnHeader');
-    // '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
+    if (ppnHeader <= 0.0) {
+      ppnCabang.refresh();
+    } else {
+      var persenPPN =
+          Utility.persenDiskonHeader('$hargaSetelahDiskonHeader', '$ppnHeader');
+      // '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
 
-    ppnCabang.value = "$persenPPN" == "NaN" ? 0.0 : persenPPN;
-    ppnCabang.refresh();
+      ppnCabang.value = "$persenPPN" == "NaN" ? 0.0 : persenPPN;
+      ppnCabang.refresh();
+    }
 
     // perhitungan service charge
 
