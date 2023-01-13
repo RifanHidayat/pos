@@ -174,7 +174,7 @@ class AuthController extends GetxController {
           } else {
             var getFirst = filter.first;
             AppData.cabangSelected =
-                "${getFirst['KODE']}-${getFirst['NAMA']}-${getFirst['CUSTOM']}-${getFirst['GUDANG']}";
+                "${getFirst['KODE']}-${getFirst['NAMA']}-${getFirst['CUSTOM']}-${getFirst['GUDANG']}-${getFirst['PPN']}";
             AppData.flagMember = "${data[0]['FLAGMEMBER']}";
             AppData.bidUsaha = "${data[0]['BIDUSAHA']}";
             sidebarCt.getCabang();

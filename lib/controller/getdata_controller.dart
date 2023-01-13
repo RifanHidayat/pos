@@ -91,6 +91,28 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
+  Future<List> aksiUpdatePutangDanPembelian(
+      String nomorSI, String lastNomorPPTGDT) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PUTANG',
+      'nomor_faktur': nomorSI,
+      'nomor_pptgdt': lastNomorPPTGDT,
+    };
+    var connect = Api.connectionApi("post", body, "update_putang_pembelian");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    List dataFinal = [];
+    if (data.isNotEmpty) {
+      dataFinal = [true, valueBody['status'], data];
+    } else {
+      dataFinal = [false, valueBody['status']];
+    }
+    return Future.value(dataFinal);
+  }
+
   Future<List> getDataAllSOHD() async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
@@ -810,6 +832,61 @@ class GetDataController extends GetxController {
     }
 
     return Future.value(statusStok);
+  }
+
+  Future<List> insertPutang(List dataInsert) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PUTANG',
+      'cabang_putang': '01',
+      'cbxx_putang': '01',
+      'salesm_putang': dataInsert[0],
+      'custom_putang': dataInsert[1],
+      'wilayah_putang': dataInsert[2],
+      'nomor_putang': dataInsert[3],
+      'nomorcb_putang': dataInsert[4],
+      'noxx_putang': dataInsert[5],
+      'noref_putang': '',
+      'ref_putang': '',
+      'nogiro_putang': '',
+      'nokey_putang': '',
+      'cb_putang': dataInsert[6],
+      'tbayar_putang': '',
+      'ceer_putang': dataInsert[7],
+      'doe_putang': tanggalDanJam,
+      'uang_putang': 'RP',
+      'kurs_putang': '1',
+      'deo_putang': dataInformasiSYSUSER[0],
+      'loe_putang': tanggalDanJam,
+      'toe_putang': jamTransaksi,
+      'sign_putang': '',
+      'tgljtp_putang': tanggalDanJam,
+      'tanggal_putang': tanggalDanJam,
+      'flag_putang': 'Z',
+      'tgl_putang': tanggalNow,
+      'jtgiro_putang': tanggalDanJam,
+      'produk_putang': '',
+      'reftr_putang': '',
+    };
+    var connect = Api.connectionApi("post", body, "insert_putang");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List dataFinal = [];
+    if (valueBody['status'] == true) {
+      dataFinal = [true, valueBody['message'], valueBody['data']];
+    } else {
+      dataFinal = [false, valueBody['message'], valueBody['data']];
+    }
+
+    return Future.value(dataFinal);
   }
 
   Future<List> getImeiEditKeranjang(kode, group, kodecabang, kodegudang) async {

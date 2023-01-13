@@ -122,6 +122,7 @@ class EditKeranjangController extends BaseController {
           if (type == 'edit_dari_scanbarcode') {
             Get.back();
             Get.back();
+            dashboardCt.aksiPilihKategoriBarang();
             Get.to(
               RincianPemesanan(),
             );
@@ -130,6 +131,7 @@ class EditKeranjangController extends BaseController {
             Get.back();
             Get.back();
             Get.back();
+            dashboardCt.aksiPilihKategoriBarang();
             Get.to(
               RincianPemesanan(),
             );

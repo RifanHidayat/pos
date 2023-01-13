@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/screen/pos/selesai_pembayaran.dart';
@@ -145,20 +146,12 @@ class SimpanPembayaran extends BaseController {
     var valueBody = jsonDecode(getValue.body);
     print('sampe sioni');
     print(valueBody);
-    // var data = valueBody['data'];
-    // print('berhasil insert pptghd $data');
     bool statusBerhasil = false;
     if (valueBody['status'] == true) {
       Future<bool> prosesInsertPptgdt =
           insertPPTGDT(dataDetailKartu, valueBody["primaryKey"]);
       statusBerhasil = await prosesInsertPptgdt;
-    }
-    // else if (valueBody['status'] == false &&
-    //     valueBody['message'] == "ulang") {
-    // else if (valueBody['status'] == false) {
-    //   insertPPTGHD(dataDetailKartu);
-    // }
-    else {
+    } else {
       UtilsAlert.showToast("Gagal pembayaran 1");
     }
 
@@ -226,7 +219,8 @@ class SimpanPembayaran extends BaseController {
     bool statusBerhasil = false;
     if (valueBody['status'] == true) {
       print('berhasil insert pptgdt ${valueBody["data"]}');
-      Future<bool> prosesInsertPutang = insertPutang(dataDetailKartu);
+      Future<bool> prosesInsertPutang =
+          insertPutang(dataDetailKartu, lastNomor);
       statusBerhasil = await prosesInsertPutang;
     } else {
       UtilsAlert.showToast('gagal proses 2');
@@ -234,53 +228,39 @@ class SimpanPembayaran extends BaseController {
     return Future.value(statusBerhasil);
   }
 
-  Future<bool> insertPutang(dataDetailKartu) async {
-    var dt = DateTime.now();
-    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
-    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
-    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+  Future<bool> insertPutang(dataDetailKartu, lastNomorPPTGDT) async {
+    // CHECK PUTANG
 
-    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+    Future<List> checkingPutang = GetDataController().getSpesifikData("PUTANG",
+        "NOMOR", dashboardCt.nomorFaktur.value, "get_spesifik_data_transaksi");
+    List prosesCheckPutang = await checkingPutang;
 
-    Map<String, dynamic> body = {
-      'database': AppData.databaseSelected,
-      'periode': AppData.periodeSelected,
-      'stringTabel': 'PUTANG',
-      'cabang_putang': '01',
-      'cbxx_putang': '01',
-      'salesm_putang': dashboardCt.kodePelayanSelected.value,
-      'custom_putang': dashboardCt.customSelected.value,
-      'wilayah_putang': dashboardCt.wilayahCustomerSelected.value,
-      'nomor_putang': dashboardCt.nomorFaktur.value,
-      'nomorcb_putang': dashboardCt.nomorCbLastSelected.value,
-      'noxx_putang': dashboardCt.nomorFaktur.value,
-      'noref_putang': '',
-      'ref_putang': '',
-      'nogiro_putang': '',
-      'nokey_putang': '00001',
-      'cb_putang': dashboardCt.cabangKodeSelected.value,
-      'tbayar_putang': '',
-      'ceer_putang': dataDetailKartu[0]["total_pembayaran"],
-      'doe_putang': tanggalDanJam,
-      'uang_putang': 'RP',
-      'kurs_putang': '1',
-      'deo_putang': dataInformasiSYSUSER[0],
-      'loe_putang': tanggalDanJam,
-      'toe_putang': jamTransaksi,
-      'sign_putang': '',
-      'tgljtp_putang': tanggalDanJam,
-      'tanggal_putang': tanggalDanJam,
-      'flag_putang': 'Z',
-      'tgl_putang': tanggalNow,
-      'jtgiro_putang': tanggalDanJam,
-      'produk_putang': '',
-      'reftr_putang': '',
-    };
-    var connect = Api.connectionApi("post", body, "insert_putang");
-    var getValue = await connect;
-    var valueBody = jsonDecode(getValue.body);
-    print("berhasil insert putang ${valueBody['data']}");
-    return Future.value(valueBody['status']);
+    if (prosesCheckPutang.isEmpty) {
+      var dataInsert = [
+        dashboardCt.kodePelayanSelected.value,
+        dashboardCt.customSelected.value,
+        dashboardCt.wilayahCustomerSelected.value,
+        dashboardCt.nomorFaktur.value,
+        dashboardCt.nomorCbLastSelected.value,
+        dashboardCt.nomorFaktur.value,
+        dashboardCt.cabangKodeSelected.value,
+        dataDetailKartu[0]["total_pembayaran"],
+      ];
+
+      Future<List> prosesInsertPutang =
+          GetDataController().insertPutang(dataInsert);
+      List hasilInsertPutang = await prosesInsertPutang;
+
+      if (hasilInsertPutang[0] == true) {
+        // update pembayaran tabel putang dan insert
+        // Future<List> updatePutangDanInsertPembelian =
+        //     GetDataController().aksiUpdatePutangDanPembelian(lastNomorPPTGDT);
+        // List hasilUpdatePutang = await updatePutangDanInsertPembelian;
+      }
+    }
+
+    // return Future.value(valueBody['status']);
+    return Future.value(true);
   }
 
   Future<bool> updateJlhdPaid() async {

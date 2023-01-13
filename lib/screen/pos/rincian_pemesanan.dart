@@ -74,13 +74,14 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              flex: 10,
+                              flex: 5,
                               child: InkWell(
                                 onTap: () => Navigator.pop(context),
                                 child: Center(
                                   child: Icon(
                                     Iconsax.arrow_down_1,
                                     color: Utility.primaryDefault,
+                                    size: 20,
                                   ),
                                 ),
                               ),
@@ -91,7 +92,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width,
                                   child: Padding(
-                                    padding: const EdgeInsets.only(left: 8),
+                                    padding: const EdgeInsets.only(left: 12),
                                     child: Text(
                                       "Rincian Pesanan",
                                       textAlign: TextAlign.left,

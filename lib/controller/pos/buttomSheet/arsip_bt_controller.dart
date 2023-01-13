@@ -38,6 +38,7 @@ class ArsipButtomSheetController extends BaseController
   }
 
   void checkDetailTransaksi(pk, dataList) {
+    UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat...");
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -50,8 +51,10 @@ class ArsipButtomSheetController extends BaseController
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
         if (data.isNotEmpty) {
+          Get.back();
           detailArsipBarang(data, dataList);
         } else {
+          Get.back();
           UtilsAlert.showToast("Barang tidak tersedia");
           bottomSheetPosController.validasiSebelumAksi(
               "Hapus Faktur dan detail pembelian",
@@ -392,13 +395,24 @@ class ArsipButtomSheetController extends BaseController
                       SizedBox(
                         height: 5,
                       ),
-                      Button1(
-                        textBtn: "Lanjutkan Transaksi",
-                        colorBtn: Utility.primaryDefault,
+                      InkWell(
                         onTap: () {
                           dashboardController
                               .gantiLanjutkanArsipFaktur(data[0]['NOMOR']);
                         },
+                        child: CardCustom(
+                          colorBg: Utility.primaryDefault,
+                          radiusBorder: Utility.borderStyle5,
+                          widgetCardCustom: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Center(
+                              child: Text(
+                                "Lanjutkan Transaksi",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       SizedBox(
                         height: Utility.medium,

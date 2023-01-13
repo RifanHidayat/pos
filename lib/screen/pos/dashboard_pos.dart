@@ -373,6 +373,8 @@ class _DashboardState extends State<Dashboard> {
                                       if (controller.listKeranjangArsip.value
                                               .isEmpty &&
                                           controller.nomorFaktur.value == "-") {
+                                        print(
+                                            'all cabang ${controller.listCabang.value}');
                                         globalController.buttomSheet1(
                                             controller.listCabang.value,
                                             "Pilih Cabang",
@@ -948,7 +950,7 @@ class _DashboardState extends State<Dashboard> {
                               Stack(
                                 children: [
                                   Container(
-                                    height: 90,
+                                    height: 80,
                                     alignment: Alignment.bottomLeft,
                                     width: MediaQuery.of(context).size.width,
                                     decoration: BoxDecoration(
@@ -962,22 +964,28 @@ class _DashboardState extends State<Dashboard> {
                                             // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
                                             fit: BoxFit.fill)),
                                   ),
-                                  Container(
-                                    height: 20,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                        color: Utility.primaryDefault,
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(6),
-                                        )),
-                                    child: Center(
-                                      child: Text(
-                                        "$stokWare",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: Utility.small),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            color: Utility.primaryDefault,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(6),
+                                            )),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(3),
+                                          child: Text(
+                                            "$stokWare",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: Utility.small),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   )
                                 ],
                               ),
@@ -992,9 +1000,9 @@ class _DashboardState extends State<Dashboard> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Expanded(
-                                      flex: 70,
+                                      flex: 50,
                                       child: Text(
-                                        "$namaBarang - $type",
+                                        "$namaBarang",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             fontSize: Utility.small,
@@ -1002,13 +1010,16 @@ class _DashboardState extends State<Dashboard> {
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 30,
-                                      child: Text(
-                                        "${globalController.convertToIdr(hargaJual, 0)}",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: Utility.grey600,
-                                            fontSize: Utility.semiMedium),
+                                      flex: 50,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          "${globalController.convertToIdr(hargaJual, 0)}",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: Utility.grey600,
+                                              fontSize: Utility.semiMedium),
+                                        ),
                                       ),
                                     )
                                   ],
@@ -1121,22 +1132,31 @@ class _DashboardState extends State<Dashboard> {
                                                   // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
                                                   fit: BoxFit.fill)),
                                         ),
-                                        Container(
-                                          height: 20,
-                                          width: 20,
-                                          decoration: BoxDecoration(
-                                              color: Utility.primaryDefault,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(6),
-                                              )),
-                                          child: Center(
-                                            child: Text(
-                                              "$stokWare",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: Utility.small),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  color: Utility.primaryDefault,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft: Radius.circular(6),
+                                                  )),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(3),
+                                                child: Text(
+                                                  "$stokWare",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: Utility.small),
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         )
                                       ],
                                     ),

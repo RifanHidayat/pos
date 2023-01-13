@@ -37,6 +37,7 @@ class HapusJldtController extends BaseController {
       Get.back();
       Get.back();
       Get.back();
+      dashboardCt.getKelompokBarang('first');
       if (dataSelected != "") {
         Get.back();
       }

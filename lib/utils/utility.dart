@@ -79,6 +79,12 @@ class Utility {
       bottomLeft: Radius.circular(8),
       bottomRight: Radius.circular(8));
 
+  static BorderRadius borderStyle5 = BorderRadius.only(
+      topLeft: Radius.circular(10),
+      topRight: Radius.circular(10),
+      bottomLeft: Radius.circular(10),
+      bottomRight: Radius.circular(10));
+
   // TEXT CUSTOM
 
   static TextStyle judulList = TextStyle(

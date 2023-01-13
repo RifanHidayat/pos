@@ -225,16 +225,26 @@ class BottomSheetPos extends BaseController
           qtySebelumEdit.value = "$qtyProduk";
           qtySebelumEdit.refresh();
           dashboardCt.jumlahPesan.value.text = "$qtyProduk";
-          var fltr1 = jual * qtyProduk;
+
+          // validasi harga standar jual jika global include ppn
+          var cabangSelected = dashboardCt.listCabang.firstWhere(
+              (el) => el["KODE"] == dashboardCt.cabangKodeSelected.value);
+          double hargaJualFinal = 0.0;
+          if (dashboardCt.includePPN.value == "Y") {
+            double hitung1 = double.parse("$jual") *
+                (100 / (100 + double.parse("${cabangSelected['PPN']}")));
+            hargaJualFinal = hitung1;
+          } else {
+            hargaJualFinal = double.parse("$jual");
+          }
+
+          var fltr1 = hargaJualFinal * qtyProduk;
           var fltr2 = discd * qtyProduk;
           var fltr3 = fltr1 - fltr2;
-          // print(fltr1);
-          // print(fltr2);
-          // print(discd);
-          // print(fltr3);
+
           dashboardCt.totalPesan.value = fltr3.toDouble();
           dashboardCt.totalPesanNoEdit.value = fltr3.toDouble();
-          var convertJual = globalCt.convertToIdr(jual, 0);
+          var convertJual = globalCt.convertToIdr(hargaJualFinal, 0);
           dashboardCt.hargaJualPesanBarang.value.text = convertJual;
           dashboardCt.persenDiskonPesanBarang.value.text = "$diskon";
           var convertDiskonNominal = globalCt.convertToIdr(discd, 0);
@@ -545,14 +555,14 @@ class BottomSheetPos extends BaseController
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            flex: 10,
+                            flex: 15,
                             child: Text(
                               "Total",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(
-                            flex: 90,
+                            flex: 85,
                             child: Container(
                               alignment: Alignment.centerRight,
                               child: Text(
@@ -606,33 +616,51 @@ class BottomSheetPos extends BaseController
                               : SizedBox(),
                           Expanded(
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 6.0, right: 6.0),
-                              child: Button1(
-                                textBtn: type == "edit_keranjang"
-                                    ? "Edit"
-                                    : "Tambah",
-                                colorBtn: Utility.primaryDefault,
-                                onTap: () {
-                                  if (type == "edit_keranjang") {
-                                    validasiSebelumAksi(
-                                        "Edit Barang",
-                                        "Yakin edit barang ini ?",
-                                        "",
-                                        type,
-                                        produkSelected);
-                                  } else {
-                                    print(dashboardCt.totalPesanNoEdit.value);
-                                    validasiSebelumAksi(
-                                        "Simpan Barang",
-                                        "Yakin simpan barang ini ke keranjang ?",
-                                        "",
-                                        type,
-                                        produkSelected);
-                                  }
-                                },
-                              ),
-                            ),
+                                padding: const EdgeInsets.only(
+                                    left: 6.0, right: 6.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: InkWell(
+                                    onTap: () {
+                                      if (type == "edit_keranjang") {
+                                        validasiSebelumAksi(
+                                            "Edit Barang",
+                                            "Yakin edit barang ini ?",
+                                            "",
+                                            type,
+                                            produkSelected);
+                                      } else {
+                                        print(
+                                            dashboardCt.totalPesanNoEdit.value);
+                                        validasiSebelumAksi(
+                                            "Simpan Barang",
+                                            "Yakin simpan barang ini ke keranjang ?",
+                                            "",
+                                            type,
+                                            produkSelected);
+                                      }
+                                    },
+                                    child: CardCustom(
+                                      colorBg: Utility.primaryDefault,
+                                      radiusBorder: Utility.borderStyle5,
+                                      widgetCardCustom: Padding(
+                                          padding: EdgeInsets.all(8),
+                                          child: Center(
+                                            child: type == "edit_keranjang"
+                                                ? Text(
+                                                    "Edit",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )
+                                                : Text(
+                                                    "Tambah",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                          )),
+                                    ),
+                                  ),
+                                )),
                           )
                         ],
                       ),

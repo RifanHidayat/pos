@@ -152,6 +152,7 @@ class MasukKeranjangController extends BaseController {
     Get.back();
     dashboardCt
         .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
+    dashboardCt.aksiPilihKategoriBarang();
     dashboardCt.listMenu.refresh();
     dashboardCt.listKeranjang.refresh();
     dashboardCt.listKeranjangArsip.refresh();

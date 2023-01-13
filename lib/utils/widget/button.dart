@@ -33,7 +33,7 @@ class Button1 extends StatelessWidget {
       },
       child: Center(
         child: Padding(
-          padding: EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 6),
+          padding: const EdgeInsets.all(5),
           child: Text(
             "$textBtn",
             style: TextStyle(
@@ -172,25 +172,17 @@ class Button3 extends StatelessWidget {
             padding: EdgeInsets.only(right: 8),
             child: icon1,
           ),
-          icon1 != null
-              ? Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: Text(
+          Flexible(
+            child: icon1 != null
+                ? Text(
+                    "$textBtn",
+                    style: TextStyle(color: colorText),
+                  )
+                : Text(
                     "$textBtn",
                     style: TextStyle(color: colorText),
                   ),
-                )
-              : Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: Padding(
-                    padding:
-                        EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 6),
-                    child: Text(
-                      "$textBtn",
-                      style: TextStyle(color: colorText),
-                    ),
-                  ),
-                ),
+          ),
         ],
       ),
     );

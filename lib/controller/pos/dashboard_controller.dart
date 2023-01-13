@@ -111,6 +111,7 @@ class DashbardController extends BaseController {
       var getValue2 = getValue1[0].split("-");
       checkingJlhdArsip();
       getCabangJikaAdaArsip();
+      getKelompokBarang('first');
     } else {
       // arsipController.startLoad();
       var typeLoad = type == "hapus_faktur" ? "hapus_faktur" : "noarsip";
@@ -151,6 +152,7 @@ class DashbardController extends BaseController {
           print('sysdata terpilih ${element.nama}');
           includePPN.value = element.nama;
           includePPN.refresh();
+          print('include ppn ${includePPN.value}');
         }
       }
     }
@@ -442,8 +444,8 @@ class DashbardController extends BaseController {
   }
 
   void getKelompokBarang(type) {
-    listMenu.value.clear();
-    listMenu..refresh();
+    listMenu.clear();
+    listMenu.refresh();
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -462,6 +464,8 @@ class DashbardController extends BaseController {
           var getFirst = data.first;
           var kodeInisial = getFirst['INISIAL'];
           kategoriBarang.value = getFirst['NAMA'];
+          kategoriBarang.refresh();
+          print('load menu first');
           getMenu(kodeInisial, type);
         }
         kategoriBarang.refresh();
@@ -488,24 +492,25 @@ class DashbardController extends BaseController {
   }
 
   void aksiPilihKategoriBarang() {
-    listMenu.value.clear();
-    listMenu.refresh();
+    print("load menu run");
     var getKode = "";
-    for (var element in listKelompokBarang.value) {
+    for (var element in listKelompokBarang) {
       if (element['NAMA'] == kategoriBarang.value) {
         getKode = element['INISIAL'];
       }
     }
     print('get kode $getKode');
-    getMenu(getKode, '');
+    getMenu(getKode, 'first');
   }
 
   void getMenu(kodeInisial, type) {
+    listMenu.clear();
+    listMenu.refresh();
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
       'stringTabel': 'PROD1',
-      'offset': listMenu.value.length,
+      'offset': listMenu.length,
       'limit': 12,
       'inisial': '$kodeInisial',
       'gudang': '${gudangSelected.value}',
@@ -517,6 +522,7 @@ class DashbardController extends BaseController {
         List data = valueBody['data'];
         loadingString.value =
             data.isEmpty ? "Tidak ada barang" : "Sedang memuat...";
+        List tampungMenu = [];
         for (var element in data) {
           var filter = {
             'GROUP': element['GROUP'],
@@ -536,8 +542,9 @@ class DashbardController extends BaseController {
             'status': false,
             'jumlah_beli': 0,
           };
-          listMenu.value.add(filter);
+          tampungMenu.add(filter);
         }
+        listMenu.value = tampungMenu;
         listMenu.refresh();
         viewButtonKeranjang.value = true;
         viewButtonKeranjang.refresh();
@@ -628,7 +635,7 @@ class DashbardController extends BaseController {
 
   void checkingKeranjang() {
     double hitungJumlahSeluruh = 0.0;
-    for (var element1 in listMenu.value) {
+    for (var element1 in listMenu) {
       for (var element2 in listKeranjangArsip) {
         if ("${element1['GROUP']}${element1['KODE']}" ==
             "${element2['GROUP']}${element2['BARANG']}") {
@@ -719,6 +726,10 @@ class DashbardController extends BaseController {
     // perhitungan ppn header
 
     if (ppnHeader <= 0.0) {
+      var storageCabang = AppData.cabangSelected;
+      List filter = storageCabang.split("-");
+      print('perhitungan ppn header $ppnHeader');
+      ppnCabang.value = double.parse(filter[4]);
       ppnCabang.refresh();
     } else {
       var persenPPN =

@@ -66,69 +66,65 @@ class Onboard extends StatelessWidget {
             Expanded(
               flex: 10,
               child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: TextButton(
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Utility.primaryDefault),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ))),
-                      onPressed: () {
-                        controller.nextRoute();
-                      },
-                      child: !controller.loading.value
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 8, bottom: 8),
-                                  child: Text(
-                                    "Mulai",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Icon(
-                                    Icons.arrow_forward,
+                padding: const EdgeInsets.only(
+                    top: 12, bottom: 10, right: 30, left: 30),
+                child: TextButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Utility.primaryDefault),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ))),
+                    onPressed: () {
+                      controller.nextRoute();
+                    },
+                    child: !controller.loading.value
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Mulai",
+                                style: TextStyle(
                                     color: Colors.white,
-                                  ),
-                                )
-                              ],
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
+                              )
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    color: Colors.white,
+                                  )),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: Text(
+                                  "Tunggu Sebentar...",
+                                  style: TextStyle(
                                       color: Colors.white,
-                                    )),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 8, bottom: 8, left: 16),
-                                  child: Text(
-                                    "Tunggu Sebentar...",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              ],
-                            ))
-                  ),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )
+                            ],
+                          )),
+              ),
             )
           ],
         ),

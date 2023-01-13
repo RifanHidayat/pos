@@ -551,6 +551,7 @@ class _PembayaranState extends State<Pembayaran> {
                     : Utility.greyLight100,
                 icon1: Icon(
                   Iconsax.receipt_search,
+                  size: 18,
                   color: controller.buttonPilihBayar.value == 0
                       ? Colors.white
                       : Utility.primaryDefault,
@@ -576,6 +577,7 @@ class _PembayaranState extends State<Pembayaran> {
                     : Utility.greyLight100,
                 icon1: Icon(
                   Iconsax.scan,
+                  size: 18,
                   color: controller.buttonPilihBayar.value == 1
                       ? Colors.white
                       : Utility.primaryDefault,
