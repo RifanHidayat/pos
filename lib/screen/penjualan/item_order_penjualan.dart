@@ -67,15 +67,15 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                 return controller.statusBack.value;
               },
               child: Obx(
-                () => Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-                      CardCustom(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: CardCustom(
                         colorBg: Colors.white,
                         radiusBorder: Utility.borderStyle1,
                         widgetCardCustom: Padding(
@@ -117,26 +117,33 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                               ),
                               !controller.statusInformasiSo.value
                                   ? SizedBox()
-                                  : SizedBox(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: Utility.medium,
-                                          ),
-                                          lineHeaderInfo()
-                                        ],
+                                  : Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16, right: 16),
+                                      child: SizedBox(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: Utility.medium,
+                                            ),
+                                            lineHeaderInfo()
+                                          ],
+                                        ),
                                       ),
                                     )
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-                      InkWell(
+                    ),
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: InkWell(
                         onTap: () {
                           if (controller.listBarang.isNotEmpty) {
                             globalCt.buttomSheet1(
@@ -176,13 +183,16 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: Utility.large,
-                      ),
-                      Flexible(
-                          child: controller.barangTerpilih.isEmpty &&
-                                  controller.statusSODTKosong.value == true
-                              ? Center(
+                    ),
+                    SizedBox(
+                      height: Utility.large,
+                    ),
+                    Flexible(
+                        child: controller.barangTerpilih.isEmpty &&
+                                controller.statusSODTKosong.value == true
+                            ? SizedBox(
+                                height: 400,
+                                child: Center(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -203,10 +213,63 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                       ),
                                     ],
                                   ),
-                                )
-                              : listPilihanBarang())
-                    ],
-                  ),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16, right: 16),
+                                      child: listPilihanBarang(),
+                                    ),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: rincianWidget()),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.normal,
+                                    ),
+                                    controller.barangTerpilih.value.isEmpty
+                                        ? SizedBox()
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 16, right: 16),
+                                            child: detailNominalBayar()),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.normal,
+                                    ),
+                                  ],
+                                ),
+                              ))
+                  ],
                 ),
               ),
             ),
@@ -238,6 +301,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Expanded(
+                          flex: 65,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -258,43 +322,25 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                           ),
                         ),
                         Expanded(
+                            flex: 35,
                             child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: InkWell(
-                                            onTap: () {
-                                              HeaderRincianOrderPenjualanController()
-                                                  .sheetButtomHeaderRincian();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(Iconsax.receipt_2),
-                                                Text("Rincian")
-                                              ],
-                                            ))),
-                                    Expanded(
-                                        child: InkWell(
-                                            onTap: () {
-                                              controller.showDialog();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(Iconsax.add_circle),
-                                                Text("Simpan")
-                                              ],
-                                            ))),
-                                  ],
-                                ))),
+                              padding: const EdgeInsets.all(8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  controller.showDialog();
+                                },
+                                child: CardCustom(
+                                  colorBg: Utility.primaryDefault,
+                                  radiusBorder: Utility.borderStyle1,
+                                  widgetCardCustom: Center(
+                                    child: Text(
+                                      "Simpan",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -427,128 +473,160 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
     );
   }
 
-  Widget listPilihanBarang() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        controller.barangTerpilih.value.isEmpty
-            ? Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Utility.primaryDefault,
-                    ),
-                    Text(
-                      "Sedang memuat",
+  Widget rincianWidget() {
+    return InkWell(
+      onTap: () {
+        HeaderRincianOrderPenjualanController().sheetButtomHeaderRincian();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 85,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Iconsax.receipt_2,
+                    color: Utility.nonAktif,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 8, top: 2),
+                    child: Text(
+                      "Rincian",
                       style: TextStyle(fontWeight: FontWeight.bold),
-                    )
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 15,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Icon(
+                  Iconsax.arrow_right_3,
+                  size: 18,
+                  color: Utility.nonAktif,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget listPilihanBarang() {
+    return controller.barangTerpilih.value.isEmpty
+        ? SizedBox(
+            height: 200,
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Utility.primaryDefault,
+                  ),
+                  Text(
+                    "Sedang memuat",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+          )
+        : ListView.builder(
+            physics: BouncingScrollPhysics(),
+            itemCount: controller.barangTerpilih.value.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              var namaBarang = controller.barangTerpilih.value[index]["NAMA"];
+              var hargaJual = controller.barangTerpilih.value[index]["STDJUAL"];
+              var qtyBeli = controller.barangTerpilih.value[index]["qty_beli"];
+              var disc1 = controller.barangTerpilih.value[index]["DISC1"];
+              var discd = controller.barangTerpilih.value[index]["DISCD"];
+              var group = controller.barangTerpilih.value[index]["GROUP"];
+              var kode = controller.barangTerpilih.value[index]["KODE"];
+              var nourut = controller.barangTerpilih.value[index]["NOURUT"];
+              double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
+                  "$hargaJual", "$qtyBeli", "$discd");
+              int filterTotalBarang = hargaTotalBarang.toInt();
+              return Slidable(
+                endActionPane: ActionPane(
+                  extentRatio: 0.3,
+                  motion: ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      flex: 1,
+                      onPressed: (BuildContext context) {
+                        controller.editBarangSelected(group, kode);
+                      },
+                      backgroundColor: Utility.infoLight50,
+                      foregroundColor: Utility.infoDefault,
+                      icon: Iconsax.edit_2,
+                    ),
+                    SlidableAction(
+                      flex: 1,
+                      onPressed: (BuildContext context) {
+                        controller.hapusSODT(nourut);
+                      },
+                      backgroundColor: Color(0xffFFF2EB),
+                      foregroundColor: Colors.red,
+                      icon: Iconsax.trash,
+                    ),
                   ],
                 ),
-              )
-            : ListView.builder(
-                physics: controller.barangTerpilih.value.length <= 10
-                    ? AlwaysScrollableScrollPhysics()
-                    : BouncingScrollPhysics(),
-                itemCount: controller.barangTerpilih.value.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  var namaBarang =
-                      controller.barangTerpilih.value[index]["NAMA"];
-                  var hargaJual =
-                      controller.barangTerpilih.value[index]["STDJUAL"];
-                  var qtyBeli =
-                      controller.barangTerpilih.value[index]["qty_beli"];
-                  var disc1 = controller.barangTerpilih.value[index]["DISC1"];
-                  var discd = controller.barangTerpilih.value[index]["DISCD"];
-                  var group = controller.barangTerpilih.value[index]["GROUP"];
-                  var kode = controller.barangTerpilih.value[index]["KODE"];
-                  var nourut = controller.barangTerpilih.value[index]["NOURUT"];
-                  double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
-                      "$hargaJual", "$qtyBeli", "$discd");
-                  int filterTotalBarang = hargaTotalBarang.toInt();
-                  return Slidable(
-                    endActionPane: ActionPane(
-                      extentRatio: 0.3,
-                      motion: ScrollMotion(),
-                      children: [
-                        SlidableAction(
-                          flex: 1,
-                          onPressed: (BuildContext context) {
-                            controller.editBarangSelected(group, kode);
-                          },
-                          backgroundColor: Utility.infoLight50,
-                          foregroundColor: Utility.infoDefault,
-                          icon: Iconsax.edit_2,
-                        ),
-                        SlidableAction(
-                          flex: 1,
-                          onPressed: (BuildContext context) {
-                            controller.hapusSODT(nourut);
-                          },
-                          backgroundColor: Color(0xffFFF2EB),
-                          foregroundColor: Colors.red,
-                          icon: Iconsax.trash,
-                        ),
-                      ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "$namaBarang",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "$namaBarang",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 70,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                          "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
-                                    ),
-                                    disc1 == 0
-                                        ? SizedBox()
-                                        : Expanded(
-                                            child: Text(
-                                              "Disc $disc1%",
-                                              style: TextStyle(
-                                                  color: Colors.green),
-                                            ),
-                                          ),
-                                  ],
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 70,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                      "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
                                 ),
-                              ),
-                              Expanded(
-                                flex: 30,
-                                child: Text(
-                                  "${Utility.rupiahFormat('$filterTotalBarang', 'with_rp')}",
-                                  textAlign: TextAlign.end,
-                                ),
-                              )
-                            ],
+                                disc1 == 0
+                                    ? SizedBox()
+                                    : Expanded(
+                                        child: Text(
+                                          "Disc $disc1%",
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                      ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Divider(),
-                      ],
+                          Expanded(
+                            flex: 30,
+                            child: Text(
+                              "${Utility.rupiahFormat('$filterTotalBarang', 'with_rp')}",
+                              textAlign: TextAlign.end,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  );
-                }),
-        SizedBox(
-          height: Utility.medium,
-        ),
-        controller.barangTerpilih.value.isEmpty
-            ? SizedBox()
-            : detailNominalBayar()
-      ],
-    );
+                    Divider(),
+                  ],
+                ),
+              );
+            });
   }
 
   Widget detailNominalBayar() {
@@ -594,6 +672,9 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                   )
                 ],
               ),
+              SizedBox(
+                height: Utility.normal,
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -636,6 +717,9 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                     ),
                   )
                 ],
+              ),
+              SizedBox(
+                height: Utility.normal,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,6 +764,9 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                   )
                 ],
               ),
+              SizedBox(
+                height: Utility.normal,
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -707,6 +794,25 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                   )
                 ],
               ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              CardCustom(
+                colorBg: Colors.white,
+                radiusBorder: Utility.borderStyle1,
+                widgetCardCustom: InkWell(
+                  onTap: () => controller.showKeteranganSOHD(),
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Center(
+                      child: Text("Keterangan"),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: Utility.medium,
+              )
             ],
           );
   }

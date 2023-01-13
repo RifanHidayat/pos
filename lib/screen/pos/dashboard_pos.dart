@@ -813,16 +813,34 @@ class _DashboardState extends State<Dashboard> {
           var stokWare = controller.listMenu.value[index]['STOKWARE'];
           var status = controller.listMenu.value[index]['status'];
           var jumlahBeli = controller.listMenu.value[index]['jumlah_beli'];
+          var type = controller.listMenu.value[index]['TIPE'];
           return Padding(
             padding: const EdgeInsets.all(3.0),
             child: status == false
                 ? InkWell(
                     onTap: () {
+                      print('tipe barang selected $type');
                       if (controller.nomorFaktur.value == "-") {
                         UtilsAlert.showToast(
                             "Harap buat faktur terlebih dahulu");
-                      } else if (stokWare == 0 || stokWare < 0) {
-                        UtilsAlert.showToast("Stock barang habis");
+                      } else if (stokWare <= 0) {
+                        if (type == "1") {
+                          UtilsAlert.loadingSimpanData(
+                              context, "Sedang memuat...");
+                          var jual =
+                              globalController.convertToIdr(hargaJual, 0);
+                          buttomSheetProduk.buttomShowCardMenu(
+                              context, keyPilihBarang, jual);
+                        } else if (type == "3") {
+                          UtilsAlert.loadingSimpanData(
+                              context, "Sedang memuat...");
+                          var jual =
+                              globalController.convertToIdr(hargaJual, 0);
+                          buttomSheetProduk.buttomShowCardMenu(
+                              context, keyPilihBarang, jual);
+                        } else {
+                          UtilsAlert.showToast("Stock barang habis");
+                        }
                       } else {
                         UtilsAlert.loadingSimpanData(
                             context, "Sedang memuat...");
@@ -968,7 +986,7 @@ class _DashboardState extends State<Dashboard> {
                                     Expanded(
                                       flex: 70,
                                       child: Text(
-                                        "$namaBarang",
+                                        "$namaBarang - $type",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             fontSize: Utility.small,
@@ -1034,13 +1052,27 @@ class _DashboardState extends State<Dashboard> {
           var status = controller.listMenu.value[index]['status'];
           var stokWare = controller.listMenu.value[index]['STOKWARE'];
           var jumlah_beli = controller.listMenu.value[index]['jumlah_beli'];
+          var type = controller.listMenu.value[index]['TIPE'];
           return status == false
               ? InkWell(
                   onTap: () {
+                    print('tipe barang selected $type');
                     if (controller.nomorFaktur.value == "-") {
                       UtilsAlert.showToast("Harap buat faktur terlebih dahulu");
                     } else if (stokWare == 0 || stokWare < 0) {
-                      UtilsAlert.showToast("Stock barang habis");
+                      if (type == "1") {
+                        var jual = globalController.convertToIdr(hargaJual, 0);
+                        buttomSheetProduk.buttomShowCardMenu(
+                            context, keyPilihBarang, jual);
+                      } else if (type == "3") {
+                        UtilsAlert.loadingSimpanData(
+                            context, "Sedang memuat...");
+                        var jual = globalController.convertToIdr(hargaJual, 0);
+                        buttomSheetProduk.buttomShowCardMenu(
+                            context, keyPilihBarang, jual);
+                      } else {
+                        UtilsAlert.showToast("Stock barang habis");
+                      }
                     } else {
                       var jual = globalController.convertToIdr(hargaJual, 0);
                       buttomSheetProduk.buttomShowCardMenu(

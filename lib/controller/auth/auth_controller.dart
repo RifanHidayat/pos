@@ -178,12 +178,12 @@ class AuthController extends GetxController {
             AppData.flagMember = "${data[0]['FLAGMEMBER']}";
             AppData.bidUsaha = "${data[0]['BIDUSAHA']}";
             sidebarCt.getCabang();
-            Navigator.pop(Get.context!);
+            Get.back();
             Get.offAll(Dashboard());
           }
         } else {
           UtilsAlert.showToast("Password Salah");
-          Navigator.pop(Get.context!);
+          Get.back();
         }
       }
     });

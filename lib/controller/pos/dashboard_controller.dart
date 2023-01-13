@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -628,7 +629,7 @@ class DashbardController extends BaseController {
   void checkingKeranjang() {
     double hitungJumlahSeluruh = 0.0;
     for (var element1 in listMenu.value) {
-      for (var element2 in listKeranjangArsip.value) {
+      for (var element2 in listKeranjangArsip) {
         if ("${element1['GROUP']}${element1['KODE']}" ==
             "${element2['GROUP']}${element2['BARANG']}") {
           element1['status'] = true;
@@ -639,15 +640,10 @@ class DashbardController extends BaseController {
         }
       }
     }
-    jumlahItemDikeranjang.value = listKeranjang.value.length;
-    totalNominalDikeranjang.value = hitungJumlahSeluruh;
+
     if (listKeranjangArsip.isNotEmpty) {
       hitungAllArsipMenu();
     }
-    listKeranjang.refresh();
-    listMenu.refresh();
-    jumlahItemDikeranjang.refresh();
-    totalNominalDikeranjang.refresh();
   }
 
   void hitungAllArsipMenu() async {
@@ -663,16 +659,20 @@ class DashbardController extends BaseController {
 
     for (var element in listKeranjangArsip.value) {
       double hargaBarang = double.parse("${element['HARGA']}");
+      double persenDiskonBarang = double.parse("${element['DISC1']}");
       double discdBarang = double.parse("${element['DISCD']}");
       double dischBarang = double.parse("${element['DISCH']}");
       double qtyBarang = double.parse("${element['QTY']}");
       var hitung1 = hargaBarang * qtyBarang;
       var hitung2 = discdBarang * qtyBarang;
       var finalHitung = hitung1 - hitung2;
+      var hitungSubtotal =
+          qtyBarang * (hargaBarang - (hargaBarang * persenDiskonBarang * 0.01));
       var hitungDiscn = hitung2 + dischBarang;
       var hitungDiscnJldt = discdBarang + dischBarang;
 
-      subtotalKeranjang = subtotalKeranjang + finalHitung;
+      subtotalKeranjang = subtotalKeranjang + hitungSubtotal;
+      // subtotalKeranjang = subtotalKeranjang + finalHitung;
       hargaTotheader = hargaTotheader + hitung1;
       qtyallheader = qtyallheader + qtyBarang;
       discdHeader = discdHeader + hitung2;
@@ -682,7 +682,7 @@ class DashbardController extends BaseController {
       biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
 
       // update jldt
-      double hrgSetelahDiskon = finalHitung - dischBarang;
+      double hrgSetelahDiskon = hitungSubtotal - dischBarang;
       // var hitungPpnJldt =
       //     Utility.nominalPPNHeader('$hrgSetelahDiskon', '${ppnCabang.value}');
       var hitungPpnJldt = double.parse("${element['TAXN']}");
@@ -708,14 +708,12 @@ class DashbardController extends BaseController {
 
     // perhitungan diskon header
 
-    if (diskonHeader.value == 0.0) {
-      print('disch ${informasiJlhd.value[0]['DISCH']}');
-      var fltr1 = Utility.persenDiskonHeader("${totalNominalDikeranjang.value}",
-          "${informasiJlhd.value[0]['DISCH']}");
+    print('disch $dischHeader');
+    var fltr1 = Utility.persenDiskonHeader(
+        "${totalNominalDikeranjang.value}", "$dischHeader");
 
-      diskonHeader.value = fltr1;
-      diskonHeader.refresh();
-    }
+    diskonHeader.value = "$fltr1" == "NaN" ? 0.0 : fltr1;
+    diskonHeader.refresh();
 
     var hargaSetelahDiskonHeader = totalNominalDikeranjang.value - dischHeader;
 
@@ -725,7 +723,7 @@ class DashbardController extends BaseController {
         Utility.persenDiskonHeader('$hargaSetelahDiskonHeader', '$ppnHeader');
     // '$hargaSetelahDiskonHeader', '${informasiJlhd.value[0]['TAXP']}');
 
-    ppnCabang.value = persenPPN;
+    ppnCabang.value = "$persenPPN" == "NaN" ? 0.0 : persenPPN;
     ppnCabang.refresh();
 
     // perhitungan service charge
@@ -735,24 +733,48 @@ class DashbardController extends BaseController {
 
     var precisionPersenServiceCharge = convertPersenServiceCharge;
 
-    serviceChargerCabang.value = precisionPersenServiceCharge;
+    serviceChargerCabang.value = "$precisionPersenServiceCharge" == "NaN"
+        ? 0.0
+        : precisionPersenServiceCharge;
 
     serviceChargerCabang.refresh();
 
     var nominalService = Utility.nominalPPNHeader(
         '$hargaSetelahDiskonHeader', '${serviceChargerCabang.value}');
 
-    var convertServiceChargeNominal = nominalService;
+    var convertServiceChargeNominal =
+        "$nominalService" == "NaN" ? 0.0 : nominalService;
 
     var hargaNetHeader =
         hargaSetelahDiskonHeader + ppnHeader + convertServiceChargeNominal;
 
     // var fixedTaxn = ppnHeader.toPrecision(2);
     var fixedTaxn = ppnHeader;
-    var fixedHrgNet = hargaNetHeader;
+    var fixedHrgNet = "$hargaNetHeader" == "NaN" ? 0.0 : hargaNetHeader;
+
+    // print('hrg tot jlhd ${hargatotjlhd.value}');
+    // print('discn header $discdHeader');
+    // print('disch header $dischHeader');
+    // print('discn header $discnHeader');
+    // print('fix taxn $fixedTaxn');
+    // print('fix service $convertServiceChargeNominal');
+    // print('hrg net $fixedHrgNet');
 
     updateDataJlhd(hargatotjlhd.value, discdHeader, dischHeader, discnHeader,
         fixedTaxn, convertServiceChargeNominal, fixedHrgNet);
+
+    Future<List> updateInformasiJLHD = GetDataController().getSpesifikData(
+        "JLHD", "PK", primaryKeyFaktur.value, "get_spesifik_data_transaksi");
+    List hasilUpdate = await updateInformasiJLHD;
+
+    informasiJlhd.value = hasilUpdate;
+    informasiJlhd.refresh();
+
+    jumlahItemDikeranjang.value = listKeranjangArsip.length;
+    jumlahItemDikeranjang.refresh();
+
+    // totalNominalDikeranjang.value = hargaNetHeader;
+    // totalNominalDikeranjang.refresh();
   }
 
   void validasiCabangsdPelanggan(kodeCbArsip, gudangArsip, kodeSalesArsip) {

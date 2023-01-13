@@ -800,7 +800,13 @@ class OrderPenjualanPesanBarangController extends GetxController {
         String nominalDiskonBarang = hasilInputQty[0];
         double totalNominalUpdate = hasilInputQty[1];
 
+        var vld1 = value.replaceAll(".", ".");
+        var vld2 = vld1.replaceAll(",", ".");
+        double vld3 = double.parse(vld2);
+
         setState(() {
+          itemOrderPenjualanCt.persenDiskonPesanBarang.value.text =
+              vld3.toString();
           itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text =
               nominalDiskonBarang;
           itemOrderPenjualanCt.totalPesanBarang.value = totalNominalUpdate;
@@ -863,20 +869,7 @@ class OrderPenjualanPesanBarangController extends GetxController {
   }
 
   Future<bool> perhitunganMenyeluruhOrderPenjualan(List hasilSodt) async {
-    // Future<List> prosesGetDataSODT = GetDataController().getSpesifikData(
-    //     "SODT",
-    //     "NOMOR",
-    //     dashboardPenjualanCt.nomorSoSelected.value,
-    //     "get_spesifik_data_transaksi");
-    // List hasilSodt = await prosesGetDataSODT;
-
-    // Future<List> prosesGetSodt = GetDataController()
-    //     .getDataSODT(dashboardPenjualanCt.nomorSoSelected.value);
-    // List hasilSodt = await prosesGetSodt;
-
     if (hasilSodt.isNotEmpty) {
-      // List hasilSodt = itemOrderPenjualanCt.sodtSelected;
-
       double subtotalKeranjang = 0.0;
       double hargaTotheader = 0.0;
       double qtyallheader = 0.0;
@@ -895,8 +888,7 @@ class OrderPenjualanPesanBarangController extends GetxController {
         var hitung2 = discdBarang * qtyBarang;
         var finalHitung = hitung1 - hitung2;
         var hitungDiscn = hitung2 + dischBarang;
-        var hitungDiscnJldt =
-            discdBarang.toPrecision(2) + dischBarang.toPrecision(2);
+        var hitungDiscnJldt = discdBarang + dischBarang;
 
         print('sodt taxn ${double.parse("${element['TAXN']}")}');
         print('sodt biaya ${double.parse("${element['BIAYA']}")}');
@@ -916,7 +908,7 @@ class OrderPenjualanPesanBarangController extends GetxController {
         double hitungPpnSodt = 0.0;
 
         var ongkosSodt = double.parse("${element['BIAYA']}");
-        var discnSodt = hitungDiscnJldt.toPrecision(2);
+        var discnSodt = hitungDiscnJldt;
         var ppnSodt = double.parse("${element['TAXN']}");
         GetDataController().updateSodt(element['NOMOR'], element['NOURUT'],
             discnSodt, ppnSodt, ongkosSodt);
@@ -972,8 +964,8 @@ class OrderPenjualanPesanBarangController extends GetxController {
       itemOrderPenjualanCt.totalNetto.value = hargaNetHeader;
       itemOrderPenjualanCt.totalNetto.refresh();
 
-      var fixedTaxn = taxnHeader.toPrecision(2);
-      var fixedHrgNet = hargaNetHeader.toPrecision(2);
+      var fixedTaxn = taxnHeader;
+      var fixedHrgNet = hargaNetHeader;
 
       GetDataController().updateSohd(
           dashboardPenjualanCt.nomorSoSelected.value,
@@ -982,6 +974,7 @@ class OrderPenjualanPesanBarangController extends GetxController {
           discdHeader,
           dischHeader,
           discnHeader,
+          hitungPersenPPN.toStringAsFixed(2),
           fixedTaxn,
           fixedHrgNet);
     }

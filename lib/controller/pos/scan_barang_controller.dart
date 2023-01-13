@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/buttom_sheet/np_barang_ct.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/edit_keranjang_controller.dart';
@@ -20,10 +21,12 @@ class ScanBarangController extends BaseController {
 
   var dashboardCt = Get.put(DashbardController());
   var buttomSheetProduk = Get.put(BottomSheetPos());
+  var notaPengirimanPesanBarang =
+      Get.put(NotaPengirimanBarangPesanController());
   var globalCt = Get.put(GlobalController());
   var editKeranjangCt = Get.put(EditKeranjangController());
 
-  void getBarcodeImei(type, code) {
+  void getBarcodeImei(type, code, scanMenu) {
     var imeiSelected = "";
     for (var element in buttomSheetProduk.listDataImei.value) {
       if (element["IMEI"] == code) {
@@ -34,9 +37,15 @@ class ScanBarangController extends BaseController {
       // }
     }
     if (imeiSelected != "") {
-      buttomSheetProduk.imeiSelected.value = imeiSelected;
-      buttomSheetProduk.imeiSelected.refresh();
-      Get.back();
+      if (scanMenu == "POS") {
+        buttomSheetProduk.imeiSelected.value = imeiSelected;
+        buttomSheetProduk.imeiSelected.refresh();
+        Get.back();
+      } else {
+        notaPengirimanPesanBarang.imeiSelected.value = imeiSelected;
+        notaPengirimanPesanBarang.imeiSelected.refresh();
+        Get.back();
+      }
     } else {
       Get.back();
     }
@@ -130,7 +139,8 @@ class ScanBarangController extends BaseController {
         dashboardCt.jumlahPesan.value.text = "$hasilQty";
         dashboardCt.htgUkuran.value = "${produkDikeranjang[0]["HTG"]}";
         dashboardCt.pakUkuran.value = "${produkDikeranjang[0]["PAK"]}";
-        editKeranjangCt.editKeranjang(dataFinalProduk, 'edit_dari_scanbarcode');
+        editKeranjangCt
+            .editKeranjang(dataFinalProduk, 'edit_dari_scanbarcode', []);
       } else {
         buttomSheetProduk.checkingUkuran(Get.context!, barangSelect.value, jual,
             "", 0, "", "", "", "", "", "", "", "");

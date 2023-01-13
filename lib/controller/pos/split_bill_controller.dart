@@ -125,7 +125,7 @@ class SplitBillController extends BaseController {
               'SAT': dataKeranjangTerpilihSplit['SAT'],
             };
             Future<bool> proses4 = masukKeranjangCt
-                .aksiMasukKeranjangLocal([dataProdukSelected], []);
+                .aksiMasukKeranjangLocal([dataProdukSelected], [], 0);
             var hasilProses4 = await proses4;
             print('hasil proses 4 $hasilProses4');
             if (hasilProses4 == true) {

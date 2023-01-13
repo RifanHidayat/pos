@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
@@ -217,19 +218,28 @@ class _PembayaranState extends State<Pembayaran> {
                                   UtilsAlert.showToast(
                                       "Isi uang yang di terima");
                                 } else {
-                                  if (controller.tipePembayaranSelected.value !=
-                                      "Tunai") {
-                                    if (controller.statusKartuSelected.value ==
-                                        "Y") {
-                                      controller.nomorRekeningPembayaran.value
-                                          .text = "";
-                                      controller.inputDetailKartu();
+                                  ButtonSheetController().validasiButtonSheet(
+                                      "Selesaikan Pembayaran",
+                                      Text(
+                                          "Yakin selesaikan pembayaran faktur ${Utility.convertNoFaktur('${dashboardCt.nomorFaktur.value}')}"),
+                                      "selesaikan_pembayaran",
+                                      "Selesaikan", () {
+                                    if (controller
+                                            .tipePembayaranSelected.value !=
+                                        "Tunai") {
+                                      if (controller
+                                              .statusKartuSelected.value ==
+                                          "Y") {
+                                        controller.nomorRekeningPembayaran.value
+                                            .text = "";
+                                        controller.inputDetailKartu();
+                                      } else {
+                                        controller.pembayaranTanpaKartu();
+                                      }
                                     } else {
                                       controller.pembayaranTanpaKartu();
                                     }
-                                  } else {
-                                    controller.pembayaranTanpaKartu();
-                                  }
+                                  });
                                 }
                               })),
                     )
@@ -375,7 +385,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.diskonHeader.value}%",
+                                "${dashboardCt.diskonHeader.value.toStringAsFixed(2)}%",
                                 style: TextStyle(
                                     fontSize: Utility.small,
                                     color: Colors.green),
@@ -421,7 +431,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.ppnCabang.value}%",
+                                "${dashboardCt.ppnCabang.value.toStringAsFixed(2)}%",
                                 style: TextStyle(
                                     fontSize: Utility.small, color: Colors.red),
                               ),
@@ -466,7 +476,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.serviceChargerCabang.value}%",
+                                "${dashboardCt.serviceChargerCabang.value.toStringAsFixed(2)}%",
                                 style: TextStyle(
                                     fontSize: Utility.small, color: Colors.red),
                               ),
@@ -479,7 +489,7 @@ class _PembayaranState extends State<Pembayaran> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                      "${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
                       textAlign: TextAlign.right,
                     ),
                   )

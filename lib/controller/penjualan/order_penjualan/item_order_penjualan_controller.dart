@@ -14,6 +14,7 @@ import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
+import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
 class ItemOrderPenjualanController extends BaseController {
@@ -34,6 +35,11 @@ class ItemOrderPenjualanController extends BaseController {
   var nominalPPNHeaderRincian = TextEditingController().obs;
 
   var nominalOngkosHeaderRincian = TextEditingController().obs;
+
+  var keterangan1 = TextEditingController().obs;
+  var keterangan2 = TextEditingController().obs;
+  var keterangan3 = TextEditingController().obs;
+  var keterangan4 = TextEditingController().obs;
 
   Rx<List<String>> typeBarang = Rx<List<String>>([]);
 
@@ -143,6 +149,35 @@ class ItemOrderPenjualanController extends BaseController {
         // hitungSubtotal();
       }
     } else {
+      var dataUpdate = {
+        'column1': 'NOMOR',
+        'cari1': dashboardPenjualanCt.nomorSoSelected.value,
+        'HRGTOT': '0',
+        'DISCD': '0',
+        'DISCH': '0',
+        'DISCN': '0',
+        'BIAYA': '0',
+        'TAXN': '0',
+        'HRGNET': '0',
+        'QTY': '0',
+        'QTZ': '0',
+      };
+      Future<List> prosesUpdateSOHD = GetDataController().editDataGlobal(
+          "SOHD", "edit_data_global_transaksi", "1", dataUpdate);
+      List hasilproses = await prosesUpdateSOHD;
+      print(hasilproses);
+
+      subtotal.value = 0.0;
+      subtotal.refresh();
+
+      totalNetto.value = 0.0;
+      totalNetto.refresh();
+
+      hrgtotSohd.value = 0.0;
+      hrgtotSohd.refresh();
+
+      allQtyBeli.value = 0.0;
+      allQtyBeli.refresh();
       UtilsAlert.showToast("Tidak ada item yang terpilih");
       statusSODTKosong.value = true;
     }
@@ -227,6 +262,198 @@ class ItemOrderPenjualanController extends BaseController {
         Get.back();
         Get.back();
         UtilsAlert.showToast("Berhasil hapus barang");
+      }
+    });
+  }
+
+  void showKeteranganSOHD() {
+    keterangan1.value.text = dashboardPenjualanCt.dataSohd[0]['KET1'];
+    keterangan2.value.text = dashboardPenjualanCt.dataSohd[0]['KET2'];
+    keterangan3.value.text = dashboardPenjualanCt.dataSohd[0]['KET3'];
+    keterangan4.value.text = dashboardPenjualanCt.dataSohd[0]['KET4'];
+    ButtonSheetController().validasiButtonSheet(
+        "Keterangan", contentShowKeterangan(), "show_keterangan", "", () => {});
+  }
+
+  Widget contentShowKeterangan() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Keterangan 1",
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Utility.greyDark),
+        ),
+        SizedBox(
+          height: 3,
+        ),
+        Container(
+          height: 50,
+          width: MediaQuery.of(Get.context!).size.width,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: Utility.borderStyle1,
+              border: Border.all(
+                  width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+          child: Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: TextField(
+              cursorColor: Colors.black,
+              controller: keterangan1.value,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              decoration: new InputDecoration(border: InputBorder.none),
+              style:
+                  TextStyle(fontSize: 14.0, height: 1.0, color: Colors.black),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: Utility.normal,
+        ),
+        Text(
+          "Keterangan 2",
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Utility.greyDark),
+        ),
+        SizedBox(
+          height: 3,
+        ),
+        Container(
+          height: 50,
+          width: MediaQuery.of(Get.context!).size.width,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: Utility.borderStyle1,
+              border: Border.all(
+                  width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+          child: Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: TextField(
+              cursorColor: Colors.black,
+              controller: keterangan2.value,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              decoration: new InputDecoration(border: InputBorder.none),
+              style:
+                  TextStyle(fontSize: 14.0, height: 1.0, color: Colors.black),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: Utility.normal,
+        ),
+        Text(
+          "Keterangan 3",
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Utility.greyDark),
+        ),
+        SizedBox(
+          height: 3,
+        ),
+        Container(
+          height: 50,
+          width: MediaQuery.of(Get.context!).size.width,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: Utility.borderStyle1,
+              border: Border.all(
+                  width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+          child: Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: TextField(
+              cursorColor: Colors.black,
+              controller: keterangan3.value,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              decoration: new InputDecoration(border: InputBorder.none),
+              style:
+                  TextStyle(fontSize: 14.0, height: 1.0, color: Colors.black),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: Utility.normal,
+        ),
+        Text(
+          "Keterangan 4",
+          style:
+              TextStyle(fontWeight: FontWeight.bold, color: Utility.greyDark),
+        ),
+        SizedBox(
+          height: 3,
+        ),
+        Container(
+          height: 50,
+          width: MediaQuery.of(Get.context!).size.width,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: Utility.borderStyle1,
+              border: Border.all(
+                  width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+          child: Padding(
+            padding: EdgeInsets.only(left: 8),
+            child: TextField(
+              cursorColor: Colors.black,
+              controller: keterangan4.value,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              decoration: new InputDecoration(border: InputBorder.none),
+              style:
+                  TextStyle(fontSize: 14.0, height: 1.0, color: Colors.black),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: Utility.medium,
+        ),
+        InkWell(
+          onTap: () => simpanPerubahanKeterangan(),
+          child: CardCustom(
+            colorBg: Utility.primaryDefault,
+            radiusBorder: Utility.borderStyle1,
+            widgetCardCustom: Padding(
+              padding: EdgeInsets.all(12),
+              child: Center(
+                child: Text(
+                  "Simpan perubahan",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  void simpanPerubahanKeterangan() {
+    ButtonSheetController().validasiButtonSheet(
+        "Keterangan",
+        Text("Yakin simpan perubahan keterangan ?"),
+        "perubahan_keterangan",
+        "Simpan", () async {
+      UtilsAlert.loadingSimpanData(Get.context!, "Simpan perubahan data...");
+      var dataUpdate = {
+        'column1': 'NOMOR',
+        'cari1': '${dashboardPenjualanCt.nomorSoSelected.value}',
+        'KET1': keterangan1.value.text,
+        'KET2': keterangan2.value.text,
+        'KET3': keterangan3.value.text,
+        'KET4': keterangan4.value.text,
+      };
+      Future<List> editKeterangan = GetDataController().editDataGlobal(
+          "SOHD", "edit_data_global_transaksi", "1", dataUpdate);
+      List hasilUpdate = await editKeterangan;
+      if (hasilUpdate[0] == true) {
+        Future<bool> prosesRefreshSOHD = dashboardPenjualanCt.getDataAllSOHD();
+        bool hasilProsesRefresh = await prosesRefreshSOHD;
+        if (hasilProsesRefresh == true) {
+          dashboardPenjualanCt.loadSOHDSelected();
+          Get.back();
+          Get.back();
+          Get.back();
+        }
       }
     });
   }

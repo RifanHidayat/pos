@@ -8,7 +8,7 @@ class PerhitunganCt extends GetxController {
 
     double filterQty = double.parse(qtyNow);
 
-    if (filterQty <= 0) {
+    if (filterQty < 0) {
       hasilAkhir = false;
     } else {
       double hitungQty = filterQty - 1;
@@ -28,7 +28,7 @@ class PerhitunganCt extends GetxController {
     double vld3 = double.parse(vld2);
     var vld4 = vld3 == 0.0 || vld3 < 0.0 ? 1.0 : vld3;
 
-    if (vld4 <= 0) {
+    if (vld4 < 0) {
       hasilAkhir = false;
     } else {
       double filterHargaJual = Utility.convertStringRpToDouble(hargaJual);
@@ -46,7 +46,7 @@ class PerhitunganCt extends GetxController {
 
     double filterQty = double.parse(qtyNow);
 
-    if (filterQty <= 0) {
+    if (filterQty < 0) {
       hasilAkhir = false;
     } else {
       double hitungQty = filterQty + 1;

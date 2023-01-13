@@ -28,42 +28,54 @@ class BuatFakturController extends BaseController {
     List data = valueBody['data'];
 
     if (valueBody['status'] == true) {
-      var tanggalLastFaktur = data[0]['TANGGAL'];
-      var nomorAntriLastFaktur = data[0]['NOMORANTRI'];
-      var getfaktur = data[0]['NOMOR'];
-      var filter = getfaktur.substring(2);
-      var filter2 = int.parse(filter) + 1;
-      var lastFaktur = "SI$filter2";
-      var dt = DateTime.now();
+      var lastFaktur = "";
+      if (data.isNotEmpty) {
+        var tanggalLastFaktur = data[0]['TANGGAL'];
+        var nomorAntriLastFaktur = data[0]['NOMORANTRI'];
+        var getfaktur = data[0]['NOMOR'];
+        var filter = getfaktur.substring(2);
+        var filter2 = int.parse(filter) + 1;
+        lastFaktur = "SI$filter2";
+        var dt = DateTime.now();
 
-      var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
-      var inputDate = Utility.convertDate4(tanggalLastFaktur);
-      if (tanggalNow == inputDate) {
-        // print(nomorAntriLastFaktur);
-        if (nomorAntriLastFaktur == null || nomorAntriLastFaktur == "") {
-          print('nomor antri tidak valid');
+        var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+        var inputDate = Utility.convertDate4(tanggalLastFaktur);
+        if (tanggalNow == inputDate) {
+          // print(nomorAntriLastFaktur);
+          if (nomorAntriLastFaktur == null || nomorAntriLastFaktur == "") {
+            print('nomor antri tidak valid');
+            dashboardCt.nomorOrder.value =
+                "${DateFormat('yyyyMMdd').format(dt)}001";
+          } else {
+            print('nomor antri valid');
+            var ft1 =
+                nomorAntriLastFaktur.substring(nomorAntriLastFaktur.length - 3);
+            var ft2 = int.parse(ft1) + 1;
+            if (ft2 <= 9) {
+              dashboardCt.nomorOrder.value =
+                  "${DateFormat('yyyyMMdd').format(dt)}00$ft2";
+            } else if (ft2 <= 99) {
+              dashboardCt.nomorOrder.value =
+                  "${DateFormat('yyyyMMdd').format(dt)}0$ft2";
+            } else if (ft2 < 999) {
+              dashboardCt.nomorOrder.value =
+                  "${DateFormat('yyyyMMdd').format(dt)}$ft2";
+            }
+          }
+        } else {
           dashboardCt.nomorOrder.value =
               "${DateFormat('yyyyMMdd').format(dt)}001";
-        } else {
-          print('nomor antri valid');
-          var ft1 =
-              nomorAntriLastFaktur.substring(nomorAntriLastFaktur.length - 3);
-          var ft2 = int.parse(ft1) + 1;
-          if (ft2 <= 9) {
-            dashboardCt.nomorOrder.value =
-                "${DateFormat('yyyyMMdd').format(dt)}00$ft2";
-          } else if (ft2 <= 99) {
-            dashboardCt.nomorOrder.value =
-                "${DateFormat('yyyyMMdd').format(dt)}0$ft2";
-          } else if (ft2 < 999) {
-            dashboardCt.nomorOrder.value =
-                "${DateFormat('yyyyMMdd').format(dt)}$ft2";
-          }
         }
       } else {
+        var dt = DateTime.now();
+        var tahun = "${DateFormat('yyyy').format(DateTime.now())}";
+        var bulan = "${DateFormat('MM').format(DateTime.now())}";
+        var nomor = "0001";
+        lastFaktur = "SI$tahun$bulan$nomor";
         dashboardCt.nomorOrder.value =
             "${DateFormat('yyyyMMdd').format(dt)}001";
       }
+
       dashboardCt.nomorOrder.refresh();
       // print(getfaktur);
       // print(filter2);
@@ -90,10 +102,20 @@ class BuatFakturController extends BaseController {
     List data = valueBody['data'];
 
     if (valueBody['status'] == true) {
-      var getNomorCb = data[0]['NOMORCB'];
-      var filter = getNomorCb.substring(2);
-      var filter2 = int.parse(filter) + 1;
-      var lastNomorCB = "SI$filter2";
+      var lastNomorCB = "";
+      if (data.isNotEmpty) {
+        var getNomorCb = data[0]['NOMORCB'];
+        var filter = getNomorCb.substring(2);
+        var filter2 = int.parse(filter) + 1;
+        lastNomorCB = "SI$filter2";
+      } else {
+        var dt = DateTime.now();
+        var tahun = "${DateFormat('yyyy').format(DateTime.now())}";
+        var bulan = "${DateFormat('MM').format(DateTime.now())}";
+        var nomor = "0001";
+        lastNomorCB = "SI$tahun$bulan$nomor";
+      }
+
       Future<bool> prosesInsert = insertFakturBaru(lastFaktur, lastNomorCB);
       proses2 = await prosesInsert;
     }
@@ -107,6 +129,10 @@ class BuatFakturController extends BaseController {
     var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
     var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
     var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    var taxpFilter = "${dashboardCt.ppnCabang.value}" == "NaN"
+        ? 0.0
+        : dashboardCt.ppnCabang.value;
 
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
@@ -132,7 +158,7 @@ class BuatFakturController extends BaseController {
       'jlhd_deo': dataInformasiSYSUSER[0],
       'jlhd_nomorcb': "$lastNomorCB",
       'jlhd_nomorantri': "${dashboardCt.nomorOrder.value}",
-      'jlhd_taxp': "${dashboardCt.ppnCabang.value}"
+      'jlhd_taxp': "$taxpFilter"
     };
     var connect = Api.connectionApi("post", body, "buat_faktur");
 
@@ -152,14 +178,14 @@ class BuatFakturController extends BaseController {
         AppData.noFaktur =
             "${dashboardCt.nomorFaktur.value}-${dashboardCt.primaryKeyFaktur.value}-$lastNomorCB-${dashboardCt.nomorOrder.value}";
       }
+      UtilsAlert.showToast("Berhasil buat faktur");
+      Get.back();
+      Get.back();
       dashboardCt.nomorFaktur.refresh();
       dashboardCt.primaryKeyFaktur.refresh();
       print("nomor faktur ${dashboardCt.nomorFaktur.value}");
       print("key faktur ${dashboardCt.primaryKeyFaktur.value}");
       dashboardCt.checkingJlhdArsip();
-      UtilsAlert.showToast("Berhasil buat faktur");
-      Get.back();
-      Get.back();
     } else {
       getAkhirNomorFaktur();
     }

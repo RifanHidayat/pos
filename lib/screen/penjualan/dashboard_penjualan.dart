@@ -29,7 +29,14 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
 
   Future<void> refreshData() async {
     await Future.delayed(Duration(seconds: 2));
-    controller.loadData();
+    if (controller.screenAktif.value == 1) {
+      controller.getDataAllSOHD();
+    } else if (controller.screenAktif.value == 2) {
+      controller.getDataAllDOHD();
+    } else if (controller.screenAktif.value == 3) {
+      controller.getDataFakturPenjualan();
+    }
+    // controller.loadData();
   }
 
   @override
@@ -69,7 +76,9 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                         ? screenOrderPenjualan()
                         : controller.screenAktif.value == 2
                             ? screenNotaPengirimanBarang()
-                            : SizedBox(),
+                            : controller.screenAktif.value == 3
+                                ? screenFakturPenjualan()
+                                : SizedBox(),
                   ))
                 ],
               ),
@@ -158,30 +167,29 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          flex: 80,
           child: Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             child: pencarianData(),
           ),
         ),
-        Expanded(
-          flex: 20,
-          child: Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: CardCustom(
-                colorBg: Colors.white,
-                radiusBorder: Utility.borderStyle1,
-                widgetCardCustom: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Center(
-                    child: Icon(
-                      Iconsax.setting_4,
-                      color: Utility.greyDark,
-                    ),
-                  ),
-                ),
-              )),
-        )
+        // Expanded(
+        //   flex: 20,
+        //   child: Padding(
+        //       padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+        //       child: CardCustom(
+        //         colorBg: Colors.white,
+        //         radiusBorder: Utility.borderStyle1,
+        //         widgetCardCustom: Padding(
+        //           padding: const EdgeInsets.all(8),
+        //           child: Center(
+        //             child: Icon(
+        //               Iconsax.setting_4,
+        //               color: Utility.greyDark,
+        //             ),
+        //           ),
+        //         ),
+        //       )),
+        // )
       ],
     );
   }
@@ -430,10 +438,10 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            "Qty - ${Utility.rupiahFormat('$qty', '')}",
+                                            "Qty : ${Utility.rupiahFormat('$qty', '')}",
                                           ),
                                           Text(
-                                            "Outs - ${Utility.rupiahFormat('$outstanding', '')}",
+                                            "Outs : ${Utility.rupiahFormat('$outstanding', '')}",
                                             style: TextStyle(
                                                 color: outstanding < qty
                                                     ? Color.fromARGB(
@@ -583,7 +591,7 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            "Qty - $qty",
+                                            "Qty : $qty",
                                             textAlign: TextAlign.right,
                                           ),
                                         ],
@@ -593,6 +601,167 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                                 ),
                               ),
                             ],
+                          )),
+                        ),
+                        Divider(),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                      ],
+                    ),
+                  );
+                });
+  }
+
+  Widget screenFakturPenjualan() {
+    return controller.dataFakturPenjualan.isEmpty &&
+            controller.screenStatusFakturPenjualan.value == false
+        ? Center(
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Utility.primaryDefault,
+              ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              Text(
+                "Memuat data...",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ))
+        : controller.dataFakturPenjualan.isEmpty &&
+                controller.screenStatusFakturPenjualan.value == true
+            ? Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/empty.png",
+                      height: 200,
+                    ),
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Text(
+                      "Data Faktu Penjualan kosong",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                physics: BouncingScrollPhysics(),
+                itemCount: controller.dataFakturPenjualan.length,
+                itemBuilder: (context, index) {
+                  var nomor = controller.dataFakturPenjualan[index]['NOMOR'];
+                  var tanggal =
+                      controller.dataFakturPenjualan[index]['TANGGAL'];
+                  var qty = controller.dataFakturPenjualan[index]['QTY'];
+                  var paid = controller.dataFakturPenjualan[index]['PAIDPOS'];
+                  var namaPelanggan =
+                      controller.dataFakturPenjualan[index]['nama_pelanggan'];
+                  var hargaNet = controller.dataFakturPenjualan[index]
+                                  ['HRGNET'] ==
+                              null ||
+                          controller.dataFakturPenjualan[index]['HRGNET'] == ""
+                      ? 0
+                      : controller.dataFakturPenjualan[index]['HRGNET'];
+                  return Padding(
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          // onTap: () => controller.lanjutkanSoPenjualan(
+                          //     controller.dataFakturPenjualan[index], false),
+                          child: IntrinsicHeight(
+                              child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 60,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${Utility.convertNoFaktur(nomor)}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: Utility.medium),
+                                      ),
+                                      Text(
+                                        "$namaPelanggan",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: Utility.medium),
+                                      ),
+                                      Text(
+                                        "${Utility.convertDate(tanggal)}",
+                                        style:
+                                            TextStyle(color: Utility.nonAktif),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 40,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "${controller.currencyFormatter.format(hargaNet)}",
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        "Qty : $qty",
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      SizedBox(
+                                        height: 6,
+                                      ),
+                                      paid != "Y"
+                                          ? SizedBox()
+                                          : Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 30.0),
+                                              child: CardCustom(
+                                                radiusBorder:
+                                                    Utility.borderStyle1,
+                                                colorBg: paid == "Y"
+                                                    ? Utility.primaryDefault
+                                                    : Utility.nonAktif,
+                                                widgetCardCustom: Center(
+                                                  child: Text(
+                                                    "PAID",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                      SizedBox(
+                                        height: 6,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           )),
                         ),
                         Divider(),

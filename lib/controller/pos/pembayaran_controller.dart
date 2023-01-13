@@ -44,7 +44,7 @@ class PembayaranController extends BaseController {
   var selectedRadioButtonPilihPembayaran = 0.obs;
   var idPembayaranSplit = 0.obs;
 
-  var tipePembayaranSelected = "Tunai".obs;
+  var tipePembayaranSelected = "".obs;
   var statusKartuSelected = "".obs;
   var stringSelectedRadio = "".obs;
   var stringQrContent = "".obs;
@@ -115,12 +115,15 @@ class PembayaranController extends BaseController {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
-        var opsiTunai = {'KODE': "0", 'NAMA': 'Tunai', 'KARTU': 'N'};
-        data = [opsiTunai, ...data];
-        stringSelectedRadio.value = "0";
+        // var opsiTunai = {'KODE': "0", 'NAMA': 'Tunai', 'KARTU': 'N'};
+        // data = [opsiTunai, ...data];
+        var getFirst = data.first;
+        stringSelectedRadio.value = getFirst["KODE"];
+        tipePembayaranSelected.value = getFirst["NAMA"];
         listTipePembayaran.value = data;
         stringSelectedRadio.refresh();
         listTipePembayaran.refresh();
+        tipePembayaranSelected.refresh();
       }
     });
   }

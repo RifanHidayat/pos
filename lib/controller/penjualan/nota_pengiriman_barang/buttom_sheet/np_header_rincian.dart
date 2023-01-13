@@ -7,14 +7,13 @@ import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/detail_nota__pengiriman_controller.dart';
-import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 
-class HeaderRincianOrderPenjualanController extends GetxController {
-  var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
+class HeaderRincianNotaPengirimanController extends GetxController {
+  var notaPengirimanCt = Get.put(DetailNotaPenjualanController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
 
   var valueFocus = "".obs;
@@ -26,7 +25,7 @@ class HeaderRincianOrderPenjualanController extends GetxController {
       decimalDigits: 2,
     );
     var subtotal =
-        "${Utility.rupiahFormat('${itemOrderPenjualanCt.subtotal.value.toInt()}', 'with_rp')}";
+        "${Utility.rupiahFormat('${notaPengirimanCt.subtotal.value.toInt()}', 'with_rp')}";
 
     showModalBottomSheet(
         context: Get.context!,
@@ -45,129 +44,138 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                   gestureFunction(setState);
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: SingleChildScrollView(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        headLineRincian(setState),
-                        Divider(),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Utility.primaryLight50,
-                              borderRadius: Utility.borderStyle1),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: MediaQuery.of(context).viewInsets.bottom),
+                      child: SingleChildScrollView(
+                          child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    "Subtotal",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    "$subtotal",
-                                    textAlign: TextAlign.right,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              ],
+                            SizedBox(
+                              height: Utility.medium,
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Text(
-                          "Diskon",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        diskonWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Text(
-                          "PPN %",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        ppnWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Text(
-                          "Ongkos",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: Utility.small,
-                        ),
-                        ongkosWidgetRincian(setState),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Button1(
-                          textBtn: "Hitung & Simpan",
-                          colorBtn: Utility.primaryDefault,
-                          onTap: () {
-                            ButtonSheetController().validasiButtonSheet(
-                                "Hitung Rincian",
-                                contentOpHitungRincian(),
-                                "op_hitung_rincian",
-                                'Simpan', () async {
-                              Future<bool> prosesPerhitunganRincian =
-                                  GetDataController()
-                                      .hitungRincianOrderPenjualan([
-                                dashboardPenjualanCt.nomorSoSelected.value,
-                                itemOrderPenjualanCt.allQtyBeli.value,
-                                itemOrderPenjualanCt
-                                    .nominalDiskonHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .nominalOngkosHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .persenPPNHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .nominalPPNHeaderRincian.value.text
-                              ]);
-                              bool hasilPerhitungan =
-                                  await prosesPerhitunganRincian;
-                              if (hasilPerhitungan) {
-                                itemOrderPenjualanCt.loadDataSODT();
-                                Get.back();
-                                Get.back();
-                                UtilsAlert.showToast("Berhasil simpan data");
-                              } else {
-                                UtilsAlert.showToast("Rincian gagal dihitung");
-                              }
-                            });
-                          },
-                        ),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                      ])),
+                            headLineRincian(setState),
+                            Divider(),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Utility.primaryLight50,
+                                  borderRadius: Utility.borderStyle1),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "Subtotal",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        "$subtotal",
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            Text(
+                              "Diskon",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: Utility.small,
+                            ),
+                            diskonWidgetRincian(setState),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            Text(
+                              "PPN %",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: Utility.small,
+                            ),
+                            ppnWidgetRincian(setState),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            Text(
+                              "Ongkos",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: Utility.small,
+                            ),
+                            ongkosWidgetRincian(setState),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                          ])),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 18, right: 18),
+                      child: Button1(
+                        textBtn: "Hitung & Simpan",
+                        colorBtn: Utility.primaryDefault,
+                        onTap: () {
+                          ButtonSheetController().validasiButtonSheet(
+                              "Hitung Rincian",
+                              contentOpHitungRincian(),
+                              "np_hitung_rincian",
+                              'Simpan', () async {
+                            Future<bool> prosesPerhitunganRincian =
+                                GetDataController()
+                                    .hitungRincianNotaPengiriman([
+                              dashboardPenjualanCt.nomorDoSelected.value,
+                              notaPengirimanCt.allQtyBeli.value,
+                              notaPengirimanCt
+                                  .nominalDiskonHeaderRincian.value.text,
+                              notaPengirimanCt
+                                  .nominalOngkosHeaderRincian.value.text,
+                              notaPengirimanCt
+                                  .persenPPNHeaderRincian.value.text,
+                              notaPengirimanCt
+                                  .nominalPPNHeaderRincian.value.text
+                            ]);
+                            bool hasilPerhitungan =
+                                await prosesPerhitunganRincian;
+                            if (hasilPerhitungan) {
+                              Get.back();
+                              Get.back();
+                              UtilsAlert.showToast("Berhasil simpan data");
+                              notaPengirimanCt.startload('');
+                            } else {
+                              UtilsAlert.showToast("Rincian gagal dihitung");
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                  ],
                 ));
           });
         });
@@ -249,8 +257,8 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                         child: TextField(
                           textAlign: TextAlign.center,
                           cursorColor: Colors.black,
-                          controller: itemOrderPenjualanCt
-                              .persenDiskonHeaderRincian.value,
+                          controller:
+                              notaPengirimanCt.persenDiskonHeaderRincian.value,
                           keyboardType:
                               TextInputType.numberWithOptions(signed: true),
                           textInputAction: TextInputAction.done,
@@ -330,7 +338,7 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                               )
                             ],
                             cursorColor: Colors.black,
-                            controller: itemOrderPenjualanCt
+                            controller: notaPengirimanCt
                                 .nominalDiskonHeaderRincian.value,
                             keyboardType:
                                 TextInputType.numberWithOptions(signed: true),
@@ -363,18 +371,18 @@ class HeaderRincianOrderPenjualanController extends GetxController {
     if (value != "") {
       Future<double> prosesInputPersen = PerhitunganCt()
           .hitungNominalDiskonHeader(
-              value, "${itemOrderPenjualanCt.subtotal.value}");
+              value, "${notaPengirimanCt.subtotal.value}");
       double hasilInputQty = await prosesInputPersen;
       setState(() {
-        itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text = value;
-        itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text =
+        notaPengirimanCt.persenDiskonHeaderRincian.value.text = value;
+        notaPengirimanCt.nominalDiskonHeaderRincian.value.text =
             Utility.rupiahFormat("${hasilInputQty.toDouble()}", '');
-        itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
-        itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+        notaPengirimanCt.persenDiskonHeaderRincian.refresh();
+        notaPengirimanCt.nominalDiskonHeaderRincian.refresh();
       });
-      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
+      if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
         aksiPersenPPN(
-            setState, itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+            setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
       }
     }
   }
@@ -383,17 +391,16 @@ class HeaderRincianOrderPenjualanController extends GetxController {
     if (value != "") {
       Future<String> prosesInputPersen = PerhitunganCt()
           .hitungPersenDiskonHeader(
-              value, "${itemOrderPenjualanCt.subtotal.value}");
+              value, "${notaPengirimanCt.subtotal.value}");
       String hasilInputQty = await prosesInputPersen;
 
       setState(() {
-        itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text =
-            hasilInputQty;
-        itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+        notaPengirimanCt.persenDiskonHeaderRincian.value.text = hasilInputQty;
+        notaPengirimanCt.persenDiskonHeaderRincian.refresh();
       });
-      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
+      if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
         aksiPersenPPN(
-            setState, itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+            setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
       }
     }
   }
@@ -428,7 +435,7 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                           textAlign: TextAlign.center,
                           cursorColor: Colors.black,
                           controller:
-                              itemOrderPenjualanCt.persenPPNHeaderRincian.value,
+                              notaPengirimanCt.persenPPNHeaderRincian.value,
                           keyboardType:
                               TextInputType.numberWithOptions(signed: true),
                           textInputAction: TextInputAction.done,
@@ -507,8 +514,8 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                               )
                             ],
                             cursorColor: Colors.black,
-                            controller: itemOrderPenjualanCt
-                                .nominalPPNHeaderRincian.value,
+                            controller:
+                                notaPengirimanCt.nominalPPNHeaderRincian.value,
                             keyboardType:
                                 TextInputType.numberWithOptions(signed: true),
                             textInputAction: TextInputAction.done,
@@ -539,21 +546,21 @@ class HeaderRincianOrderPenjualanController extends GetxController {
   void aksiPersenPPN(setState, value) async {
     if (value != "") {
       // convert nominal diskon
-      var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
+      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincian.value.text
           .replaceAll('.', '');
       var nd2 = nd1.replaceAll(',', '.');
       var nd3 = double.parse('$nd2');
 
       Future<double> prosesHitungNominalPPN = PerhitunganCt()
           .hitungNominalPPNHeader(
-              double.parse(value), itemOrderPenjualanCt.subtotal.value, nd3);
+              double.parse(value), notaPengirimanCt.subtotal.value, nd3);
       double hasilNominalPPN = await prosesHitungNominalPPN;
       setState(() {
-        itemOrderPenjualanCt.persenPPNHeaderRincian.value.text = value;
-        itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
+        notaPengirimanCt.persenPPNHeaderRincian.value.text = value;
+        notaPengirimanCt.nominalPPNHeaderRincian.value.text =
             Utility.rupiahFormat("${hasilNominalPPN.toDouble()}", '');
-        itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
-        itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+        notaPengirimanCt.persenPPNHeaderRincian.refresh();
+        notaPengirimanCt.nominalPPNHeaderRincian.refresh();
       });
     }
   }
@@ -562,17 +569,17 @@ class HeaderRincianOrderPenjualanController extends GetxController {
     if (value != "") {
       String nominalPPN = value.replaceAll(".", "");
       // convert nominal diskon
-      var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
+      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincian.value.text
           .replaceAll('.', '');
       var nd2 = nd1.replaceAll(',', '.');
       var nd3 = double.parse('$nd2');
       Future<String> prosesHitung = PerhitunganCt().hitungPersenPPNHeader(
-          double.parse(nominalPPN), itemOrderPenjualanCt.subtotal.value, nd3);
+          double.parse(nominalPPN), notaPengirimanCt.subtotal.value, nd3);
       String hasilHitung = await prosesHitung;
 
       setState(() {
-        itemOrderPenjualanCt.persenPPNHeaderRincian.value.text = hasilHitung;
-        itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+        notaPengirimanCt.persenPPNHeaderRincian.value.text = hasilHitung;
+        notaPengirimanCt.persenPPNHeaderRincian.refresh();
       });
     }
   }
@@ -620,8 +627,8 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                           )
                         ],
                         cursorColor: Colors.black,
-                        controller: itemOrderPenjualanCt
-                            .nominalOngkosHeaderRincian.value,
+                        controller:
+                            notaPengirimanCt.nominalOngkosHeaderRincian.value,
                         keyboardType:
                             TextInputType.numberWithOptions(signed: true),
                         textInputAction: TextInputAction.done,
@@ -644,47 +651,47 @@ class HeaderRincianOrderPenjualanController extends GetxController {
 
   void hitungNettoOrderPenjualan(setState) async {
     // filter nominal diskon
-    var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
+    var nd1 = notaPengirimanCt.nominalDiskonHeaderRincian.value.text
         .replaceAll('.', '');
     var nd2 = nd1.replaceAll(',', '.');
     var nd3 = double.parse('$nd2');
 
     // filter nominal ppn
-    var np1 = itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text
-        .replaceAll('.', '');
+    var np1 =
+        notaPengirimanCt.nominalPPNHeaderRincian.value.text.replaceAll('.', '');
     var np2 = np1.replaceAll(',', '.');
     var np3 = double.parse('$np2');
 
     // filter nominal ongkos
-    var no1 = itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text
+    var no1 = notaPengirimanCt.nominalOngkosHeaderRincian.value.text
         .replaceAll('.', '');
     var no2 = no1.replaceAll(',', '.');
     var no3 = double.parse('$no2');
 
     Future<double> prosesHitungNetto = PerhitunganCt()
         .hitungNettoOrderPenjualan(
-            itemOrderPenjualanCt.subtotal.value, nd3, np3, no3);
+            notaPengirimanCt.subtotal.value, nd3, np3, no3);
     double hasilNetto = await prosesHitungNetto;
     print('hasil netto $hasilNetto');
     setState(() {
-      itemOrderPenjualanCt.totalNetto.value = hasilNetto;
-      itemOrderPenjualanCt.totalNetto.refresh();
+      notaPengirimanCt.totalNetto.value = hasilNetto;
+      notaPengirimanCt.totalNetto.refresh();
     });
   }
 
   void gestureFunction(setState) {
     if (valueFocus.value == "persen_diskon_rincian") {
       aksiPersenDiskonHeader(
-          itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text, setState);
+          notaPengirimanCt.persenDiskonHeaderRincian.value.text, setState);
     } else if (valueFocus.value == "nominal_diskon_rincian") {
       aksiInputNominalDiskon(
-          setState, itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text);
+          setState, notaPengirimanCt.nominalDiskonHeaderRincian.value.text);
     } else if (valueFocus.value == "persen_ppn_rincian") {
       aksiPersenPPN(
-          setState, itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+          setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
     } else if (valueFocus.value == "nominal_ppn_rincian") {
       aksiNominalPPN(
-          setState, itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text);
+          setState, notaPengirimanCt.nominalPPNHeaderRincian.value.text);
     }
   }
 }

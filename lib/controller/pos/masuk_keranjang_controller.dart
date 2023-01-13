@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/perhitungan_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -15,7 +16,7 @@ class MasukKeranjangController extends BaseController {
   var dashboardCt = Get.put(DashbardController());
   var perhitunganCt = Get.put(PerhitunganController());
 
-  Future<bool> masukKeranjang(produkSelected, imeiData) async {
+  Future<bool> masukKeranjang(produkSelected, imeiData, qtySebelumEdit) async {
     UtilsAlert.loadingSimpanData(Get.context!, "Simpan data");
 
     var filterJml1 = dashboardCt.jumlahPesan.value.text;
@@ -27,30 +28,45 @@ class MasukKeranjangController extends BaseController {
         Utility.convertDate4(dashboardCt.informasiJlhd[0]["TANGGAL"]);
     var tanggalJlhd = "$convertTanggal1 23:59:59";
     bool prosesMasukKeranjang = false;
-    if (filterJumlahPesan == 0.0) {
+    if (filterJumlahPesan <= 0.0) {
       UtilsAlert.showToast("Quantity tidak valid");
       Get.back();
       Get.back();
     } else {
-      Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
-          produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
-      bool hasilValidasi1 = await validasi1;
-      if (hasilValidasi1 == true) {
-        Future<bool> proses = aksiMasukKeranjangLocal(produkSelected, imeiData);
+      if (produkSelected[0]['TIPE'] == "1") {
+        print('status tipe barang ${produkSelected[0]['TIPE']}');
+        Future<bool> proses =
+            aksiMasukKeranjangLocal(produkSelected, imeiData, qtySebelumEdit);
+        prosesMasukKeranjang = await proses;
+      } else if (produkSelected[0]['TIPE'] == "3") {
+        print('status tipe barang ${produkSelected[0]['TIPE']}');
+        Future<bool> proses =
+            aksiMasukKeranjangLocal(produkSelected, imeiData, qtySebelumEdit);
         prosesMasukKeranjang = await proses;
       } else {
-        Get.back();
-        Get.back();
-        Get.back();
+        Future<bool> validasi1 = checkStok(produkSelected[0]['GROUP'],
+            produkSelected[0]['KODE'], tanggalJlhd, filterJumlahPesan);
+        bool hasilValidasi1 = await validasi1;
+        if (hasilValidasi1 == true) {
+          Future<bool> proses =
+              aksiMasukKeranjangLocal(produkSelected, imeiData, qtySebelumEdit);
+          prosesMasukKeranjang = await proses;
+        } else {
+          Get.back();
+          Get.back();
+          Get.back();
+        }
       }
     }
     return Future.value(prosesMasukKeranjang);
   }
 
-  Future<bool> aksiMasukKeranjangLocal(produkSelected, imeiData) async {
+  Future<bool> aksiMasukKeranjangLocal(
+      produkSelected, imeiData, qtySebelumEdit) async {
     setBusy();
     // check harga jual di edit
-    var filter1 = dashboardCt.hargaJualPesanBarang.value.text;
+    var convertHrgjual = dashboardCt.hargaJualPesanBarang.value.text.split(',');
+    var filter1 = convertHrgjual[0];
     var filter2 = filter1.replaceAll("Rp", "");
     var filter3 = filter1.replaceAll(" ", "");
     var filter4 = filter2.replaceAll(".", "");
@@ -94,7 +110,7 @@ class MasukKeranjangController extends BaseController {
         hrgJualEditFinal, filterJumlahPesan);
     kirimProd3(produkSelected, valueNomorKey, valueNomorUrut, hrgJualEditFinal,
         filterJumlahPesan);
-    updateWareStok(produkSelected, filterJumlahPesan);
+    updateWareStok(produkSelected, filterJumlahPesan, qtySebelumEdit);
 
     // // // update data barang
 
@@ -128,10 +144,9 @@ class MasukKeranjangController extends BaseController {
       };
       dashboardCt.listKeranjang.add(filter);
     }
+
     dashboardCt.catatanPembelian.value.text = "";
     UtilsAlert.showToast("Berhasil tambah barang ke keranjang");
-    dashboardCt
-        .checkingDetailKeranjangArsip(dashboardCt.primaryKeyFaktur.value);
     Get.back();
     Get.back();
     Get.back();
@@ -266,13 +281,14 @@ class MasukKeranjangController extends BaseController {
     });
   }
 
-  void updateWareStok(produkSelected, filterJumlahPesan) {
+  void updateWareStok(produkSelected, filterJumlahPesan, qtySebelumEdit) {
     Map<String, dynamic> body = {
       "database": '${AppData.databaseSelected}',
       "periode": '${AppData.periodeSelected}',
       "stringTabel": 'WARE1',
       'group': '${produkSelected[0]["GROUP"]}',
       'kode': '${produkSelected[0]["KODE"]}',
+      'qty_sebelum_edit': qtySebelumEdit,
       'qty_pesanan': '$filterJumlahPesan',
       'gudang': '${dashboardCt.gudangSelected.value}',
     };
@@ -314,7 +330,6 @@ class MasukKeranjangController extends BaseController {
     var connect = Api.connectionApi("post", body, "insert_jlim");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    // List data = valueBody['data'];
     print(valueBody);
   }
 
@@ -361,7 +376,6 @@ class MasukKeranjangController extends BaseController {
     var connect = Api.connectionApi("post", body, "insert_prod2");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    // List data = valueBody['data'];
     print(valueBody);
   }
 
@@ -408,7 +422,6 @@ class MasukKeranjangController extends BaseController {
     var connect = Api.connectionApi("post", body, "insert_imeix");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    // List data = valueBody['data'];
     print(valueBody);
   }
 

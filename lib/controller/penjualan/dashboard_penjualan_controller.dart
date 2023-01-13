@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/cetak_penjualan.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/hapus_dodt.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/buat_penjualan.dart';
@@ -46,6 +47,9 @@ class DashbardPenjualanController extends GetxController {
   // NOTA PENGIRIMAN BARANG
   var nomorDoSelected = "".obs;
   var nomoDoCbSelected = "".obs;
+  // FAKTUR PENJUALAN
+  var nomorFakturPenjualanSelected = "".obs;
+  var nomoFakturPenjualanCbSelected = "".obs;
 
   var checkIncludePPN = false.obs;
   var screenBuatSoKeterangan = false.obs;
@@ -53,6 +57,7 @@ class DashbardPenjualanController extends GetxController {
 
   var screenStatusOrderPenjualan = true.obs;
   var screenStatusNotaPengiriman = true.obs;
+  var screenStatusFakturPenjualan = true.obs;
 
   var jumlahArsipOrderPenjualan = 0.obs;
 
@@ -65,6 +70,9 @@ class DashbardPenjualanController extends GetxController {
   // NOTA PENGIRIMAN BARANG
   var dataAllDohd = [].obs;
   var dohdSelected = [].obs;
+  // NOTA PENGIRIMAN BARANG
+  var dataFakturPenjualan = [].obs;
+  var fakturPenjualanSelected = [].obs;
 
   var dateSelectedBuatOrderPenjualan = DateTime.now().obs;
   var tanggalAkumulasiJatuhTempo = DateTime.now().obs;
@@ -112,6 +120,8 @@ class DashbardPenjualanController extends GetxController {
       getDataAllSOHD();
     } else if (id == 2) {
       getDataAllDOHD();
+    } else if (id == 3) {
+      getDataFakturPenjualan();
     }
     for (var element in menuShowonTop) {
       if (element['id_menu'] == id) {
@@ -126,6 +136,7 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void addPenjualan() {
+    getDataSales();
     if (screenAktif.value == 1) {
       Get.to(
           BuatOrderPenjualan(
@@ -294,7 +305,34 @@ class DashbardPenjualanController extends GetxController {
     return Future.value(hasil);
   }
 
+  Future<bool> getDataFakturPenjualan() async {
+    print("get all faktur penjualan running");
+    dataFakturPenjualan.clear();
+    dataFakturPenjualan.refresh();
+    screenStatusFakturPenjualan.value = false;
+    screenStatusFakturPenjualan.refresh();
+    Future<List> prosesDataAllFakturPenjualan =
+        getDataCt.getDataAllFakturPenjualan(
+      sidebarCt.cabangKodeSelectedSide.value,
+    );
+    List data = await prosesDataAllFakturPenjualan;
+    bool hasil = false;
+    if (data.isNotEmpty) {
+      hasil = true;
+      dataFakturPenjualan.value = data;
+      dataFakturPenjualan.refresh();
+      screenStatusFakturPenjualan.value = true;
+      screenStatusFakturPenjualan.refresh();
+    } else {
+      hasil = false;
+      screenStatusFakturPenjualan.value = true;
+      screenStatusFakturPenjualan.refresh();
+    }
+    return Future.value(hasil);
+  }
+
   void loadSOHDSelected() {
+    print('pilih sohd');
     dataSohd.value = dataAllSohd
         .where((ele) => ele['NOMOR'] == nomorSoSelected.value)
         .toList();
@@ -306,6 +344,13 @@ class DashbardPenjualanController extends GetxController {
         .where((ele) => ele['NOMOR'] == nomorDoSelected.value)
         .toList();
     dohdSelected.refresh();
+  }
+
+  void loadFakturPenjualanSelected() {
+    fakturPenjualanSelected.value = dataFakturPenjualan
+        .where((ele) => ele['NOMOR'] == nomorFakturPenjualanSelected.value)
+        .toList();
+    fakturPenjualanSelected.refresh();
   }
 
   void lanjutkanSoPenjualan(dataSelected, statusOutStand) async {
@@ -382,6 +427,18 @@ class DashbardPenjualanController extends GetxController {
                             loadData();
                           }
                         } else if (screenAktif.value == 2) {
+                          Future<bool> prosesHapusDOHD = HapusSodtController()
+                              .hapusFakturDanJldt(dataSelected['NOMOR']);
+                          bool hasilHapus = await prosesHapusDOHD;
+                          if (hasilHapus) {
+                            UtilsAlert.showToast(
+                                "Berhasil hapus nota pengiriman");
+                            Get.back();
+                            Get.back();
+                            Get.back();
+                            loadData();
+                            getDataAllDOHD();
+                          }
                         } else if (screenAktif.value == 3) {}
                       });
                     },
@@ -651,6 +708,11 @@ class DashbardPenjualanController extends GetxController {
       nomorSoSelected.value = dataSelected["NOMOR"];
       nomoCbSelected.value = "${dataSelected["CB"]}";
 
+      Future<bool> prosesDeviceIp =
+          getDataCt.closeSODH(sidebarCt.ipdevice.value, nomorSoSelected.value);
+      bool hasilProsesDevice = await prosesDeviceIp;
+      print("ip device $hasilProsesDevice");
+
       dataSohd.refresh();
       nomorSoSelected.refresh();
       nomoCbSelected.refresh();
@@ -658,6 +720,11 @@ class DashbardPenjualanController extends GetxController {
       dohdSelected.value = [dataSelected];
       nomorDoSelected.value = dataSelected["NOMOR"];
       nomoDoCbSelected.value = "${dataSelected["CB"]}";
+
+      Future<bool> prosesDeviceIp =
+          getDataCt.closeDODH(sidebarCt.ipdevice.value, nomorDoSelected.value);
+      bool hasilProsesDevice = await prosesDeviceIp;
+      print("ip device $hasilProsesDevice");
 
       dohdSelected.refresh();
       nomorDoSelected.refresh();
@@ -679,11 +746,6 @@ class DashbardPenjualanController extends GetxController {
     Future<bool> prosesPilihCabang =
         sidebarCt.pilihCabangSelected(dataSelected["CB"]);
     bool hasilPilihCabang = await prosesPilihCabang;
-
-    Future<bool> prosesDeviceIp =
-        getDataCt.closeSODH(sidebarCt.ipdevice.value, nomorSoSelected.value);
-    bool hasilProsesDevice = await prosesDeviceIp;
-    print("ip device $hasilProsesDevice");
 
     if (dataSales.isEmpty) {
       Get.back();

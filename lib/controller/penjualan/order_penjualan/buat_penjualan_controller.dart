@@ -227,7 +227,7 @@ class BuatPenjualanController extends BaseController {
       Future<bool> prosesGetAllDOHD = dashboardPenjualanCt.getDataAllDOHD();
       bool hasilGetAll = await prosesGetAllDOHD;
       if (hasilGetAll) {
-        Get.to(DetailNotaPengirimanBarang(dataForm: false),
+        Get.to(DetailNotaPengirimanBarang(dataForm: true),
             duration: Duration(milliseconds: 500),
             transition: Transition.rightToLeftWithFade);
       }

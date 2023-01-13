@@ -13,7 +13,8 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 
 class ScanImei extends StatefulWidget {
-  const ScanImei({Key? key}) : super(key: key);
+  String scanMenu;
+  ScanImei({Key? key, required this.scanMenu});
 
   @override
   State<StatefulWidget> createState() => _ScanImeiState();
@@ -95,7 +96,7 @@ class _ScanImeiState extends State<ScanImei> {
     var compileData = await scanData;
     if (compileData.format != "" || compileData.code != "") {
       setState(() {
-        scanBarangCt.getBarcodeImei(compileData.format, compileData.code);
+        scanBarangCt.getBarcodeImei(compileData.format, compileData.code, widget.scanMenu);
       });
     } else {
       controller?.resumeCamera();

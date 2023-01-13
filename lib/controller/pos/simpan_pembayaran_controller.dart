@@ -143,22 +143,26 @@ class SimpanPembayaran extends BaseController {
     var connect = Api.connectionApi("post", body, "insert_pptghd");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    var data = valueBody['data'];
-    print('berhasil insert pptghd $data');
+    print('sampe sioni');
+    print(valueBody);
+    // var data = valueBody['data'];
+    // print('berhasil insert pptghd $data');
     bool statusBerhasil = false;
     if (valueBody['status'] == true) {
       Future<bool> prosesInsertPptgdt =
           insertPPTGDT(dataDetailKartu, valueBody["primaryKey"]);
       statusBerhasil = await prosesInsertPptgdt;
-    } else if (valueBody['status'] == false &&
-        valueBody['message'] == "ulang") {
-      insertPPTGHD(dataDetailKartu);
-    } else {
+    }
+    // else if (valueBody['status'] == false &&
+    //     valueBody['message'] == "ulang") {
+    // else if (valueBody['status'] == false) {
+    //   insertPPTGHD(dataDetailKartu);
+    // }
+    else {
       UtilsAlert.showToast("Gagal pembayaran 1");
     }
 
     return Future.value(statusBerhasil);
-    // return Future.value(true);
   }
 
   Future<bool> insertPPTGDT(dataDetailKartu, pkNumber) async {
@@ -304,35 +308,46 @@ class SimpanPembayaran extends BaseController {
     var connect = Api.connectionApi("post", body, "get_last_number_pembayaran");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
     if (valueBody['status'] == true) {
-      var tp1 = valueBody['data'][0]['NOMOR'];
-      var fltr1 = tp1.substring(0, 2);
-      var fltr2 = tp1.substring(8, 12);
-      var tambah = int.parse(fltr2) + 1;
-      var fltr3 = "$tambah".length == 3
-          ? "0$tambah"
-          : "$tambah".length == 2
-              ? "00$tambah"
-              : "$tambah".length == 1
-                  ? "000$tambah"
-                  : "$tambah";
+      var fltr1a = "";
+      var fltr3a = "";
+
       var dt = DateTime.now();
       var tahunBulan = "${DateFormat('yyyyMM').format(dt)}";
-      lastNumber = "$fltr1$tahunBulan$fltr3";
+      if (data.isNotEmpty) {
+        var tp1 = valueBody['data'][0]['NOMOR'];
+        var fltr1 = tp1.substring(0, 2);
+        var fltr2 = tp1.substring(8, 12);
+        var tambah = int.parse(fltr2) + 1;
+        var fltr3 = "$tambah".length == 3
+            ? "0$tambah"
+            : "$tambah".length == 2
+                ? "00$tambah"
+                : "$tambah".length == 1
+                    ? "000$tambah"
+                    : "$tambah";
 
-      var tp1a = valueBody['data'][0]['NOMORCB'];
-      var fltr1a = tp1a.substring(0, 2);
-      var fltr2a = tp1a.substring(8, 12);
-      var tambaha = int.parse(fltr2a) + 1;
-      var fltr3a = "$tambaha".length == 3
-          ? "0$tambah"
-          : "$tambah".length == 2
-              ? "00$tambah"
-              : "$tambah".length == 1
-                  ? "000$tambah"
-                  : "$tambah";
+        lastNumber = "$fltr1$tahunBulan$fltr3";
 
-      lastNumberCb = "$fltr1a$tahunBulan$fltr3a";
+        var tp1a = valueBody['data'][0]['NOMORCB'];
+        fltr1a = tp1a.substring(0, 2);
+        var fltr2a = tp1a.substring(8, 12);
+        var tambaha = int.parse(fltr2a) + 1;
+        fltr3a = "$tambaha".length == 3
+            ? "0$tambah"
+            : "$tambah".length == 2
+                ? "00$tambah"
+                : "$tambah".length == 1
+                    ? "000$tambah"
+                    : "$tambah";
+        lastNumberCb = "$fltr1a$tahunBulan$fltr3a";
+      } else {
+        var kode = "DB";
+        var nomor = "0001";
+        lastNumber = "$kode$tahunBulan$nomor";
+        lastNumberCb = "$kode$tahunBulan$nomor";
+      }
     } else {
       UtilsAlert.showToast(valueBody['message']);
     }

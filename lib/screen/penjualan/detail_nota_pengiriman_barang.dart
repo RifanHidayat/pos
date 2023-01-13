@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/buttom_sheet/np_barang_ct.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/buttom_sheet/np_header_rincian.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/detail_nota__pengiriman_controller.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_header_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/buat_penjualan.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
+import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
+import 'package:siscom_pos/utils/widget/month_year_picker.dart';
 
 class DetailNotaPengirimanBarang extends StatefulWidget {
   bool dataForm;
@@ -71,15 +77,15 @@ class _DetailNotaPengirimanBarangState
                 return controller.statusBack.value;
               },
               child: Obx(
-                () => Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-                      CardCustom(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: CardCustom(
                         colorBg: Colors.white,
                         radiusBorder: Utility.borderStyle1,
                         widgetCardCustom: Padding(
@@ -137,54 +143,112 @@ class _DetailNotaPengirimanBarangState
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: Utility.medium,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          if (controller.sohdTerpilih.isNotEmpty) {
-                            GlobalController().buttomSheet1(
-                                controller.sohdTerpilih.value,
-                                "Pilih SO",
-                                "pilih_so_nota_pengiriman",
-                                "");
-                          }
-                        },
-                        child: CardCustom(
-                          colorBg: Colors.white,
-                          radiusBorder: Utility.borderStyle1,
-                          widgetCardCustom: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 90,
-                                  child: Text(
-                                    "Pilih SO",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: Utility.medium,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 3),
+                              child: InkWell(
+                                onTap: () {
+                                  if (controller.sohdTerpilih.isNotEmpty) {
+                                    GlobalController().buttomSheet1(
+                                        controller.sohdTerpilih.value,
+                                        "Pilih SO",
+                                        "pilih_so_nota_pengiriman",
+                                        "");
+                                  } else {
+                                    UtilsAlert.showToast(
+                                        "Data SO tidak ditemukan");
+                                  }
+                                },
+                                child: CardCustom(
+                                  colorBg: Colors.white,
+                                  radiusBorder: Utility.borderStyle1,
+                                  widgetCardCustom: Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          flex: 90,
+                                          child: Text(
+                                            "Pilih SO",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 10,
+                                          child: Icon(
+                                            Iconsax.arrow_down_1,
+                                            size: 18,
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 10,
-                                  child: Icon(
-                                    Iconsax.arrow_down_1,
-                                    size: 18,
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
                           ),
-                        ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 3),
+                              child: CardCustom(
+                                colorBg: Colors.white,
+                                radiusBorder: Utility.borderStyle1,
+                                widgetCardCustom: InkWell(
+                                  onTap: () {
+                                    DatePicker.showPicker(
+                                      Get.context!,
+                                      pickerModel: CustomMonthPicker(
+                                        minTime: DateTime(2000, 1, 1),
+                                        maxTime: DateTime(2100, 1, 1),
+                                        currentTime: DateTime.now(),
+                                      ),
+                                      onConfirm: (time) {
+                                        if (time != null) {
+                                          UtilsAlert.loadingSimpanData(
+                                              Get.context!, "Sedang memuat...");
+                                          setState(() {
+                                            controller.periodeSelected.value =
+                                                time;
+                                            controller.periodeSelected
+                                                .refresh();
+                                            controller.getSoSelected(false);
+                                          });
+                                        }
+                                      },
+                                    );
+                                  },
+                                  child: Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: Text(
+                                          "${DateFormat('MMMM - yyyy').format(controller.periodeSelected.value)}")),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                      SizedBox(
-                        height: Utility.large,
-                      ),
-                      Flexible(
-                          child: controller.barangTerpilih.isEmpty &&
-                                  controller.statusDODTKosong.value == true
-                              ? Center(
+                    ),
+                    SizedBox(
+                      height: Utility.large,
+                    ),
+                    Flexible(
+                        child: controller.barangTerpilih.isEmpty &&
+                                controller.statusDODTKosong.value == true
+                            ? SizedBox(
+                                height: 300,
+                                child: Center(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -205,10 +269,64 @@ class _DetailNotaPengirimanBarangState
                                       ),
                                     ],
                                   ),
-                                )
-                              : listPilihanBarang())
-                    ],
-                  ),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16, right: 16),
+                                      child: listPilihanBarang(),
+                                    ),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 16, right: 16),
+                                        child: rincianWidget()),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.normal,
+                                    ),
+                                    controller.barangTerpilih.value.isEmpty
+                                        ? SizedBox()
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 16, right: 16),
+                                            child: detailNominalBayar(),
+                                          ),
+                                    SizedBox(
+                                      height: Utility.medium,
+                                    ),
+                                    Divider(
+                                      thickness: 3.5,
+                                      color: Utility.greyLight100,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.normal,
+                                    ),
+                                  ],
+                                ),
+                              ))
+                  ],
                 ),
               ),
             ),
@@ -240,6 +358,7 @@ class _DetailNotaPengirimanBarangState
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Expanded(
+                          flex: 65,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -260,43 +379,25 @@ class _DetailNotaPengirimanBarangState
                           ),
                         ),
                         Expanded(
+                            flex: 35,
                             child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: InkWell(
-                                            onTap: () {
-                                              HeaderRincianOrderPenjualanController()
-                                                  .sheetButtomHeaderRincian();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(Iconsax.receipt_2),
-                                                Text("Rincian")
-                                              ],
-                                            ))),
-                                    Expanded(
-                                        child: InkWell(
-                                            onTap: () {
-                                              controller.showDialog();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Icon(Iconsax.add_circle),
-                                                Text("Simpan")
-                                              ],
-                                            ))),
-                                  ],
-                                ))),
+                              padding: const EdgeInsets.all(8.0),
+                              child: InkWell(
+                                onTap: () {
+                                  controller.showDialog();
+                                },
+                                child: CardCustom(
+                                  colorBg: Utility.primaryDefault,
+                                  radiusBorder: Utility.borderStyle1,
+                                  widgetCardCustom: Center(
+                                    child: Text(
+                                      "Simpan",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )),
                       ],
                     ),
                   ),
@@ -429,126 +530,172 @@ class _DetailNotaPengirimanBarangState
     );
   }
 
-  Widget listPilihanBarang() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        controller.barangTerpilih.value.isEmpty
-            ? Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Utility.primaryDefault,
-                    ),
-                    Text(
-                      "Sedang memuat",
+  Widget rincianWidget() {
+    return InkWell(
+      onTap: () {
+        HeaderRincianNotaPengirimanController().sheetButtomHeaderRincian();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 85,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Iconsax.receipt_2,
+                    color: Utility.nonAktif,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 8, top: 2),
+                    child: Text(
+                      "Rincian",
                       style: TextStyle(fontWeight: FontWeight.bold),
-                    )
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 15,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Icon(
+                  Iconsax.arrow_right_3,
+                  size: 18,
+                  color: Utility.nonAktif,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget listPilihanBarang() {
+    return controller.barangTerpilih.value.isEmpty
+        ? SizedBox(
+            height: 200,
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Utility.primaryDefault,
+                  ),
+                  Text(
+                    "Sedang memuat",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+          )
+        : ListView.builder(
+            physics: BouncingScrollPhysics(),
+            itemCount: controller.barangTerpilih.value.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              var namaBarang = controller.barangTerpilih.value[index]["NAMA"];
+              var hargaJual = controller.barangTerpilih.value[index]["STDJUAL"];
+              var qtyBeli = controller.barangTerpilih.value[index]["qty_beli"];
+              var disc1 = controller.barangTerpilih.value[index]["DISC1"];
+              var discd = controller.barangTerpilih.value[index]["DISCD"];
+              var group = controller.barangTerpilih.value[index]["GROUP"];
+              var kode = controller.barangTerpilih.value[index]["KODE"];
+              var nourut = controller.barangTerpilih.value[index]["NOURUT"];
+              double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
+                  "$hargaJual", "$qtyBeli", "$discd");
+              int filterTotalBarang = hargaTotalBarang.toInt();
+              return Slidable(
+                endActionPane: ActionPane(
+                  extentRatio: 0.3,
+                  motion: ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      flex: 1,
+                      onPressed: (BuildContext context) {
+                        NotaPengirimanBarangPesanController()
+                            .validasiEditBarang(
+                                [controller.barangTerpilih.value[index]]);
+                      },
+                      backgroundColor: Utility.infoLight50,
+                      foregroundColor: Utility.infoDefault,
+                      icon: Iconsax.edit_2,
+                    ),
+                    SlidableAction(
+                      flex: 1,
+                      onPressed: (BuildContext context) {
+                        controller.hapusListNota(
+                            controller.barangTerpilih.value[index]);
+                      },
+                      backgroundColor: Color.fromARGB(255, 255, 157, 150),
+                      foregroundColor: Colors.red,
+                      icon: Iconsax.trash,
+                    ),
                   ],
                 ),
-              )
-            : ListView.builder(
-                physics: controller.barangTerpilih.value.length <= 10
-                    ? AlwaysScrollableScrollPhysics()
-                    : BouncingScrollPhysics(),
-                itemCount: controller.barangTerpilih.value.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  var namaBarang =
-                      controller.barangTerpilih.value[index]["NAMA"];
-                  var hargaJual =
-                      controller.barangTerpilih.value[index]["STDJUAL"];
-                  var qtyBeli =
-                      controller.barangTerpilih.value[index]["qty_beli"];
-                  var disc1 = controller.barangTerpilih.value[index]["DISC1"];
-                  var discd = controller.barangTerpilih.value[index]["DISCD"];
-                  var group = controller.barangTerpilih.value[index]["GROUP"];
-                  var kode = controller.barangTerpilih.value[index]["KODE"];
-                  var nourut = controller.barangTerpilih.value[index]["NOURUT"];
-                  double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
-                      "$hargaJual", "$qtyBeli", "$discd");
-                  int filterTotalBarang = hargaTotalBarang.toInt();
-                  return Slidable(
-                    endActionPane: ActionPane(
-                      extentRatio: 0.3,
-                      motion: ScrollMotion(),
-                      children: [
-                        SlidableAction(
-                          flex: 1,
-                          onPressed: (BuildContext context) {
-                            // controller.editBarangSelected(group, kode);
-                          },
-                          backgroundColor: Utility.infoLight50,
-                          foregroundColor: Utility.infoDefault,
-                          icon: Iconsax.edit_2,
-                        ),
-                        
-                      ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "$namaBarang",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "$namaBarang",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 70,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                          "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
-                                    ),
-                                    disc1 == 0
-                                        ? SizedBox()
-                                        : Expanded(
-                                            child: Text(
-                                              "Disc $disc1%",
-                                              style: TextStyle(
-                                                  color: Colors.green),
-                                            ),
-                                          ),
-                                  ],
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 70,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                      "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
                                 ),
-                              ),
-                              Expanded(
-                                flex: 30,
-                                child: Text(
-                                  "${Utility.rupiahFormat('$filterTotalBarang', 'with_rp')}",
-                                  textAlign: TextAlign.end,
-                                ),
-                              )
-                            ],
+                                disc1 == 0
+                                    ? SizedBox()
+                                    : Expanded(
+                                        child: Text(
+                                          "Disc $disc1%",
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                      ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Divider(),
-                      ],
+                          Expanded(
+                            flex: 30,
+                            child: Text(
+                              "${Utility.rupiahFormat('$filterTotalBarang', 'with_rp')}",
+                              textAlign: TextAlign.end,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  );
-                }),
-        SizedBox(
-          height: Utility.medium,
-        ),
-        controller.barangTerpilih.value.isEmpty
-            ? SizedBox()
-            : detailNominalBayar()
-      ],
-    );
+                    Divider(),
+                  ],
+                ),
+              );
+            });
   }
 
   Widget detailNominalBayar() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          height: 8,
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -570,6 +717,9 @@ class _DetailNotaPengirimanBarangState
               ),
             )
           ],
+        ),
+        SizedBox(
+          height: Utility.normal,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,6 +762,9 @@ class _DetailNotaPengirimanBarangState
               ),
             )
           ],
+        ),
+        SizedBox(
+          height: Utility.normal,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,6 +809,9 @@ class _DetailNotaPengirimanBarangState
             )
           ],
         ),
+        SizedBox(
+          height: Utility.normal,
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -683,6 +839,25 @@ class _DetailNotaPengirimanBarangState
             )
           ],
         ),
+        SizedBox(
+          height: Utility.medium,
+        ),
+        CardCustom(
+          colorBg: Colors.white,
+          radiusBorder: Utility.borderStyle1,
+          widgetCardCustom: InkWell(
+            onTap: () => controller.showKeteranganDOHD(),
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Center(
+                child: Text("Keterangan"),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: Utility.medium,
+        )
       ],
     );
   }

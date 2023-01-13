@@ -370,30 +370,59 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Expanded(
-                                          flex: 30,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "Total Tagihan",
-                                                style: TextStyle(
-                                                    color: Utility.greyLight300,
-                                                    fontSize:
-                                                        Utility.semiMedium),
-                                              ),
-                                              Text(
-                                                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                                                  style: TextStyle(
-                                                      color: Utility.grey900,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                      fontSize: Utility.medium))
-                                            ],
-                                          ),
+                                          flex: 50,
+                                          child: Obx(() => dashboardCt
+                                                  .statusHitungHeader.value
+                                              ? Center(
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(
+                                                        height: 40,
+                                                        width: 40,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          strokeWidth: 3,
+                                                          color: Utility
+                                                              .primaryDefault,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        "Sedang memuat...",
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Utility
+                                                                .primaryDefault),
+                                                      )
+                                                    ],
+                                                  ),
+                                                )
+                                              : Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Total Tagihan",
+                                                      style: TextStyle(
+                                                          color: Utility
+                                                              .greyLight300,
+                                                          fontSize: Utility
+                                                              .semiMedium),
+                                                    ),
+                                                    Text(
+                                                        "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                                        style: TextStyle(
+                                                            color:
+                                                                Utility.grey900,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            fontSize:
+                                                                Utility.medium))
+                                                  ],
+                                                )),
                                         ),
                                         Expanded(
-                                          flex: 70,
+                                          flex: 50,
                                           child: Button1(
                                             colorBtn: Utility.primaryDefault,
                                             textBtn: "Pilih Pembayaran",

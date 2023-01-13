@@ -212,26 +212,26 @@ class Sidebar extends StatelessWidget {
               title: Text('Stok Opname'),
               onTap: () => null,
             ),
-            ListTile(
-              leading: Icon(Iconsax.receipt_search),
-              iconColor: Utility.greyDark,
-              title: Text('Riwayat Pesanan'),
-            ),
-            ListTile(
-              leading: Icon(Iconsax.box),
-              iconColor: Utility.greyDark,
-              title: Text('Kelola Produk'),
-            ),
+            // ListTile(
+            //   leading: Icon(Iconsax.receipt_search),
+            //   iconColor: Utility.greyDark,
+            //   title: Text('Riwayat Pesanan'),
+            // ),
+            // ListTile(
+            //   leading: Icon(Iconsax.box),
+            //   iconColor: Utility.greyDark,
+            //   title: Text('Kelola Produk'),
+            // ),
             ListTile(
               leading: Icon(Iconsax.profile_2user),
               iconColor: Utility.greyDark,
               title: Text('Pelanggan'),
             ),
-            ListTile(
-              leading: Icon(Iconsax.user_square),
-              iconColor: Utility.greyDark,
-              title: Text('Salesman'),
-            ),
+            // ListTile(
+            //   leading: Icon(Iconsax.user_square),
+            //   iconColor: Utility.greyDark,
+            //   title: Text('Salesman'),
+            // ),
             ListTile(
               leading: Icon(Iconsax.document_text),
               iconColor: Utility.greyDark,

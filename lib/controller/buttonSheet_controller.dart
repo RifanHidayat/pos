@@ -70,27 +70,18 @@ class ButtonSheetController extends GetxController {
                 SizedBox(
                   height: Utility.medium,
                 ),
-                type == "validasi_lanjutkan_orderpenjualan" || type == "cetak_faktur_penjualan"
+                type == "validasi_lanjutkan_orderpenjualan" ||
+                        type == "cetak_faktur_penjualan" ||
+                        type == "show_keterangan"
                     ? SizedBox()
                     : Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: Button1(
-                                textBtn: acc,
-                                colorBtn: Utility.primaryDefault,
-                                onTap: () {
-                                  if (onTap != null) onTap();
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
                             child: InkWell(
                               onTap: () => Get.back(),
                               child: Container(
+                                  margin: EdgeInsets.only(right: 3),
                                   decoration: BoxDecoration(
                                       borderRadius: Utility.borderStyle1,
                                       border: Border.all(
@@ -107,7 +98,19 @@ class ButtonSheetController extends GetxController {
                                     ),
                                   )),
                             ),
-                          )
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 3),
+                              child: Button1(
+                                textBtn: acc,
+                                colorBtn: Utility.primaryDefault,
+                                onTap: () {
+                                  if (onTap != null) onTap();
+                                },
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                 SizedBox(

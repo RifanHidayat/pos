@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -612,6 +613,37 @@ class DetailStruk extends StatelessWidget {
               Expanded(
                 flex: 70,
                 child: Text(
+                  "Total Item",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+                          ? Utility.normal
+                          : Utility.small,
+                      color: Utility.grey900),
+                ),
+              ),
+              Expanded(
+                flex: 30,
+                child: Text(
+                  "${dashboardCt.jumlahItemDikeranjang.value}",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+                          ? Utility.normal
+                          : Utility.small),
+                ),
+              )
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 70,
+                child: Text(
                   "Subtotal",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -642,176 +674,20 @@ class DetailStruk extends StatelessWidget {
             children: [
               Expanded(
                 flex: 70,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Diskon",
-                      style: TextStyle(
-                          fontSize:
-                              !pembayaranCt.viewScreenShootDetailStruk.value
-                                  ? Utility.normal
-                                  : Utility.small,
-                          color: Utility.greyLight300),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 8.0),
-                      decoration: BoxDecoration(
-                          color: Color(0xffCEFBCF),
-                          borderRadius: Utility.borderStyle1),
-                      child: Center(
-                        child: Text(
-                          "${dashboardCt.diskonHeader.value}%",
-                          style: TextStyle(
-                              fontSize:
-                                  !pembayaranCt.viewScreenShootDetailStruk.value
-                                      ? Utility.normal
-                                      : Utility.small,
-                              color: Colors.green),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 30,
                 child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
-                  textAlign: TextAlign.right,
+                  "Total",
                   style: TextStyle(
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small),
-                ),
-              )
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 70,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "PPN",
-                      style: TextStyle(
-                          fontSize:
-                              !pembayaranCt.viewScreenShootDetailStruk.value
-                                  ? Utility.normal
-                                  : Utility.small,
-                          color: Utility.greyLight300),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 8.0),
-                      decoration: BoxDecoration(
-                          color: Color(0xffFFE7D8),
-                          borderRadius: Utility.borderStyle1),
-                      child: Padding(
-                        padding: EdgeInsets.all(3.0),
-                        child: Center(
-                          child: Text(
-                            "${dashboardCt.ppnCabang.value}%",
-                            style: TextStyle(
-                                fontSize: Utility.small, color: Colors.red),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 30,
-                child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small),
-                ),
-              )
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 70,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Service Charger",
-                      style: TextStyle(
-                          fontSize:
-                              !pembayaranCt.viewScreenShootDetailStruk.value
-                                  ? Utility.normal
-                                  : Utility.small,
-                          color: Utility.greyLight300),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 8.0),
-                      decoration: BoxDecoration(
-                          color: Color(0xffFFE7D8),
-                          borderRadius: Utility.borderStyle1),
-                      child: Padding(
-                        padding: EdgeInsets.all(3.0),
-                        child: Center(
-                          child: Text(
-                            "${dashboardCt.serviceChargerCabang.value}%",
-                            style: TextStyle(
-                                fontSize: Utility.small, color: Colors.red),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 30,
-                child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small),
-                ),
-              )
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 70,
-                child: Text(
-                  "Tukar Point",
-                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
                       fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
                           ? Utility.normal
                           : Utility.small,
-                      color: Utility.greyLight300),
+                      color: Utility.grey900),
                 ),
               ),
               Expanded(
                 flex: 30,
                 child: Text(
-                  "${currencyFormatter.format(0)}",
+                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
                   textAlign: TextAlign.right,
                   style: TextStyle(
                       fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
@@ -822,6 +698,269 @@ class DetailStruk extends StatelessWidget {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 70,
+                child: Text(
+                  "Bayar",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+                          ? Utility.normal
+                          : Utility.small,
+                      color: Utility.grey900),
+                ),
+              ),
+              Expanded(
+                flex: 30,
+                child: Text(
+                  "${currencyFormatter.format(int.parse("${pembayaranCt.uangterima.value.text.replaceAll('.', '')}"))}",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+                          ? Utility.normal
+                          : Utility.small),
+                ),
+              )
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 70,
+                child: Text(
+                  "Kembali",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+                          ? Utility.normal
+                          : Utility.small,
+                      color: Utility.grey900),
+                ),
+              ),
+              Expanded(
+                flex: 30,
+                child: simpanPembayaranCt.informasiSelesaiPembayaran.value[0]
+                            ['status'] ==
+                        false
+                    ? Text(
+                        "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            fontSize:
+                                !pembayaranCt.viewScreenShootDetailStruk.value
+                                    ? Utility.normal
+                                    : Utility.small),
+                      )
+                    : Text(
+                        "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihanSplit.value}"))}",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            fontSize:
+                                !pembayaranCt.viewScreenShootDetailStruk.value
+                                    ? Utility.normal
+                                    : Utility.small),
+                      ),
+              )
+            ],
+          ),
+        ),
+
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        //   child: Row(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Expanded(
+        //         flex: 70,
+        //         child: Row(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text(
+        //               "Diskon",
+        //               style: TextStyle(
+        //                   fontSize:
+        //                       !pembayaranCt.viewScreenShootDetailStruk.value
+        //                           ? Utility.normal
+        //                           : Utility.small,
+        //                   color: Utility.greyLight300),
+        //             ),
+        //             Container(
+        //               margin: EdgeInsets.only(left: 8.0),
+        //               decoration: BoxDecoration(
+        //                   color: Color(0xffCEFBCF),
+        //                   borderRadius: Utility.borderStyle1),
+        //               child: Center(
+        //                 child: Text(
+        //                   "${dashboardCt.diskonHeader.value}%",
+        //                   style: TextStyle(
+        //                       fontSize:
+        //                           !pembayaranCt.viewScreenShootDetailStruk.value
+        //                               ? Utility.normal
+        //                               : Utility.small,
+        //                       color: Colors.green),
+        //                 ),
+        //               ),
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //       Expanded(
+        //         flex: 30,
+        //         child: Text(
+        //           "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
+        //           textAlign: TextAlign.right,
+        //           style: TextStyle(
+        //               fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+        //                   ? Utility.normal
+        //                   : Utility.small),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        //   child: Row(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Expanded(
+        //         flex: 70,
+        //         child: Row(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text(
+        //               "PPN",
+        //               style: TextStyle(
+        //                   fontSize:
+        //                       !pembayaranCt.viewScreenShootDetailStruk.value
+        //                           ? Utility.normal
+        //                           : Utility.small,
+        //                   color: Utility.greyLight300),
+        //             ),
+        //             Container(
+        //               margin: EdgeInsets.only(left: 8.0),
+        //               decoration: BoxDecoration(
+        //                   color: Color(0xffFFE7D8),
+        //                   borderRadius: Utility.borderStyle1),
+        //               child: Padding(
+        //                 padding: EdgeInsets.all(3.0),
+        //                 child: Center(
+        //                   child: Text(
+        //                     "${dashboardCt.ppnCabang.value}%",
+        //                     style: TextStyle(
+        //                         fontSize: Utility.small, color: Colors.red),
+        //                   ),
+        //                 ),
+        //               ),
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //       Expanded(
+        //         flex: 30,
+        //         child: Text(
+        //           "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
+        //           textAlign: TextAlign.right,
+        //           style: TextStyle(
+        //               fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+        //                   ? Utility.normal
+        //                   : Utility.small),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        //   child: Row(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Expanded(
+        //         flex: 70,
+        //         child: Row(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text(
+        //               "Service Charger",
+        //               style: TextStyle(
+        //                   fontSize:
+        //                       !pembayaranCt.viewScreenShootDetailStruk.value
+        //                           ? Utility.normal
+        //                           : Utility.small,
+        //                   color: Utility.greyLight300),
+        //             ),
+        //             Container(
+        //               margin: EdgeInsets.only(left: 8.0),
+        //               decoration: BoxDecoration(
+        //                   color: Color(0xffFFE7D8),
+        //                   borderRadius: Utility.borderStyle1),
+        //               child: Padding(
+        //                 padding: EdgeInsets.all(3.0),
+        //                 child: Center(
+        //                   child: Text(
+        //                     "${dashboardCt.serviceChargerCabang.value}%",
+        //                     style: TextStyle(
+        //                         fontSize: Utility.small, color: Colors.red),
+        //                   ),
+        //                 ),
+        //               ),
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //       Expanded(
+        //         flex: 30,
+        //         child: Text(
+        //           "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+        //           textAlign: TextAlign.right,
+        //           style: TextStyle(
+        //               fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+        //                   ? Utility.normal
+        //                   : Utility.small),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        //   child: Row(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Expanded(
+        //         flex: 70,
+        //         child: Text(
+        //           "Tukar Point",
+        //           style: TextStyle(
+        //               fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+        //                   ? Utility.normal
+        //                   : Utility.small,
+        //               color: Utility.greyLight300),
+        //         ),
+        //       ),
+        //       Expanded(
+        //         flex: 30,
+        //         child: Text(
+        //           "${currencyFormatter.format(0)}",
+        //           textAlign: TextAlign.right,
+        //           style: TextStyle(
+        //               fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
+        //                   ? Utility.normal
+        //                   : Utility.small),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
         simpanPembayaranCt.informasiSelesaiPembayaran.value[0]['status'] ==
                 false
             ? SizedBox()
@@ -890,37 +1029,6 @@ class DetailStruk extends StatelessWidget {
                   ),
                 ),
               ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 70,
-                child: Text(
-                  "Total",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small,
-                      color: Utility.grey900),
-                ),
-              ),
-              Expanded(
-                flex: 30,
-                child: Text(
-                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small),
-                ),
-              )
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -950,7 +1058,7 @@ class DetailStruk extends StatelessWidget {
                     : Utility.small),
           ),
           Text(
-            "© Copyright 2022 PT. Shan Informasi Sistem",
+            "© Copyright 2023 PT. Shan Informasi Sistem",
             style: TextStyle(
                 color: Utility.nonAktif,
                 fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
@@ -980,102 +1088,203 @@ class DetailStruk extends StatelessWidget {
   void ShowCapturedWidget(Uint8List capturedImage, type, statusSplit) async {
     final pdf = pw.Document();
     // final image = pw.MemoryImage(capturedImage);
+
+    // final Uint8List fontData = File('./font/tnr.ttf').readAsBytesSync();
+    // final fontstyle = pw.Font.ttf(fontData.buffer.asByteData());
+
+    final font = await rootBundle.load("assets/fonts/tnr.ttf");
+    final fontstyle = pw.Font.ttf(font);
+
     pdf.addPage(pw.Page(
         pageFormat: PdfPageFormat.roll57,
         build: (pw.Context context) {
           return pw.Column(children: [
+            pw.SizedBox(
+              height: 4,
+            ),
             pw.Center(
                 child: pw.Text(
               "${pembayaranCt.informasiCabang.value[0]['NAMA']}",
               textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 6),
-            )),
-            pw.Center(
-                child: pw.Text(
-              "${pembayaranCt.informasiCabang.value[0]['ALAMAT1']}",
-              textAlign: pw.TextAlign.center,
               style: pw.TextStyle(
-                fontSize: 4,
-              ),
-            )),
-            pw.Center(
-                child: pw.Text(
-              "${pembayaranCt.informasiCabang.value[0]['ALAMAT2']}",
-              textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(
-                fontSize: 4,
-              ),
-            )),
-            pw.Center(
-                child: pw.Text(
-              "${pembayaranCt.informasiCabang.value[0]['TELP']}",
-              textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(
-                fontSize: 4,
+                font: fontstyle,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 10,
               ),
             )),
             pw.SizedBox(
               height: 6,
             ),
+            pw.Center(
+                child: pw.Text(
+              "${pembayaranCt.informasiCabang.value[0]['ALAMAT1']}",
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(
+                font: fontstyle,
+                fontSize: 8,
+              ),
+            )),
+            pw.SizedBox(
+              height: 2,
+            ),
+            pw.Center(
+                child: pw.Text(
+              "${pembayaranCt.informasiCabang.value[0]['ALAMAT2']}",
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(
+                font: fontstyle,
+                fontSize: 8,
+              ),
+            )),
+            pw.SizedBox(
+              height: 2,
+            ),
+            pw.Center(
+                child: pw.Text(
+              "${pembayaranCt.informasiCabang.value[0]['TELP']}",
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(
+                font: fontstyle,
+                fontSize: 8,
+              ),
+            )),
+            pw.SizedBox(
+              height: 10,
+            ),
             pw.Row(
               children: [
                 pw.Expanded(
+                  flex: 38,
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.Text(
-                        "Pelayan",
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 4),
-                      ),
-                      pw.Text(
-                        "Waktu",
-                        style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 4),
-                      ),
-                      pw.Text(
                         "No.Faktur",
                         style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 4),
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
+                      ),
+                      pw.SizedBox(
+                        height: 6,
                       ),
                       pw.Text(
-                        "Tipe Bayar",
+                        "Pelanggan",
                         style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold, fontSize: 4),
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
+                      ),
+                      pw.SizedBox(
+                        height: 6,
+                      ),
+                      pw.Text(
+                        "Sales",
+                        style: pw.TextStyle(
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
                       ),
                     ],
                   ),
                 ),
                 pw.Expanded(
-                    child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  mainAxisAlignment: pw.MainAxisAlignment.end,
-                  children: [
-                    pw.Text(
-                      "${dashboardCt.pelayanSelected.value}",
-                      style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold, fontSize: 4),
-                    ),
-                    pw.Text(
-                      "${DateFormat('dd MMM yyyy, HH:ss').format(DateTime.parse(dashboardCt.informasiJlhd.value[0]['DOE']))}",
-                      style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold, fontSize: 4),
-                    ),
-                    pw.Text(
-                      "${Utility.convertNoFaktur(dashboardCt.nomorFaktur.value)}",
-                      style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold, fontSize: 4),
-                    ),
-                    pw.Text(
-                      "${pembayaranCt.tipePembayaranSelected.value}",
-                      style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold, fontSize: 4),
-                    ),
-                  ],
-                ))
+                  flex: 2,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        ":",
+                        style: pw.TextStyle(
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
+                      ),
+                      pw.SizedBox(
+                        height: 6,
+                      ),
+                      pw.Text(
+                        ":",
+                        style: pw.TextStyle(
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
+                      ),
+                      pw.SizedBox(
+                        height: 6,
+                      ),
+                      pw.Text(
+                        ":",
+                        style: pw.TextStyle(
+                            font: fontstyle,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+                pw.Expanded(
+                    flex: 60,
+                    child: pw.Padding(
+                        padding: pw.EdgeInsets.only(left: 1),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          mainAxisAlignment: pw.MainAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              "${Utility.convertNoFaktur(dashboardCt.nomorFaktur.value)}",
+                              style: pw.TextStyle(
+                                  font: fontstyle,
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 9),
+                            ),
+                            pw.SizedBox(
+                              height: 6,
+                            ),
+                            pw.Text(
+                              "${dashboardCt.namaPelanggan.value}",
+                              style: pw.TextStyle(
+                                  font: fontstyle,
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 9),
+                            ),
+                            pw.SizedBox(
+                              height: 6,
+                            ),
+                            pw.Text(
+                              "${dashboardCt.pelayanSelected.value}",
+                              style: pw.TextStyle(
+                                  font: fontstyle,
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 9),
+                            ),
+                            // pw.Text(
+                            //   "${DateFormat('dd MMM yyyy, HH:ss').format(DateTime.parse(dashboardCt.informasiJlhd.value[0]['DOE']))}",
+                            //   style: pw.TextStyle(
+                            //       font: fontstyle,
+                            //       fontWeight: pw.FontWeight.bold,
+                            //       fontSize: 6),
+                            // ),
+                            // pw.SizedBox(
+                            //   height: 6,
+                            // ),
+                            // pw.Text(
+                            //   "${pembayaranCt.tipePembayaranSelected.value}",
+                            //   style: pw.TextStyle(
+                            //       font: fontstyle,
+                            //       fontWeight: pw.FontWeight.bold,
+                            //       fontSize: 6),
+                            // ),
+                          ],
+                        )))
               ],
             ),
+            pw.SizedBox(
+              height: 3,
+            ),
+            pw.Divider(),
             pw.SizedBox(
               height: 6,
             ),
@@ -1105,43 +1314,56 @@ class DetailStruk extends StatelessWidget {
                                 pw.Text(
                                   "$namaBarang",
                                   style: pw.TextStyle(
+                                      font: fontstyle,
                                       fontWeight: pw.FontWeight.bold,
-                                      fontSize: 4),
+                                      fontSize: 8),
                                 ),
-                                pw.Row(
-                                  crossAxisAlignment:
-                                      pw.CrossAxisAlignment.start,
-                                  children: [
-                                    pw.Expanded(
-                                      child: pw.Row(
-                                        crossAxisAlignment:
-                                            pw.CrossAxisAlignment.start,
-                                        children: [
-                                          pw.Text(
-                                            "Rp ${currencyFormatter.format(hargaBarang)} x $qtyBeli",
-                                            style: pw.TextStyle(fontSize: 4),
-                                          ),
-                                          pw.Flexible(
-                                              child: pw.Padding(
-                                            padding: const pw.EdgeInsets.only(
-                                                left: 0.1),
-                                            child: pw.Text(
-                                              "Disc $diskon %",
-                                              style: pw.TextStyle(fontSize: 4),
-                                            ),
-                                          ))
-                                        ],
-                                      ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Container(
+                                    child: pw.Row(children: [
+                                  pw.Expanded(
+                                    flex: 60,
+                                    child: pw.Text(
+                                      "${currencyFormatter.format(qtyBeli)} x ${currencyFormatter.format(hargaBarang)}",
+                                      style: pw.TextStyle(
+                                          font: fontstyle, fontSize: 9),
                                     ),
-                                    pw.Expanded(
-                                      child: pw.Text(
-                                        "Rp ${currencyFormatter.format(Utility.hitungTotalPembelianBarang("$hargaBarang", "$qtyBeli", "$discd"))}",
+                                  ),
+                                  pw.Expanded(
+                                    flex: 40,
+                                    child: pw.Text(
+                                        "${currencyFormatter.format(Utility.hitungTotalPembelianBarang("$hargaBarang", "$qtyBeli", "$discd"))}",
                                         textAlign: pw.TextAlign.right,
-                                        style: pw.TextStyle(fontSize: 4),
-                                      ),
-                                    ),
-                                  ],
+                                        style: pw.TextStyle(
+                                            font: fontstyle, fontSize: 9)),
+                                  ),
+                                ])),
+                                pw.SizedBox(
+                                  height: 6,
                                 ),
+                                // pw.Row(
+                                //   crossAxisAlignment:
+                                //       pw.CrossAxisAlignment.start,
+                                //   children: [
+                                //     pw.Expanded(
+                                //       child: pw.Row(
+                                //         crossAxisAlignment:
+                                //             pw.CrossAxisAlignment.start,
+                                //         children: [],
+                                //       ),
+                                //     ),
+                                //     pw.Expanded(
+                                //       child: pw.Text(
+                                //         "Rp ${currencyFormatter.format(Utility.hitungTotalPembelianBarang("$hargaBarang", "$qtyBeli", "$discd"))}",
+                                //         textAlign: pw.TextAlign.right,
+                                //         style: pw.TextStyle(
+                                //             font: fontstyle, fontSize: 6),
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),
@@ -1151,6 +1373,10 @@ class DetailStruk extends StatelessWidget {
                   );
                 }),
             pw.SizedBox(
+              height: 3,
+            ),
+            pw.Divider(),
+            pw.SizedBox(
               height: 6,
             ),
             type == 3
@@ -1159,100 +1385,309 @@ class DetailStruk extends StatelessWidget {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Expanded(
+                          flex: 45,
                           child: pw.Column(
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               children: [
-                            pw.Text(
-                              "Subtotal",
-                              style: pw.TextStyle(
-                                  fontWeight: pw.FontWeight.bold, fontSize: 4),
-                            ),
-                            pw.Row(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
                                 pw.Text(
-                                  "Diskon",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  "Total Item",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
                                 ),
                                 pw.Text(
-                                  "  ${dashboardCt.diskonHeader.value}%",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  "Subtotal",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
                                 ),
-                              ],
-                            ),
-                            pw.Row(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.Text(
+                                        "Diskon",
+                                        style: pw.TextStyle(
+                                            font: fontstyle,
+                                            fontWeight: pw.FontWeight.bold,
+                                            fontSize: 10),
+                                      ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.SizedBox(
+                                        height: 4,
+                                      ),
                                 pw.Text(
-                                  "PPN",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  "Total",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
                                 ),
                                 pw.Text(
-                                  "  ${dashboardCt.ppnCabang.value}%",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  "Bayar",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
                                 ),
-                              ],
-                            ),
-                            pw.Row(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Text(
-                                  "Service Charger",
-                                  style: pw.TextStyle(fontSize: 4),
+                                pw.SizedBox(
+                                  height: 4,
                                 ),
                                 pw.Text(
-                                  "  ${dashboardCt.serviceChargerCabang.value}%",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  "Kembali",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
                                 ),
-                              ],
-                            ),
-                            pw.Text(
-                              "Tukar Point",
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "Total",
-                              style: pw.TextStyle(
-                                  fontWeight: pw.FontWeight.bold, fontSize: 4),
-                            ),
-                          ])),
+                                // pw.Row(
+                                //   crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                //   children: [
+                                //     pw.Text(
+                                //       "Diskon",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //     pw.Text(
+                                //       "  ${dashboardCt.diskonHeader.value}%",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //   ],
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Row(
+                                //   crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                //   children: [
+                                //     pw.Text(
+                                //       "PPN",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //     pw.Text(
+                                //       "  ${dashboardCt.ppnCabang.value}%",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //   ],
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Row(
+                                //   crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                //   children: [
+                                //     pw.Text(
+                                //       "Service Charger",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //     pw.Text(
+                                //       "  ${dashboardCt.serviceChargerCabang.value}%",
+                                //       style: pw.TextStyle(
+                                //           font: fontstyle, fontSize: 8),
+                                //     ),
+                                //   ],
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Text(
+                                //   "Tukar Point",
+                                //   style: pw.TextStyle(font: fontstyle, fontSize: 8),
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                              ])),
                       pw.Expanded(
+                          flex: 2,
+                          child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  ":",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Text(
+                                  ":",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.Text(
+                                        ":",
+                                        style: pw.TextStyle(
+                                            font: fontstyle,
+                                            fontWeight: pw.FontWeight.bold,
+                                            fontSize: 10),
+                                      ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.SizedBox(
+                                        height: 4,
+                                      ),
+                                pw.Text(
+                                  ":",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Text(
+                                  ":",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Text(
+                                  ":",
+                                  style: pw.TextStyle(
+                                      font: fontstyle,
+                                      fontWeight: pw.FontWeight.bold,
+                                      fontSize: 10),
+                                ),
+                              ])),
+                      pw.Expanded(
+                          flex: 53,
                           child: pw.Column(
                               crossAxisAlignment: pw.CrossAxisAlignment.end,
                               children: [
-                            pw.Text(
-                              "Rp ${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "${currencyFormatter.format(0)}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                            pw.Text(
-                              "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                              textAlign: pw.TextAlign.right,
-                              style: pw.TextStyle(fontSize: 4),
-                            ),
-                          ]))
+                                pw.Text(
+                                  "${dashboardCt.jumlahItemDikeranjang.value}",
+                                  textAlign: pw.TextAlign.right,
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Text(
+                                  "${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
+                                  textAlign: pw.TextAlign.right,
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.Text(
+                                        "${currencyFormatter.format(dashboardCt.informasiJlhd[0]['DISCN'])}",
+                                        textAlign: pw.TextAlign.right,
+                                        style: pw.TextStyle(
+                                            font: fontstyle, fontSize: 10),
+                                      ),
+                                dashboardCt.informasiJlhd[0]['DISCN'] <= 0
+                                    ? pw.SizedBox()
+                                    : pw.SizedBox(
+                                        height: 4,
+                                      ),
+                                pw.Text(
+                                  "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                  textAlign: pw.TextAlign.right,
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                pw.Text(
+                                  "${currencyFormatter.format(int.parse("${pembayaranCt.uangterima.value.text.replaceAll('.', '')}"))}",
+                                  textAlign: pw.TextAlign.right,
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 10),
+                                ),
+                                pw.SizedBox(
+                                  height: 4,
+                                ),
+                                simpanPembayaranCt.informasiSelesaiPembayaran
+                                            .value[0]['status'] ==
+                                        false
+                                    ? pw.Text(
+                                        "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
+                                        textAlign: pw.TextAlign.right,
+                                        style: pw.TextStyle(
+                                            font: fontstyle, fontSize: 10),
+                                      )
+                                    : pw.Text(
+                                        "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihanSplit.value}"))}",
+                                        textAlign: pw.TextAlign.right,
+                                        style: pw.TextStyle(
+                                            font: fontstyle, fontSize: 10),
+                                      ),
+
+                                // pw.Text(
+                                //   "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
+                                //   textAlign: pw.TextAlign.right,
+                                //   style: pw.TextStyle(font: fontstyle, fontSize: 6),
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Text(
+                                //   "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
+                                //   textAlign: pw.TextAlign.right,
+                                //   style: pw.TextStyle(font: fontstyle, fontSize: 6),
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Text(
+                                //   "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                //   textAlign: pw.TextAlign.right,
+                                //   style: pw.TextStyle(font: fontstyle, fontSize: 6),
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                                // pw.Text(
+                                //   "${currencyFormatter.format(0)}",
+                                //   textAlign: pw.TextAlign.right,
+                                //   style: pw.TextStyle(font: fontstyle, fontSize: 6),
+                                // ),
+                                // pw.SizedBox(
+                                //   height: 6,
+                                // ),
+                              ]))
                     ],
                   ),
+            pw.SizedBox(
+              height: 3,
+            ),
+            pw.Divider(),
             pw.SizedBox(
               height: 6,
             ),
@@ -1278,14 +1713,16 @@ class DetailStruk extends StatelessWidget {
                               pw.Expanded(
                                 child: pw.Text(
                                   "Split $idBayarSplit - $tipeBayar",
-                                  style: pw.TextStyle(fontSize: 4),
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 6),
                                 ),
                               ),
                               pw.Expanded(
                                 child: pw.Text(
                                   "Rp ${currencyFormatter.format(totalBayar)}",
                                   textAlign: pw.TextAlign.right,
-                                  style: pw.TextStyle(fontSize: 4),
+                                  style: pw.TextStyle(
+                                      font: fontstyle, fontSize: 6),
                                 ),
                               )
                             ],
@@ -1307,7 +1744,9 @@ class DetailStruk extends StatelessWidget {
                     "--LUNAS--",
                     textAlign: pw.TextAlign.center,
                     style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold, fontSize: 4),
+                        font: fontstyle,
+                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 6),
                   ),
             pw.SizedBox(
               height: 0.2,
@@ -1315,12 +1754,13 @@ class DetailStruk extends StatelessWidget {
             pw.Text(
               "SISCOM ONLINE",
               textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 4),
+              style: pw.TextStyle(
+                  font: fontstyle, fontWeight: pw.FontWeight.bold, fontSize: 6),
             ),
             pw.Text(
-              "© Copyright 2022 PT. Shan Informasi Sistem",
+              "© Copyright 2023 PT. Shan Informasi Sistem",
               textAlign: pw.TextAlign.center,
-              style: pw.TextStyle(fontSize: 4),
+              style: pw.TextStyle(font: fontstyle, fontSize: 6),
             )
           ]); // Center
         })); // Page

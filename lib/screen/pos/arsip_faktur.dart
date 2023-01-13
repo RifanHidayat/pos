@@ -223,7 +223,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
                       ),
                     ),
                     Expanded(
-                      flex: 55,
+                      flex: 40,
                       child: Padding(
                         padding: EdgeInsets.all(3.0),
                         child: Column(
@@ -248,7 +248,7 @@ class _ArsipFakturState extends State<ArsipFaktur> {
                       ),
                     ),
                     Expanded(
-                      flex: 30,
+                      flex: 45,
                       child: Container(
                         padding: EdgeInsets.all(3.0),
                         alignment: Alignment.centerRight,

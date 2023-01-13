@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/detail_nota__pengiriman_controller.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/simpan_nota_pengiriman.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/screen/pos/scan_imei.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -13,14 +17,32 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 class NotaPengirimanBarangPesanController extends GetxController {
   var notaPenjualanCt = Get.put(DetailNotaPenjualanController());
+  var sidebarCt = Get.put(SidebarController());
 
   var valueFocus = "".obs;
+  var qtyPesanSebelum = "".obs;
+
+  var screenCustomImei = 0.obs;
+  var typeBarangSelected = 0.obs;
+
+  var imeiSelected = "".obs;
+  Rx<List<String>> imeiBarang = Rx<List<String>>([]);
+
+  var listDataImei = [].obs;
+  var listDataImeiSelected = [].obs;
 
   void validasiEditBarang(produkSelected) async {
+    typeBarangSelected.value = int.parse(produkSelected[0]['TIPE']);
+    typeBarangSelected.refresh();
+
     notaPenjualanCt.typeBarang.value.clear();
     notaPenjualanCt.hargaJualPesanBarang.value.text =
         Utility.rupiahFormat("${produkSelected[0]['STDJUAL']}", "");
     notaPenjualanCt.jumlahPesan.value.text = "${produkSelected[0]['qty_beli']}";
+    qtyPesanSebelum.value = produkSelected[0]['qty_beli'] == 0
+        ? "0"
+        : "${produkSelected[0]['qty_beli']}";
+    qtyPesanSebelum.refresh();
     notaPenjualanCt.persenDiskonPesanBarang.value.text =
         "${produkSelected[0]['DISC1']}";
     notaPenjualanCt.nominalDiskonPesanBarang.value.text =
@@ -29,7 +51,99 @@ class NotaPengirimanBarangPesanController extends GetxController {
         "${produkSelected[0]['STDJUAL']}",
         "${produkSelected[0]['qty_beli']}",
         "${produkSelected[0]['DISCD']}");
-    checkUkuran(produkSelected);
+    checkOutsdanStok(produkSelected);
+  }
+
+  void checkOutsdanStok(produkSelected) async {
+    // GET OUTS
+    Future<double> prosesGetOuts = checkOutsSodtSelected(produkSelected);
+    double hasilGetOuts = await prosesGetOuts;
+    notaPenjualanCt.qtyOuts.value =
+        hasilGetOuts - produkSelected[0]['qty_beli'];
+    notaPenjualanCt.qtyOuts.refresh();
+    // GET STOK BARANG
+    Future<List> getStokBarang = GetDataController().checkStokOutstanding(
+        produkSelected[0]['GROUP'],
+        produkSelected[0]['KODE'],
+        sidebarCt.gudangSelectedSide.value);
+    List hasilStokSelected = await getStokBarang;
+    if (hasilStokSelected.isNotEmpty) {
+      notaPenjualanCt.stokBarangTerpilih.value =
+          double.parse("${hasilStokSelected[0]['STOK']}");
+      notaPenjualanCt.stokBarangTerpilih.refresh();
+    } else {
+      notaPenjualanCt.stokBarangTerpilih.value = 0.0;
+      notaPenjualanCt.stokBarangTerpilih.refresh();
+    }
+
+    // CHECK TIPE BARANG SELECTED
+    validasiTipeBarang(produkSelected);
+  }
+
+  void validasiTipeBarang(produkSelected) async {
+    if (typeBarangSelected.value == 1) {
+      print('proses check imei');
+      listDataImei.clear();
+      listDataImei.refresh();
+
+      listDataImeiSelected.clear();
+      listDataImeiSelected.refresh();
+
+      if (double.parse(qtyPesanSebelum.value) <= 0.0) {
+        Future<List> checkingImei = GetDataController().prosesCheckImei(
+            produkSelected,
+            sidebarCt.cabangKodeSelectedSide.value,
+            sidebarCt.gudangSelectedSide.value);
+        List hasilEmei = await checkingImei;
+        if (hasilEmei.isNotEmpty) {
+          var getFirst = hasilEmei.first;
+
+          imeiSelected.value = getFirst["IMEI"];
+          imeiSelected.refresh();
+
+          for (var element in hasilEmei) {
+            imeiBarang.value.add(element["IMEI"]);
+          }
+
+          listDataImei.value = hasilEmei;
+          listDataImei.refresh();
+          imeiBarang.refresh();
+
+          checkUkuran(produkSelected);
+        } else {
+          UtilsAlert.showToast("Data IMEI tidak valid");
+        }
+      } else {
+        imeiBarang.value.clear();
+        imeiBarang.refresh();
+        Future<List> getimeiEditKeranjang = GetDataController()
+            .getImeiEditKeranjang(
+                produkSelected[0]['KODE'],
+                produkSelected[0]['GROUP'],
+                sidebarCt.cabangKodeSelectedSide.value,
+                sidebarCt.gudangSelectedSide.value);
+        List dataImeiEdit = await getimeiEditKeranjang;
+
+        var getFirst = dataImeiEdit.first;
+        imeiSelected.value = getFirst["IMEI"];
+        imeiSelected.refresh();
+
+        List tampungImeiSelected = [];
+        for (var element in dataImeiEdit) {
+          imeiBarang.value.add(element["IMEI"]);
+          if (int.parse(element['FLAG']) >= 7) {
+            tampungImeiSelected.add(element["IMEI"]);
+          }
+        }
+        print('list imei selected $tampungImeiSelected');
+        listDataImeiSelected.value = tampungImeiSelected;
+        listDataImeiSelected.refresh();
+        checkUkuran(produkSelected);
+      }
+    } else {
+      checkUkuran(produkSelected);
+    }
+    // CHECK UKURAN
   }
 
   void checkUkuran(produkSelected) async {
@@ -43,9 +157,19 @@ class NotaPengirimanBarangPesanController extends GetxController {
         notaPenjualanCt.typeBarang.value.add(element["SATUAN"]);
       }
       notaPenjualanCt.typeBarang.refresh();
+
       notaPenjualanCt.typeBarangSelected.value = produkSelected[0]['SAT'];
+      notaPenjualanCt.typeBarangSelected.refresh();
+
       notaPenjualanCt.htgBarangSelected.value = "${dataUkuran[0]['HTG']}";
+      notaPenjualanCt.htgBarangSelected.refresh();
+
       notaPenjualanCt.pakBarangSelected.value = "${dataUkuran[0]['PAK']}";
+      notaPenjualanCt.pakBarangSelected.refresh();
+
+      screenCustomImei.value = 0;
+      screenCustomImei.refresh();
+
       Get.back();
       sheetButtomMenu(produkSelected);
     } else {
@@ -54,9 +178,19 @@ class NotaPengirimanBarangPesanController extends GetxController {
     }
   }
 
+  Future<double> checkOutsSodtSelected(produkSelected) {
+    var getdata = notaPenjualanCt.sodtTerpilih.firstWhere((element) =>
+        "${element['GROUP']}${element['BARANG']}" ==
+        "${produkSelected[0]['GROUP']}${produkSelected[0]['KODE']}");
+    double outsQty = double.parse("${getdata['QTY']}");
+    return Future.value(outsQty);
+  }
+
   void gestureFunction(setState) {
     if (valueFocus.value == "qty_input") {
-      aksiInputQty(setState, notaPenjualanCt.jumlahPesan.value.text);
+      if (typeBarangSelected.value != 1) {
+        aksiInputQty(setState, notaPenjualanCt.jumlahPesan.value.text);
+      }
     } else if (valueFocus.value == "standart_jual") {
       gantiHargaJual(setState, notaPenjualanCt.hargaJualPesanBarang.value.text);
     } else if (valueFocus.value == "persen_diskon") {
@@ -73,11 +207,6 @@ class NotaPengirimanBarangPesanController extends GetxController {
   }
 
   void sheetButtomMenu(produkSelected) {
-    NumberFormat currencyFormatter = NumberFormat.currency(
-      locale: 'id',
-      symbol: 'Rp ',
-      decimalDigits: 2,
-    );
     showModalBottomSheet(
         context: Get.context!,
         isScrollControlled: true,
@@ -117,26 +246,27 @@ class NotaPengirimanBarangPesanController extends GetxController {
                         SizedBox(
                           height: Utility.medium,
                         ),
-                        inputQtyWidget(setState, produkSelected),
+                        screenOutsdanStokGudang(),
                         SizedBox(
                           height: Utility.medium,
                         ),
-                        standarJualWidget(setState, produkSelected),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        satuanWidget(setState, produkSelected),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        diskonWidget(setState, produkSelected),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Divider(),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
+                        typeBarangSelected.value != 1
+                            ? SizedBox()
+                            : tabIsThereImei(setState),
+                        typeBarangSelected.value != 1
+                            ? SizedBox()
+                            : SizedBox(
+                                height: Utility.medium,
+                              ),
+                        typeBarangSelected.value != 1
+                            ? screenDetailInputBarang(setState, produkSelected)
+                            : screenCustomImei.value == 0
+                                ? screenDetailInputBarang(
+                                    setState, produkSelected)
+                                : screenCustomImei.value == 1
+                                    ? screenImei(setState, produkSelected)
+                                    : screenDetailInputBarang(
+                                        setState, produkSelected),
                         totalWidget(setState, produkSelected),
                         SizedBox(
                           height: Utility.large,
@@ -145,42 +275,17 @@ class NotaPengirimanBarangPesanController extends GetxController {
                           textBtn: "Simpan",
                           colorBtn: Utility.primaryDefault,
                           onTap: () {
-                            // if (!notaPenjualanCt.statusEditBarang.value) {
-                            //   ButtonSheetController().validasiButtonSheet(
-                            //       "Pesan Barang",
-                            //       contentOpPesanBarang(),
-                            //       "op_pesan_barang",
-                            //       'Tambah', () async {
-                            //     Future<List> prosesSimpanSODT =
-                            //         SimpanSODTController()
-                            //             .buatSodt(produkSelected);
-                            //     List hasilProses = await prosesSimpanSODT;
-                            //     if (hasilProses[0] == true) {
-                            //       notaPenjualanCt.loadDataSODT();
-                            //       Get.back();
-                            //       Get.back();
-                            //       UtilsAlert.showToast(
-                            //           "Berhasil tambah barang");
-                            //     }
-                            //   });
-                            // } else {
-                            //   ButtonSheetController().validasiButtonSheet(
-                            //       "Edit Barang",
-                            //       contentOpEditBarang(),
-                            //       "op_edit_barang",
-                            //       'Edit', () async {
-                            //     Future<List> prosesEditSODT =
-                            //         SimpanSODTController()
-                            //             .editSODT(produkSelected);
-                            //     List hasilProses = await prosesEditSODT;
-                            //     if (hasilProses[0] == true) {
-                            //       notaPenjualanCt.loadDataSODT();
-                            //       Get.back();
-                            //       Get.back();
-                            //       UtilsAlert.showToast("Berhasil edit barang");
-                            //     }
-                            //   });
-                            // }
+                            ButtonSheetController().validasiButtonSheet(
+                                "Edit Barang",
+                                contentOpEditBarang(),
+                                "op_edit_barang",
+                                'Edit', () async {
+                              // UtilsAlert.showToast("tahap development");
+                              SimpanNotaPengirimanController().simpanDODT(
+                                  produkSelected,
+                                  qtyPesanSebelum.value,
+                                  listDataImeiSelected);
+                            });
                           },
                         ),
                         SizedBox(
@@ -242,6 +347,233 @@ class NotaPengirimanBarangPesanController extends GetxController {
     );
   }
 
+  Widget screenDetailInputBarang(setState, produkSelected) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          inputQtyWidget(setState, produkSelected),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          standarJualWidget(setState, produkSelected),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          satuanWidget(setState, produkSelected),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          diskonWidget(setState, produkSelected),
+          SizedBox(
+            height: Utility.medium,
+          ),
+          Divider(),
+          SizedBox(
+            height: Utility.medium,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget screenImei(setState, produkSelected) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 40,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: Utility.borderStyle2,
+                        border: Border.all(
+                            width: 0.5,
+                            color: Color.fromARGB(255, 211, 205, 205))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isDense: true,
+                          autofocus: true,
+                          focusColor: Colors.grey,
+                          items: imeiBarang.value
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
+                          value: imeiSelected.value,
+                          onChanged: (selectedValue) {
+                            setState(() {
+                              imeiSelected.value = selectedValue!;
+                              imeiSelected.refresh();
+                              int lengthBefore =
+                                  listDataImeiSelected.value.length;
+                              listDataImeiSelected.value
+                                  .add(imeiSelected.value);
+                              var filter =
+                                  listDataImeiSelected.toSet().toList();
+                              listDataImeiSelected.value = filter;
+                              listDataImeiSelected.refresh();
+                              if (lengthBefore !=
+                                  listDataImeiSelected.value.length) {
+                                aksiTambah(setState);
+                              }
+                            });
+                          },
+                          isExpanded: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 40,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: Center(
+                        child: Button3(
+                      textBtn: "Scan IMEI",
+                      colorSideborder: Utility.primaryDefault,
+                      overlayColor: Utility.infoLight50,
+                      colorText: Utility.primaryDefault,
+                      icon1: Icon(
+                        Iconsax.scan_barcode,
+                        color: Utility.primaryDefault,
+                      ),
+                      onTap: () => Get.to(ScanImei(
+                        scanMenu: "PENJUALAN",
+                      )),
+                    )),
+                  ),
+                ),
+                Expanded(
+                  flex: 10,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        imeiSelected.value = imeiSelected.value;
+                        int lengthBefore = listDataImeiSelected.value.length;
+                        listDataImeiSelected.value.add(imeiSelected.value);
+                        var filter = listDataImeiSelected.toSet().toList();
+                        listDataImeiSelected.value = filter;
+                        listDataImeiSelected.refresh();
+                        if (lengthBefore != listDataImeiSelected.value.length) {
+                          aksiKurangQty(setState);
+                        }
+                      });
+                    },
+                    child: Center(
+                      child: Icon(
+                        Iconsax.refresh,
+                        color: Utility.primaryDefault,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Utility.large,
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle1,
+                border: Border.all(
+                    width: 0.5, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "IMEI Terpilih",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: listDataImeiSelected.value.length,
+                    itemBuilder: (context, index) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IntrinsicHeight(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 90,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        "${listDataImeiSelected.value[index]}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 10,
+                                    child: Center(
+                                        child: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          listDataImeiSelected.value
+                                              .removeWhere((element) =>
+                                                  element ==
+                                                  listDataImeiSelected
+                                                      .value[index]);
+                                          aksiKurangQty(setState);
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Iconsax.trash,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                    )),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Divider()
+                        ],
+                      );
+                    })
+              ],
+            ),
+          ),
+          SizedBox(
+            height: Utility.large,
+          )
+        ],
+      ),
+    );
+  }
+
   Widget totalWidget(setState, produkSelected) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,13 +593,53 @@ class NotaPengirimanBarangPesanController extends GetxController {
             alignment: Alignment.centerRight,
             child: Text(
               // "${totalPesanBarang.value}",
-              "${Utility.rupiahFormat('${notaPenjualanCt.totalPesanBarang.value.toInt()}', 'with_rp')}",
+              "${Utility.rupiahFormat('${notaPenjualanCt.totalPesanBarang.value}', 'with_rp')}",
               style: TextStyle(
                   fontSize: Utility.large, fontWeight: FontWeight.bold),
             ),
           ),
         )
       ],
+    );
+  }
+
+  Widget screenOutsdanStokGudang() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Utility.infoLight50, borderRadius: Utility.borderStyle1),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(left: 3.0, right: 3.0),
+                child: Text(
+                  "Stok gudang : ${notaPenjualanCt.stokBarangTerpilih.value}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 252, 162, 27)),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(left: 3.0, right: 3.0),
+                child: Text(
+                  "Outs. SO : ${notaPenjualanCt.qtyOuts.value}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 160, 19, 8)),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 
@@ -296,7 +668,9 @@ class NotaPengirimanBarangPesanController extends GetxController {
                   Expanded(
                     child: InkWell(
                       onTap: () async {
-                        aksiKurangQty(setState);
+                        if (typeBarangSelected.value != 1) {
+                          aksiKurangQty(setState);
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
@@ -325,6 +699,8 @@ class NotaPengirimanBarangPesanController extends GetxController {
                             },
                             child: TextField(
                               textAlign: TextAlign.center,
+                              readOnly:
+                                  typeBarangSelected.value != 1 ? false : true,
                               cursorColor: Utility.primaryDefault,
                               controller: notaPenjualanCt.jumlahPesan.value,
                               keyboardType: TextInputType.number,
@@ -336,7 +712,9 @@ class NotaPengirimanBarangPesanController extends GetxController {
                                   height: 1.0,
                                   color: Colors.black),
                               onSubmitted: (value) async {
-                                aksiInputQty(setState, value);
+                                if (typeBarangSelected.value != 1) {
+                                  aksiInputQty(setState, value);
+                                }
                               },
                             ),
                           ),
@@ -347,7 +725,9 @@ class NotaPengirimanBarangPesanController extends GetxController {
                   Expanded(
                     child: InkWell(
                       onTap: () async {
-                        aksiTambah(setState);
+                        if (typeBarangSelected.value != 1) {
+                          aksiTambah(setState);
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
@@ -368,96 +748,190 @@ class NotaPengirimanBarangPesanController extends GetxController {
   }
 
   void aksiKurangQty(setState) async {
-    Future<dynamic> prosesKurangQty = PerhitunganCt().kurangQty(
-        notaPenjualanCt.jumlahPesan.value.text,
-        notaPenjualanCt.hargaJualPesanBarang.value.text);
-    List hasilKurang = await prosesKurangQty;
-    var valueValidasi = hasilKurang[0];
-    // print(valueValidasi);
-    if (valueValidasi == false || valueValidasi == 0.0) {
-      UtilsAlert.showToast("Qty tidak valid");
+    double jumlahPesanan = double.parse(notaPenjualanCt.jumlahPesan.value.text);
+    if (jumlahPesanan < 0) {
+      UtilsAlert.showToast('Gagal kurang qty');
     } else {
-      double qty = hasilKurang[0];
-      double totalNominal = hasilKurang[1];
-
-      if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
-        Future<double> akumulasiJikaAdaDiskon = PerhitunganCt().jikaAdaDiskon(
-            totalNominal,
-            notaPenjualanCt.nominalDiskonPesanBarang.value.text,
-            qty);
-
-        double totalAkhir = await akumulasiJikaAdaDiskon;
-
-        setState(() {
-          notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-        });
+      Future<dynamic> prosesKurangQty = PerhitunganCt().kurangQty(
+          notaPenjualanCt.jumlahPesan.value.text,
+          notaPenjualanCt.hargaJualPesanBarang.value.text);
+      List hasilKurang = await prosesKurangQty;
+      var valueValidasi = hasilKurang[0];
+      if (valueValidasi == false || valueValidasi < 0.0) {
+        UtilsAlert.showToast("Qty tidak valid");
       } else {
-        setState(() {
+        double qty = hasilKurang[0];
+        double totalNominal = hasilKurang[1];
+
+        if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
+          Future<double> akumulasiJikaAdaDiskon = PerhitunganCt().jikaAdaDiskon(
+              totalNominal,
+              notaPenjualanCt.nominalDiskonPesanBarang.value.text,
+              qty);
+
+          double totalAkhir = await akumulasiJikaAdaDiskon;
+
+          if (qty <= 0.0) {
+            notaPenjualanCt.totalPesanBarang.value = 0.0;
+            notaPenjualanCt.jumlahPesan.value.text = "0";
+          } else {
+            notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
+            notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+          }
+        } else {
           notaPenjualanCt.totalPesanBarang.value = totalNominal.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-        });
+          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+        }
       }
     }
   }
 
   void aksiTambah(setState) async {
-    Future<dynamic> prosesTambahQty = PerhitunganCt().tambahQty(
-        notaPenjualanCt.jumlahPesan.value.text,
-        notaPenjualanCt.hargaJualPesanBarang.value.text);
-    List hasilTambah = await prosesTambahQty;
-    double qty = hasilTambah[0];
-    double totalNominal = hasilTambah[1];
-
-    if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
-      Future<double> akumulasiJikaAdaDiskon = PerhitunganCt().jikaAdaDiskon(
-          totalNominal,
-          notaPenjualanCt.nominalDiskonPesanBarang.value.text,
-          qty);
-
-      double totalAkhir = await akumulasiJikaAdaDiskon;
-
-      setState(() {
-        notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
-        notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-      });
+    double jumlahPesanan = double.parse(notaPenjualanCt.jumlahPesan.value.text);
+    double validasiQty1 = notaPenjualanCt.qtyOuts.value - jumlahPesanan;
+    double validasiQty2 =
+        notaPenjualanCt.stokBarangTerpilih.value - jumlahPesanan;
+    if (validasiQty1 < 0) {
+      UtilsAlert.showToast("Qty melebihi outstanding");
     } else {
-      setState(() {
-        notaPenjualanCt.totalPesanBarang.value = totalNominal.toPrecision(2);
-        notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-      });
+      if (validasiQty2 < 0) {
+        UtilsAlert.showToast("Qty melebihi stok gudang");
+      } else {
+        Future<dynamic> prosesTambahQty = PerhitunganCt().tambahQty(
+            notaPenjualanCt.jumlahPesan.value.text,
+            notaPenjualanCt.hargaJualPesanBarang.value.text);
+        List hasilTambah = await prosesTambahQty;
+        double qty = hasilTambah[0];
+        double totalNominal = hasilTambah[1];
+
+        if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
+          Future<double> akumulasiJikaAdaDiskon = PerhitunganCt().jikaAdaDiskon(
+              totalNominal,
+              notaPenjualanCt.nominalDiskonPesanBarang.value.text,
+              qty);
+
+          double totalAkhir = await akumulasiJikaAdaDiskon;
+
+          setState(() {
+            notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
+            notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+          });
+        } else {
+          setState(() {
+            notaPenjualanCt.totalPesanBarang.value =
+                totalNominal.toPrecision(2);
+            notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+          });
+        }
+      }
     }
   }
 
   void aksiInputQty(setState, value) async {
-    Future<dynamic> prosesInputQty = PerhitunganCt()
-        .inputQty(value, notaPenjualanCt.hargaJualPesanBarang.value.text);
-    List hasilInputQty = await prosesInputQty;
-    var valueValidasi = hasilInputQty[0];
-    if (valueValidasi == false) {
-      UtilsAlert.showToast("Qty tidak valid");
+    double jumlahPesanan = double.parse(notaPenjualanCt.jumlahPesan.value.text);
+    if (jumlahPesanan >= notaPenjualanCt.qtyOuts.value) {
+      UtilsAlert.showToast("Qty melebihi outstanding");
     } else {
-      double qty = hasilInputQty[0];
-      double totalNominal = hasilInputQty[1];
-      if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
-        Future<double> akumulasiJikaAdaDiskon = PerhitunganCt().jikaAdaDiskon(
-            totalNominal,
-            notaPenjualanCt.nominalDiskonPesanBarang.value.text,
-            qty);
-
-        double totalAkhir = await akumulasiJikaAdaDiskon;
-
-        setState(() {
-          notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-        });
+      if (jumlahPesanan >= notaPenjualanCt.stokBarangTerpilih.value) {
+        UtilsAlert.showToast("Qty melebihi stok gudang");
       } else {
-        setState(() {
-          notaPenjualanCt.totalPesanBarang.value = totalNominal.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
-        });
+        Future<dynamic> prosesInputQty = PerhitunganCt()
+            .inputQty(value, notaPenjualanCt.hargaJualPesanBarang.value.text);
+        List hasilInputQty = await prosesInputQty;
+        var valueValidasi = hasilInputQty[0];
+        if (valueValidasi == false) {
+          UtilsAlert.showToast("Qty tidak valid");
+        } else {
+          double qty = hasilInputQty[0];
+          double totalNominal = hasilInputQty[1];
+
+          if (notaPenjualanCt.persenDiskonPesanBarang.value.text != "") {
+            Future<double> akumulasiJikaAdaDiskon = PerhitunganCt()
+                .jikaAdaDiskon(totalNominal,
+                    notaPenjualanCt.nominalDiskonPesanBarang.value.text, qty);
+
+            double totalAkhir = await akumulasiJikaAdaDiskon;
+
+            setState(() {
+              notaPenjualanCt.totalPesanBarang.value =
+                  totalAkhir.toPrecision(2);
+              notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+            });
+          } else {
+            setState(() {
+              notaPenjualanCt.totalPesanBarang.value =
+                  totalNominal.toPrecision(2);
+              notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+            });
+          }
+        }
       }
     }
+  }
+
+  Widget tabIsThereImei(setState) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  screenCustomImei.value = 0;
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: screenCustomImei.value == 0
+                          ? Utility.primaryDefault
+                          : Colors.transparent,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    "Detail",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  screenCustomImei.value = 1;
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: screenCustomImei.value == 1
+                          ? Utility.primaryDefault
+                          : Colors.transparent,
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    "Serial Number/Imei",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Widget standarJualWidget(setState, produkSelected) {
@@ -545,12 +1019,12 @@ class NotaPengirimanBarangPesanController extends GetxController {
 
         setState(() {
           notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
+          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
         });
       } else {
         setState(() {
           notaPenjualanCt.totalPesanBarang.value = totalNominal.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(2);
+          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
         });
       }
     }
@@ -751,7 +1225,12 @@ class NotaPengirimanBarangPesanController extends GetxController {
         String nominalDiskonBarang = hasilInputQty[0];
         double totalNominalUpdate = hasilInputQty[1];
 
+        var vld1 = value.replaceAll(".", ".");
+        var vld2 = vld1.replaceAll(",", ".");
+        double vld3 = double.parse(vld2);
+
         setState(() {
+          notaPenjualanCt.persenDiskonPesanBarang.value.text = "$vld3";
           notaPenjualanCt.nominalDiskonPesanBarang.value.text =
               nominalDiskonBarang;
           notaPenjualanCt.totalPesanBarang.value = totalNominalUpdate;

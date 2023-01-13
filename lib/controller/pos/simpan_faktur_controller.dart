@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
+import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 
 class SimpanFakturController extends BaseController {
@@ -23,10 +24,16 @@ class SimpanFakturController extends BaseController {
     dashboardCt.totalNominalDikeranjang.value = 0;
     dashboardCt.diskonHeader.value = 0.0;
 
-    dashboardCt.listKeranjang.value.clear();
+    var dataFakturArsip = AppData.noFaktur.split("|");
+    dashboardCt.jumlahArsipFaktur.value = dataFakturArsip.length;
 
+    dashboardCt.listKeranjang.clear();
+    dashboardCt.listKeranjangArsip.clear();
+
+    dashboardCt.jumlahArsipFaktur.refresh();
     dashboardCt.nomorFaktur.refresh();
     dashboardCt.listKeranjang.refresh();
+    dashboardCt.listKeranjangArsip.refresh();
     dashboardCt.jumlahItemDikeranjang.refresh();
     dashboardCt.totalNominalDikeranjang.refresh();
     dashboardCt.customSelected.refresh();

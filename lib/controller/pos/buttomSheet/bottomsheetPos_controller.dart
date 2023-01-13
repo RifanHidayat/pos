@@ -39,6 +39,7 @@ class BottomSheetPos extends BaseController
   Rx<List<String>> imeiBarang = Rx<List<String>>([]);
 
   var screenCustomImei = 0.obs;
+  var qtySebelumEdit = "".obs;
 
   var listDataMeja = [].obs;
   var listDataImei = [].obs;
@@ -212,13 +213,17 @@ class BottomSheetPos extends BaseController
           } else {
             hargaJualFinal = double.parse("${getFirst['STDJUAL']}");
           }
-
+          qtySebelumEdit.value = "0";
+          qtySebelumEdit.refresh();
+          listDataImeiSelected.value.clear();
           dashboardCt.totalPesan.value = hargaJualFinal;
           dashboardCt.totalPesanNoEdit.value = hargaJualFinal;
           dashboardCt.hargaJualPesanBarang.value.text =
-              hargaJualFinal.toStringAsFixed(2);
+              Utility.rupiahFormat("$hargaJualFinal", type);
           Get.back();
         } else {
+          qtySebelumEdit.value = "$qtyProduk";
+          qtySebelumEdit.refresh();
           dashboardCt.jumlahPesan.value.text = "$qtyProduk";
           var fltr1 = jual * qtyProduk;
           var fltr2 = discd * qtyProduk;
@@ -243,7 +248,6 @@ class BottomSheetPos extends BaseController
         tipeImei.value = produkSelected[0]["TIPE"] == "1" ? true : false;
         screenCustomImei.value = 0;
         dashboardCt.listTypeBarang.value = data;
-        listDataImeiSelected.value.clear();
         refreshAll();
         typeFocus.value = "";
         sheetButtomMenu1(produkSelected, type, nomorUrut, keyFaktur,
@@ -276,25 +280,72 @@ class BottomSheetPos extends BaseController
       'kodeBarang': '$kode',
     };
     var connect = Api.connectionApi("post", body, "get_barang_once");
-    connect.then((dynamic res) {
+    connect.then((dynamic res) async {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
 
-        checkingUkuran(
-            context,
-            data,
-            jual,
-            "edit_keranjang",
-            qtyProduk,
-            nomorUrut,
-            keyFaktur,
-            nomorFaktur,
-            gudang,
-            group,
-            kode,
-            discd,
-            diskon);
+        if (data[0]['TIPE'] == "1") {
+          print('proses check imei edit');
+          imeiBarang.value.clear();
+          imeiBarang.refresh();
+          Future<List> getimeiEditKeranjang = GetDataController()
+              .getImeiEditKeranjang(
+                  kode,
+                  group,
+                  dashboardCt.cabangKodeSelected.value,
+                  dashboardCt.gudangSelected.value);
+          List dataImeiEdit = await getimeiEditKeranjang;
+
+          var getFirst = dataImeiEdit.first;
+          imeiSelected.value = getFirst["IMEI"];
+          imeiSelected.refresh();
+
+          List tampungImeiSelected = [];
+          for (var element in dataImeiEdit) {
+            imeiBarang.value.add(element["IMEI"]);
+            if (int.parse(element['FLAG']) >= 7) {
+              tampungImeiSelected.add(element["IMEI"]);
+            }
+          }
+          // listDataImei.value = data;
+          // listDataImei.refresh();
+          listDataImeiSelected.value = tampungImeiSelected;
+          listDataImeiSelected.refresh();
+          if (dataImeiEdit.isNotEmpty) {
+            checkingUkuran(
+                context,
+                data,
+                jual,
+                "edit_keranjang",
+                qtyProduk,
+                nomorUrut,
+                keyFaktur,
+                nomorFaktur,
+                gudang,
+                group,
+                kode,
+                discd,
+                diskon);
+          } else {
+            UtilsAlert.showToast("Data IMEI tidak valid");
+          }
+        } else {
+          checkingUkuran(
+              context,
+              data,
+              jual,
+              "edit_keranjang",
+              qtyProduk,
+              nomorUrut,
+              keyFaktur,
+              nomorFaktur,
+              gudang,
+              group,
+              kode,
+              discd,
+              diskon);
+        }
       }
     });
   }
@@ -1092,7 +1143,9 @@ class BottomSheetPos extends BaseController
                         Iconsax.scan_barcode,
                         color: Utility.primaryDefault,
                       ),
-                      onTap: () => Get.to(ScanImei()),
+                      onTap: () => Get.to(ScanImei(
+                        scanMenu: "POS",
+                      )),
                     )),
                   ),
                 ),
@@ -1221,12 +1274,16 @@ class BottomSheetPos extends BaseController
     double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
 
-    var hargaJualEdit = dashboardCt.hargaJualPesanBarang.value.text;
+    var convertHargaJual =
+        dashboardCt.hargaJualPesanBarang.value.text.split(',');
+    var hargaJualEdit = convertHargaJual[0];
     var filter1 = hargaJualEdit.replaceAll("Rp", "");
     var filter2 = filter1.replaceAll(" ", "");
     var filter3 = filter2.replaceAll(".", "");
     var hrgJualEdit = double.parse(filter3);
     double hargaProduk = hrgJualEdit;
+
+    print('harga produk $hargaProduk');
 
     var hasill = hargaProduk * vld2;
     // dashboardCt.totalPesan.value = hasill.toPrecision(2);
@@ -1318,8 +1375,8 @@ class BottomSheetPos extends BaseController
                               onTap: () {
                                 setState(() {
                                   if (type == "edit_keranjang") {
-                                    editKeranjangCt.editKeranjang(
-                                        dataSelected, '');
+                                    editKeranjangCt.editKeranjang(dataSelected,
+                                        '', listDataImeiSelected.value);
                                   } else if (type == "hapus_faktur") {
                                     hapusJldtCt
                                         .hapusFakturDanJldt(dataSelected);
@@ -1339,10 +1396,13 @@ class BottomSheetPos extends BaseController
                                     if (tipeImei.value == true) {
                                       masukKeranjangCt.masukKeranjang(
                                           dataSelected,
-                                          listDataImeiSelected.value);
+                                          listDataImeiSelected.value,
+                                          qtySebelumEdit.value);
                                     } else {
-                                      masukKeranjangCt
-                                          .masukKeranjang(dataSelected, []);
+                                      masukKeranjangCt.masukKeranjang(
+                                          dataSelected,
+                                          [],
+                                          qtySebelumEdit.value);
                                     }
                                   }
                                 });
@@ -1529,17 +1589,18 @@ class BottomSheetPos extends BaseController
   void aksiKurangQty(content) {
     double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
-
-    if (vld2 <= 0) {
+    int vld3 = vld2 - 1;
+    if (vld3 < 0) {
       UtilsAlert.showToast("Quantity tidak valid");
     } else {
-      var hargaJualEdit = dashboardCt.hargaJualPesanBarang.value.text;
-      var filter1 = hargaJualEdit.replaceAll("Rp", "");
+      var convertHrgjual =
+          dashboardCt.hargaJualPesanBarang.value.text.split(',');
+      var filter1 = convertHrgjual[0].replaceAll("Rp", "");
       var filter2 = filter1.replaceAll(" ", "");
       var filter3 = filter2.replaceAll(".", "");
       var hrgJualEdit = double.parse(filter3);
       double hargaProduk = hrgJualEdit;
-      double hitungJumlahPesan = vld2 - 1;
+      double hitungJumlahPesan = double.parse('$vld3');
       // dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
       dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toString();
       var hasill = hargaProduk * hitungJumlahPesan;
@@ -1564,8 +1625,8 @@ class BottomSheetPos extends BaseController
     // dashboardCt.jumlahPesan.value.text = "${vld4.toStringAsFixed(2)}";
     dashboardCt.jumlahPesan.value.text = vld4.toString();
 
-    var filter1 =
-        dashboardCt.hargaJualPesanBarang.value.text.replaceAll("Rp", "");
+    var convertHrgjual = dashboardCt.hargaJualPesanBarang.value.text.split(',');
+    var filter1 = convertHrgjual[0].replaceAll("Rp", "");
     var filter2 = filter1.replaceAll(" ", "");
     var filter3 = filter2.replaceAll(".", "");
     var filterFinal = double.parse(filter3);
@@ -1586,8 +1647,8 @@ class BottomSheetPos extends BaseController
     double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
 
-    var hargaJualEdit = dashboardCt.hargaJualPesanBarang.value.text;
-    var filter1 = hargaJualEdit.replaceAll("Rp", "");
+    var convertHrgjual = dashboardCt.hargaJualPesanBarang.value.text.split(',');
+    var filter1 = convertHrgjual[0].replaceAll("Rp", "");
     var filter2 = filter1.replaceAll(" ", "");
     var filter3 = filter2.replaceAll(".", "");
     var hrgJualEdit = double.parse(filter3);
@@ -1636,12 +1697,14 @@ class BottomSheetPos extends BaseController
       var vld2 = vld1.replaceAll(",", ".");
       double vld3 = double.parse(vld2);
 
-      var flt1 =
-          dashboardCt.hargaJualPesanBarang.value.text.replaceAll(".", "");
+      var convertHrgjual =
+          dashboardCt.hargaJualPesanBarang.value.text.split(',');
+      var flt1 = convertHrgjual[0].replaceAll(".", "");
       var flt2 = flt1.replaceAll(",", "");
 
       var hitung = Utility.nominalDiskonHeader(flt2, "$vld3");
       var hitungFinal = dashboardCt.totalPesanNoEdit.value - hitung;
+      print('hasil hitung $hitungFinal');
       if (hitungFinal < 0) {
         UtilsAlert.showToast("Gagal tambah diskon");
         dashboardCt.persenDiskonPesanBarang.value.text = "";
@@ -1663,8 +1726,9 @@ class BottomSheetPos extends BaseController
       var filter3 = filter2.replaceAll(".", "");
       double inputNominal = double.parse(filter3);
 
-      var flt1 =
-          dashboardCt.hargaJualPesanBarang.value.text.replaceAll(".", "");
+      var convertHrgjual =
+          dashboardCt.hargaJualPesanBarang.value.text.split(',');
+      var flt1 = convertHrgjual[0].replaceAll(".", "");
       var flt2 = flt1.replaceAll(",", "");
 
       var hitung = (inputNominal / double.parse("$flt2")) * 100;
@@ -1858,6 +1922,7 @@ class BottomSheetPos extends BaseController
     Get.back();
     Get.back();
     Get.back();
+    Get.back();
   }
 
   void voidFaktur(dataSelected) async {
@@ -1889,6 +1954,7 @@ class BottomSheetPos extends BaseController
   }
 
   void editBarangKeranjang(selectedProduk) {
+    print('masuk sini edit');
     var filterProduk = [];
     for (var element in dashboardCt.listKeranjangArsip.value) {
       if ("${element['GROUP']}${element['BARANG']}" ==
