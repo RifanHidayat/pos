@@ -33,12 +33,14 @@ class HapusJldtController extends BaseController {
 
     if (valueBody['status'] == true) {
       prosesHapusJlhdjldt = valueBody['status'];
+      dashboardCt.checkArsipFaktur();
       validasi(keyFaktur);
       Get.back();
       Get.back();
       Get.back();
       dashboardCt.getKelompokBarang('first');
       if (dataSelected != "") {
+        dashboardCt.checkArsipFaktur();
         Get.back();
       }
     }
@@ -83,7 +85,27 @@ class HapusJldtController extends BaseController {
       dashboardCt.listKeranjangArsip.value
           .removeWhere((element) => element["NOURUT"] == dataSelected[0]);
       dashboardCt.listKeranjangArsip.refresh();
-      dashboardCt.hitungAllArsipMenu();
+      if (dashboardCt.listKeranjangArsip.value.length == 0) {
+        dashboardCt.jumlahItemDikeranjang.value = 0;
+        dashboardCt.totalNominalDikeranjang.value = 0.0;
+
+        dashboardCt.persenDiskonPesanBarang.value.text = "0.0";
+        dashboardCt.hargaDiskonPesanBarang.value.text = "0.0";
+        dashboardCt.persenDiskonPesanBarangView.value.text = "0.0";
+        dashboardCt.hargaDiskonPesanBarangView.value.text = "0.0";
+
+        dashboardCt.ppnPesan.value.text = "0.0";
+        dashboardCt.ppnHarga.value.text = "0.0";
+        dashboardCt.ppnPesanView.value.text = "0.0";
+        dashboardCt.ppnHargaView.value.text = "0.0";
+
+        dashboardCt.serviceChargePesan.value.text = "0.0";
+        dashboardCt.serviceChargeHarga.value.text = "0.0";
+        dashboardCt.serviceChargePesanView.value.text = "0.0";
+        dashboardCt.serviceChargeHargaView.value.text = "0.0";
+      } else {
+        dashboardCt.hitungAllArsipMenu();
+      }
       // print(
       //     "list keranjang setelah di hapus ${dashboardCt.listKeranjangArsip.value}");
       if (type != 'proses_split_bill') {
@@ -130,9 +152,9 @@ class HapusJldtController extends BaseController {
       print('hasil filter setelah di hapus $filter');
       AppData.noFaktur = filter;
     }
-
+    dashboardCt.startLoad('hapus_faktur');
     if (AppData.noFaktur != "") {
-      dashboardCt.checkingData();
+      // dashboardCt.checkingData();
     } else {
       dashboardCt.nomorFaktur.value = "-";
       dashboardCt.primaryKeyFaktur.value = "";
@@ -140,17 +162,29 @@ class HapusJldtController extends BaseController {
       dashboardCt.customSelected.value = "";
       dashboardCt.jumlahItemDikeranjang.value = 0;
       dashboardCt.totalNominalDikeranjang.value = 0;
-      dashboardCt.persenDiskonPesanBarang.value.text = "";
-      dashboardCt.hargaDiskonPesanBarang.value.text = "";
+      dashboardCt.persenDiskonPesanBarang.value.text = "0.0";
+      dashboardCt.hargaDiskonPesanBarang.value.text = "0.0";
+      dashboardCt.persenDiskonPesanBarangView.value.text = "0.0";
+      dashboardCt.hargaDiskonPesanBarangView.value.text = "0.0";
       dashboardCt.diskonHeader.value = 0.0;
       dashboardCt.allQtyJldt.value = 0;
       dashboardCt.listKeranjang.value.clear();
       dashboardCt.listKeranjangArsip.value.clear();
+
+      dashboardCt.ppnPesan.value.text = "0.0";
+      dashboardCt.ppnHarga.value.text = "0.0";
+      dashboardCt.ppnPesanView.value.text = "0.0";
+      dashboardCt.ppnHargaView.value.text = "0.0";
+
+      dashboardCt.serviceChargePesan.value.text = "0.0";
+      dashboardCt.serviceChargeHarga.value.text = "0.0";
+      dashboardCt.serviceChargePesanView.value.text = "0.0";
+      dashboardCt.serviceChargeHargaView.value.text = "0.0";
+
       refrehVariabel();
       dashboardCt.getKelompokBarang('');
       // dashboardCt.arsipController.startLoad();
     }
-    dashboardCt.startLoad('hapus_faktur');
   }
 
   void refrehVariabel() {

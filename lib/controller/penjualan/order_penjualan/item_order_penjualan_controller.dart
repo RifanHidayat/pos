@@ -442,6 +442,7 @@ class ItemOrderPenjualanController extends BaseController {
         'KET3': keterangan3.value.text,
         'KET4': keterangan4.value.text,
       };
+      print('edit keterangan sampe sini');
       Future<List> editKeterangan = GetDataController().editDataGlobal(
           "SOHD", "edit_data_global_transaksi", "1", dataUpdate);
       List hasilUpdate = await editKeterangan;

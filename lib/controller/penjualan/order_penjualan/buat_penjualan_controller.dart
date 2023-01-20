@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/detail_nota_pengiriman_barang.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
@@ -14,6 +15,7 @@ import 'package:siscom_pos/utils/toast.dart';
 class BuatPenjualanController extends BaseController {
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
+  var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
 
   void clearAll() {}
 
@@ -117,6 +119,8 @@ class BuatPenjualanController extends BaseController {
       Future<bool> prosesGetAllSOHD = dashboardPenjualanCt.getDataAllSOHD();
       bool hasilGetAll = await prosesGetAllSOHD;
       if (hasilGetAll) {
+        itemOrderPenjualanCt.totalNetto.value = 0.0;
+        itemOrderPenjualanCt.totalNetto.refresh();
         Get.to(ItemOrderPenjualan(dataForm: false),
             duration: Duration(milliseconds: 500),
             transition: Transition.rightToLeftWithFade);

@@ -11,6 +11,7 @@ import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_split_ct.dart';
 import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/screen/pos/pembayaran.dart';
 import 'package:siscom_pos/screen/pos/selesai_pembayaran.dart';
@@ -81,6 +82,7 @@ class PembayaranController extends BaseController {
 
   var dashboardCt = Get.put(DashbardController());
   var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var simpanPembayaranSplitCt = Get.put(SimpanPembayaranSplit());
   var buttonSheetPosCt = Get.put(BottomSheetPos());
   var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
 
@@ -409,7 +411,7 @@ class PembayaranController extends BaseController {
         });
   }
 
-  void inputDetailKartu() {
+  void inputDetailKartu(prosesBayar) {
     showModalBottomSheet(
         context: Get.context!,
         isScrollControlled: true,
@@ -629,7 +631,7 @@ class PembayaranController extends BaseController {
         });
   }
 
-  void pembayaranTanpaKartu() {
+  void pembayaranTanpaKartu(prosesBayar) {
     var filterUang = Utility.convertStringRpToDouble(uangterima.value.text);
     var dataDetailKartu = [
       {
@@ -644,12 +646,20 @@ class PembayaranController extends BaseController {
         'tipe_pembayaran': tipePembayaranSelected.value,
       }
     ];
+
     var infoSplitPembayaran = [
       statusPembayaranSplit.value,
       idPembayaranSplit.value,
-      totalTagihanSplit.value
+      totalTagihanSplit.value,
+      simpanPembayaranSplitCt.statusSelesaiPembayaranSplit.value
     ];
-    simpanPembayaranCt.validasiPembayaran(dataDetailKartu, infoSplitPembayaran);
+    if (prosesBayar == "langsung") {
+      simpanPembayaranCt.validasiPembayaran(
+          dataDetailKartu, infoSplitPembayaran);
+    } else {
+      SimpanPembayaranSplit()
+          .validasiPembayaranSplit(dataDetailKartu, infoSplitPembayaran);
+    }
   }
 
   void transkasiBaru() {

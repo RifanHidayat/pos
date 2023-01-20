@@ -33,6 +33,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
   void initState() {
     controller.timeNow();
     controller.clearAllBuatOrderPenjualan();
+    controller.getDataSales();
     super.initState();
   }
 

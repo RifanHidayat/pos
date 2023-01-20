@@ -13,7 +13,9 @@ import 'package:screenshot/screenshot.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/selesai_pembayaran_controller.dart';
 import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_split_ct.dart';
 import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -30,8 +32,9 @@ class DetailStruk extends StatelessWidget {
   var pembayaranCt = Get.put(PembayaranController());
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
-  var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var simpanPembayaranCt = Get.put(SimpanPembayaranSplit());
   var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
+  var selesaiPembayaranCt = Get.put(SelesaiPembayaranController());
 
   //Create an instance of ScreenshotController
   ScreenshotController screenshotController = ScreenshotController();
@@ -245,8 +248,8 @@ class DetailStruk extends StatelessWidget {
                               ShowCapturedWidget(
                                   capturedImage!,
                                   1,
-                                  simpanPembayaranCt.informasiSelesaiPembayaran
-                                      .value[0]['status']);
+                                  selesaiPembayaranCt.pembayaranStatus.value ==
+                                      false);
                               // ShowCapturedWidget(
                               //     context, capturedImage!, 2);
                             }).catchError((onError) {
@@ -717,14 +720,25 @@ class DetailStruk extends StatelessWidget {
               ),
               Expanded(
                 flex: 30,
-                child: Text(
-                  "${currencyFormatter.format(int.parse("${pembayaranCt.uangterima.value.text.replaceAll('.', '')}"))}",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                      fontSize: !pembayaranCt.viewScreenShootDetailStruk.value
-                          ? Utility.normal
-                          : Utility.small),
-                ),
+                child: selesaiPembayaranCt.pembayaranStatus.value == false
+                    ? Text(
+                        "Rp ${currencyFormatter.format(int.parse("${pembayaranCt.uangterima.value.text.replaceAll('.', '')}"))}",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            fontSize:
+                                !pembayaranCt.viewScreenShootDetailStruk.value
+                                    ? Utility.normal
+                                    : Utility.small),
+                      )
+                    : Text(
+                        "${Utility.rupiahFormat('${selesaiPembayaranCt.totalSplitPembayaran.value}', 'with_rp')}",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                            fontSize:
+                                !pembayaranCt.viewScreenShootDetailStruk.value
+                                    ? Utility.normal
+                                    : Utility.small),
+                      ),
               )
             ],
           ),
@@ -748,9 +762,7 @@ class DetailStruk extends StatelessWidget {
               ),
               Expanded(
                 flex: 30,
-                child: simpanPembayaranCt.informasiSelesaiPembayaran.value[0]
-                            ['status'] ==
-                        false
+                child: selesaiPembayaranCt.pembayaranStatus.value == false
                     ? Text(
                         "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
                         textAlign: TextAlign.right,
@@ -961,8 +973,7 @@ class DetailStruk extends StatelessWidget {
         //     ],
         //   ),
         // ),
-        simpanPembayaranCt.informasiSelesaiPembayaran.value[0]['status'] ==
-                false
+        selesaiPembayaranCt.pembayaranStatus.value == false
             ? SizedBox()
             : SizedBox(
                 child: Padding(
@@ -1633,8 +1644,7 @@ class DetailStruk extends StatelessWidget {
                                 pw.SizedBox(
                                   height: 4,
                                 ),
-                                simpanPembayaranCt.informasiSelesaiPembayaran
-                                            .value[0]['status'] ==
+                                selesaiPembayaranCt.pembayaranStatus.value ==
                                         false
                                     ? pw.Text(
                                         "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",

@@ -14,7 +14,7 @@ import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
-import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_split_ct.dart';
 import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
@@ -29,7 +29,9 @@ import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
 class Pembayaran extends StatefulWidget {
   var dataPembayaran;
-  Pembayaran({Key? key, this.dataPembayaran}) : super(key: key);
+  String prosesBayar;
+  Pembayaran({Key? key, this.dataPembayaran, required this.prosesBayar})
+      : super(key: key);
   @override
   _PembayaranState createState() => _PembayaranState();
 }
@@ -38,7 +40,7 @@ class _PembayaranState extends State<Pembayaran> {
   var controller = Get.put(PembayaranController());
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
-  var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var simpanPembayaranCt = Get.put(SimpanPembayaranSplit());
   var splitJumlahBayarCt = Get.put(SplitJumlahBayarController());
 
   bool statusSplitPembayaran = false;
@@ -136,14 +138,15 @@ class _PembayaranState extends State<Pembayaran> {
                   onTap: () {
                     var status =
                         simpanPembayaranCt.statusSelesaiPembayaranSplit.value;
-                    checkBeforeBack(status, widget.dataPembayaran[0]);
+                    checkBeforeBack(status, widget.dataPembayaran);
                   },
                 )),
             body: WillPopScope(
                 onWillPop: () async {
                   var status =
                       simpanPembayaranCt.statusSelesaiPembayaranSplit.value;
-                  checkBeforeBack(status, widget.dataPembayaran[0]);
+                  checkBeforeBack(status, widget.dataPembayaran);
+                  print('status selesai pembayaran $status');
                   return statusBack;
                 },
                 child: Obx(
@@ -232,12 +235,15 @@ class _PembayaranState extends State<Pembayaran> {
                                           "Y") {
                                         controller.nomorRekeningPembayaran.value
                                             .text = "";
-                                        controller.inputDetailKartu();
+                                        controller.inputDetailKartu(
+                                            widget.prosesBayar);
                                       } else {
-                                        controller.pembayaranTanpaKartu();
+                                        controller.pembayaranTanpaKartu(
+                                            widget.prosesBayar);
                                       }
                                     } else {
-                                      controller.pembayaranTanpaKartu();
+                                      controller.pembayaranTanpaKartu(
+                                          widget.prosesBayar);
                                     }
                                   });
                                 }
@@ -997,9 +1003,11 @@ class _PembayaranState extends State<Pembayaran> {
   // }
 
   checkBeforeBack(status, splitType) {
-    if (splitType == true) {
+    // print(status);
+    // print(splitType);
+    if (splitType[0] == true) {
       if (status == true) {
-        showDialog();
+        showDialog(splitType);
       } else {
         setState(() {
           statusBack = true;
@@ -1014,7 +1022,7 @@ class _PembayaranState extends State<Pembayaran> {
     }
   }
 
-  void showDialog() {
+  void showDialog(splitType) {
     showGeneralDialog(
       barrierDismissible: false,
       context: Get.context!,
@@ -1034,6 +1042,9 @@ class _PembayaranState extends State<Pembayaran> {
               positiveBtnPressed: () {
                 setState(() {
                   statusBack = true;
+                  splitJumlahBayarCt.listPembayaranSplit
+                      .removeWhere((element) => element['id'] == splitType[1]);
+                  splitJumlahBayarCt.listPembayaranSplit.refresh();
                   simpanPembayaranCt.statusSelesaiPembayaranSplit.value = false;
                   simpanPembayaranCt.statusSelesaiPembayaranSplit.refresh();
                   Get.back();

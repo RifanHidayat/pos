@@ -57,90 +57,91 @@ class _RincianPemesananState extends State<RincianPemesanan> {
         child: Scaffold(
           backgroundColor: Utility.baseColor2,
           body: WillPopScope(
-              onWillPop: () async {
-                Get.back();
-                return true;
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // header
-                  Expanded(
-                    flex: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 5,
-                              child: InkWell(
-                                onTap: () => Navigator.pop(context),
-                                child: Center(
-                                  child: Icon(
-                                    Iconsax.arrow_down_1,
-                                    color: Utility.primaryDefault,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 60,
+            onWillPop: () async {
+              Get.back();
+              return true;
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // header
+                Expanded(
+                  flex: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: InkWell(
+                              onTap: () => Navigator.pop(context),
                               child: Center(
-                                child: SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 12),
-                                    child: Text(
-                                      "Rincian Pesanan",
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: Utility.medium,
-                                          color: Utility.primaryDefault),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 30,
-                              child: Button3(
-                                textBtn: "Simpan",
-                                colorSideborder: Utility.primaryDefault,
-                                overlayColor: Color.fromARGB(255, 90, 125, 253),
-                                icon1: Icon(
-                                  Iconsax.document_download,
+                                child: Icon(
+                                  Iconsax.arrow_down_1,
                                   color: Utility.primaryDefault,
                                   size: 20,
                                 ),
-                                colorText: Utility.primaryDefault,
-                                onTap: () {
-                                  buttonSheetPosController.validasiSebelumAksi(
-                                      "Arsip Faktur",
-                                      "Yakin arsip faktur ini ?",
-                                      "",
-                                      "arsip_faktur", []);
-                                },
                               ),
-                            )
-                          ],
-                        ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 60,
+                            child: Center(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 12),
+                                  child: Text(
+                                    "Rincian Pesanan",
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: Utility.medium,
+                                        color: Utility.primaryDefault),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 30,
+                            child: Button3(
+                              textBtn: "Simpan",
+                              colorSideborder: Utility.primaryDefault,
+                              overlayColor: Color.fromARGB(255, 90, 125, 253),
+                              icon1: Icon(
+                                Iconsax.document_download,
+                                color: Utility.primaryDefault,
+                                size: 20,
+                              ),
+                              colorText: Utility.primaryDefault,
+                              onTap: () {
+                                buttonSheetPosController.validasiSebelumAksi(
+                                    "Arsip Faktur",
+                                    "Yakin arsip faktur ini ?",
+                                    "",
+                                    "arsip_faktur", []);
+                              },
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
+                ),
 
-                  // konten
-                  Expanded(
-                      flex: 75,
-                      child: SingleChildScrollView(
-                        physics: BouncingScrollPhysics(),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              bottom: MediaQuery.of(context).viewInsets.bottom),
-                          child: Column(
+                // konten
+                Expanded(
+                    flex: 75,
+                    child: SingleChildScrollView(
+                      physics: BouncingScrollPhysics(),
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                        child: Obx(
+                          () => Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -202,32 +203,29 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                 SizedBox(
                                   height: Utility.small,
                                 ),
-                                Obx(
-                                  () => dashboardCt.statusHitungHeader.value
-                                      ? Center(
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                height: 40,
-                                                width: 40,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 3,
-                                                  color: Utility.primaryDefault,
-                                                ),
+                                dashboardCt.statusHitungHeader.value
+                                    ? Center(
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 40,
+                                              width: 40,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 3,
+                                                color: Utility.primaryDefault,
                                               ),
-                                              Text(
-                                                "Sedang memuat...",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color:
-                                                        Utility.primaryDefault),
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                      : detailNominalBayar(),
-                                ),
+                                            ),
+                                            Text(
+                                              "Sedang memuat...",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      Utility.primaryDefault),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    : detailNominalBayar(),
                                 SizedBox(
                                   height: Utility.medium,
                                 ),
@@ -276,183 +274,184 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                                 ),
                               ]),
                         ),
-                      )),
+                      ),
+                    )),
 
-                  // bottom
-                  Expanded(
-                      flex: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Utility.baseColor2,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(18),
-                            topRight: Radius.circular(18),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromARGB(255, 228, 228, 228)
-                                  .withOpacity(1.0),
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(1, 1), // changes position of shadow
-                            ),
-                          ],
+                // bottom
+                Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Utility.baseColor2,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(18),
+                          topRight: Radius.circular(18),
                         ),
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: Utility.medium,
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: InkWell(
-                                            onTap: () {
-                                              splitBillBtSheetCt
-                                                  .pilihMetodeSplit();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Center(
-                                                  child:
-                                                      Icon(Iconsax.receipt_2),
-                                                ),
-                                                Text("Split")
-                                              ],
-                                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color.fromARGB(255, 228, 228, 228)
+                                .withOpacity(1.0),
+                            spreadRadius: 1,
+                            blurRadius: 1,
+                            offset: Offset(1, 1), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 16.0, right: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: Utility.medium,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () {
+                                            splitBillBtSheetCt
+                                                .pilihMetodeSplit();
+                                          },
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Center(
+                                                child: Icon(Iconsax.receipt_2),
+                                              ),
+                                              Text("Split")
+                                            ],
                                           ),
                                         ),
-                                        Expanded(
-                                          child: InkWell(
-                                            onTap: () {
-                                              buttonSheetPosController
-                                                  .getDataMeja();
-                                            },
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Center(
-                                                  child:
-                                                      Icon(Iconsax.element_4),
-                                                ),
-                                                Text("Meja")
-                                              ],
-                                            ),
+                                      ),
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () {
+                                            buttonSheetPosController
+                                                .getDataMeja();
+                                          },
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Center(
+                                                child: Icon(Iconsax.element_4),
+                                              ),
+                                              Text("Meja")
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: Utility.large,
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          flex: 50,
-                                          child: Obx(() => dashboardCt
-                                                  .statusHitungHeader.value
-                                              ? Center(
-                                                  child: Column(
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 40,
-                                                        width: 40,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          strokeWidth: 3,
-                                                          color: Utility
-                                                              .primaryDefault,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        "Sedang memuat...",
-                                                        style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Utility
-                                                                .primaryDefault),
-                                                      )
-                                                    ],
-                                                  ),
-                                                )
-                                              : Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: Utility.large,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 50,
+                                        child: dashboardCt
+                                                .statusHitungHeader.value
+                                            ? Center(
+                                                child: Column(
                                                   children: [
-                                                    Text(
-                                                      "Total Tagihan",
-                                                      style: TextStyle(
-                                                          color: Utility
-                                                              .greyLight300,
-                                                          fontSize: Utility
-                                                              .semiMedium),
+                                                    SizedBox(
+                                                      height: 40,
+                                                      width: 40,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 3,
+                                                        color: Utility
+                                                            .primaryDefault,
+                                                      ),
                                                     ),
                                                     Text(
-                                                        "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                                      "Sedang memuat...",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Utility
+                                                              .primaryDefault),
+                                                    )
+                                                  ],
+                                                ),
+                                              )
+                                            : Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Total Tagihan",
+                                                    style: TextStyle(
+                                                        color: Utility
+                                                            .greyLight300,
+                                                        fontSize:
+                                                            Utility.semiMedium),
+                                                  ),
+                                                  Obx(
+                                                    () => Text(
+                                                        "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text, dashboardCt.serviceChargePesan.value.text))}",
                                                         style: TextStyle(
                                                             color:
                                                                 Utility.grey900,
                                                             fontWeight:
                                                                 FontWeight.w800,
-                                                            fontSize:
-                                                                Utility.medium))
-                                                  ],
-                                                )),
+                                                            fontSize: Utility
+                                                                .medium)),
+                                                  )
+                                                ],
+                                              ),
+                                      ),
+                                      Expanded(
+                                        flex: 50,
+                                        child: Button1(
+                                          colorBtn: Utility.primaryDefault,
+                                          textBtn: "Pilih Pembayaran",
+                                          onTap: () {
+                                            Get.to(
+                                                Pembayaran(
+                                                  dataPembayaran: [false, ""],
+                                                  prosesBayar: "langsung",
+                                                ),
+                                                duration:
+                                                    Duration(milliseconds: 500),
+                                                transition:
+                                                    Transition.upToDown);
+                                          },
                                         ),
-                                        Expanded(
-                                          flex: 50,
-                                          child: Button1(
-                                            colorBtn: Utility.primaryDefault,
-                                            textBtn: "Pilih Pembayaran",
-                                            onTap: () {
-                                              Get.to(
-                                                  Pembayaran(
-                                                    dataPembayaran: [false, ""],
-                                                  ),
-                                                  duration: Duration(
-                                                      milliseconds: 500),
-                                                  transition:
-                                                      Transition.upToDown);
-                                            },
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: Utility.medium,
-                                    ),
-                                  ],
-                                ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: Utility.medium,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ))
-                ],
-              )),
+                      ),
+                    ))
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -665,25 +664,21 @@ class _RincianPemesananState extends State<RincianPemesanan> {
       child: ListView.builder(
           physics: BouncingScrollPhysics(),
           shrinkWrap: true,
-          itemCount: dashboardCt.listKeranjangArsip.value.length,
+          itemCount: dashboardCt.listKeranjangArsip.length,
           itemBuilder: (context, index) {
-            var namaBarang =
-                dashboardCt.listKeranjangArsip.value[index]['NAMA'];
-            var nomorUrut =
-                dashboardCt.listKeranjangArsip.value[index]['NOURUT'];
-            var keyFaktur = dashboardCt.listKeranjangArsip.value[index]['PK'];
-            var nomorFaktur =
-                dashboardCt.listKeranjangArsip.value[index]['NOMOR'];
-            var qtyBeli = dashboardCt.listKeranjangArsip.value[index]['QTY'];
-            var hargaBarang =
-                dashboardCt.listKeranjangArsip.value[index]['HARGA'];
-            var htg = dashboardCt.listKeranjangArsip.value[index]['HTG'];
-            var pak = dashboardCt.listKeranjangArsip.value[index]['PAK'];
-            var group = dashboardCt.listKeranjangArsip.value[index]['GROUP'];
-            var gudang = dashboardCt.listKeranjangArsip.value[index]['GUDANG'];
-            var kode = dashboardCt.listKeranjangArsip.value[index]['BARANG'];
-            var diskon = dashboardCt.listKeranjangArsip.value[index]['DISC1'];
-            var discd = dashboardCt.listKeranjangArsip.value[index]['DISCD'];
+            var namaBarang = dashboardCt.listKeranjangArsip[index]['NAMA'];
+            var nomorUrut = dashboardCt.listKeranjangArsip[index]['NOURUT'];
+            var keyFaktur = dashboardCt.listKeranjangArsip[index]['PK'];
+            var nomorFaktur = dashboardCt.listKeranjangArsip[index]['NOMOR'];
+            var qtyBeli = dashboardCt.listKeranjangArsip[index]['QTY'];
+            var hargaBarang = dashboardCt.listKeranjangArsip[index]['HARGA'];
+            var htg = dashboardCt.listKeranjangArsip[index]['HTG'];
+            var pak = dashboardCt.listKeranjangArsip[index]['PAK'];
+            var group = dashboardCt.listKeranjangArsip[index]['GROUP'];
+            var gudang = dashboardCt.listKeranjangArsip[index]['GUDANG'];
+            var kode = dashboardCt.listKeranjangArsip[index]['BARANG'];
+            var diskon = dashboardCt.listKeranjangArsip[index]['DISC1'];
+            var discd = dashboardCt.listKeranjangArsip[index]['DISCD'];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1042,7 +1037,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.diskonHeader.value.toStringAsFixed(2)}%",
+                            "${currencyFormatter.format(double.parse(dashboardCt.persenDiskonPesanBarang.value.text))}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.green),
                           ),
@@ -1055,7 +1050,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
               Expanded(
                 flex: 30,
                 child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
+                  "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text))}",
                   textAlign: TextAlign.right,
                 ),
               )
@@ -1087,7 +1082,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.ppnCabang.value.toStringAsFixed(2)}%",
+                            "${currencyFormatter.format(double.parse(dashboardCt.ppnPesan.value.text))}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.red),
                           ),
@@ -1100,7 +1095,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
               Expanded(
                 flex: 30,
                 child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
+                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text))}",
                   textAlign: TextAlign.right,
                 ),
               )
@@ -1132,7 +1127,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                         padding: EdgeInsets.all(3.0),
                         child: Center(
                           child: Text(
-                            "${dashboardCt.serviceChargerCabang.value.toStringAsFixed(2)}%",
+                            "${currencyFormatter.format(double.parse(dashboardCt.serviceChargePesan.value.text))}%",
                             style: TextStyle(
                                 fontSize: Utility.small, color: Colors.red),
                           ),
@@ -1145,7 +1140,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
               Expanded(
                 flex: 30,
                 child: Text(
-                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                  "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.serviceChargePesan.value.text))}",
                   textAlign: TextAlign.right,
                 ),
               )
@@ -1194,7 +1189,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
               Expanded(
                 flex: 30,
                 child: Text(
-                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text, dashboardCt.serviceChargePesan.value.text))}",
                   textAlign: TextAlign.right,
                 ),
               )

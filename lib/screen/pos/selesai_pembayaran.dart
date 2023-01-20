@@ -6,7 +6,7 @@ import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/pos/pembayaran_controller.dart';
 import 'package:siscom_pos/controller/pos/selesai_pembayaran_controller.dart';
-import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_split_ct.dart';
 import 'package:siscom_pos/screen/pos/detail_struk.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -15,6 +15,8 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:siscom_pos/utils/widget/separator.dart';
 
 class SelesaiPembayaran extends StatefulWidget {
+  var dataPembayaran;
+  SelesaiPembayaran({Key? key, this.dataPembayaran}) : super(key: key);
   @override
   _SelesaiPembayaranState createState() => _SelesaiPembayaranState();
 }
@@ -24,11 +26,13 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
   var pembayaranCt = Get.put(PembayaranController());
   var dashboardCt = Get.put(DashbardController());
   var globalCt = Get.put(GlobalController());
-  var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var simpanPembayaranCt = Get.put(SimpanPembayaranSplit());
 
   @override
   void initState() {
     super.initState();
+    print("info split pembayaran page selesai ${widget.dataPembayaran}");
+    controller.startLoad(widget.dataPembayaran);
   }
 
   NumberFormat currencyFormatter = NumberFormat.currency(
@@ -111,6 +115,7 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                             SizedBox(
                               height: Utility.extraLarge + 8,
                             ),
+
                             Padding(
                               padding:
                                   const EdgeInsets.only(left: 20, right: 20),
@@ -131,26 +136,25 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                       ),
                                       Expanded(
                                         flex: 60,
-                                        child: simpanPembayaranCt
-                                                    .informasiSelesaiPembayaran
-                                                    .value[0]['status'] ==
-                                                false
-                                            ? Text(
-                                                "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
-                                                textAlign: TextAlign.right,
-                                                style: TextStyle(
-                                                    color: Utility.grey900,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )
-                                            : Text(
-                                                "${currencyFormatter.format(simpanPembayaranCt.informasiSelesaiPembayaran.value[0]['total_tagihan_split'])}",
-                                                textAlign: TextAlign.right,
-                                                style: TextStyle(
-                                                    color: Utility.grey900,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                        child:
+                                            controller.pembayaranStatus.value ==
+                                                    false
+                                                ? Text(
+                                                    "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                        color: Utility.grey900,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )
+                                                : Text(
+                                                    "${currencyFormatter.format(widget.dataPembayaran[0]['total_tagihan_split'])}",
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                        color: Utility.grey900,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
                                       )
                                     ],
                                   ),
@@ -214,59 +218,56 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                       ),
                                       Expanded(
                                         flex: 60,
-                                        child: simpanPembayaranCt
-                                                    .informasiSelesaiPembayaran
-                                                    .value[0]['status'] ==
-                                                false
-                                            ? Text(
-                                                "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
-                                                textAlign: TextAlign.right,
-                                                style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )
-                                            : Text(
-                                                "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihanSplit.value}"))}",
-                                                textAlign: TextAlign.right,
-                                                style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                        child:
+                                            controller.pembayaranStatus.value ==
+                                                    false
+                                                ? Text(
+                                                    "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihan.value}"))}",
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                        color: Colors.red,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  )
+                                                : Text(
+                                                    "${currencyFormatter.format(Utility.pengurangan("${int.parse(pembayaranCt.uangterima.value.text.replaceAll('.', ''))}", "${pembayaranCt.totalTagihanSplit.value}"))}",
+                                                    textAlign: TextAlign.right,
+                                                    style: TextStyle(
+                                                        color: Colors.red,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
                                       )
                                     ],
                                   ),
-                                  simpanPembayaranCt.informasiSelesaiPembayaran
-                                                  .value[0]['status'] ==
-                                              false ||
-                                          simpanPembayaranCt
-                                                  .statusSelesaiPembayaranSplit
-                                                  .value ==
-                                              true
+                                  controller.pembayaranStatus.value == false
                                       ? SizedBox()
-                                      : SizedBox(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                height: Utility.medium,
+                                      : widget.dataPembayaran[0]
+                                                  ['status_selesai_split'] ==
+                                              true
+                                          ? SizedBox()
+                                          : SizedBox(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    height: Utility.medium,
+                                                  ),
+                                                  Button1(
+                                                    textBtn:
+                                                        "Lanjutkan Split Pembayaran",
+                                                    colorBtn:
+                                                        Utility.primaryDefault,
+                                                    colorText: Colors.white,
+                                                    onTap: () {
+                                                      Get.back();
+                                                      Get.back();
+                                                    },
+                                                  ),
+                                                ],
                                               ),
-                                              Button1(
-                                                textBtn:
-                                                    "Lanjutkan Split Pembayaran",
-                                                colorBtn:
-                                                    Utility.primaryDefault,
-                                                colorText: Colors.white,
-                                                onTap: () {
-                                                  Get.back();
-                                                  Get.back();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                            ),
                                 ],
                               ),
                             )
@@ -278,11 +279,8 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                 ),
                 Expanded(
                     flex: 20,
-                    child: simpanPembayaranCt.informasiSelesaiPembayaran
-                                    .value[0]['status'] ==
-                                false ||
-                            simpanPembayaranCt
-                                    .statusSelesaiPembayaranSplit.value ==
+                    child: controller.pembayaranStatus.value == false ||
+                            widget.dataPembayaran[0]['status_selesai_split'] ==
                                 true
                         ? CardCustom(
                             colorBg: Colors.white,
@@ -443,12 +441,12 @@ class _SelesaiPembayaranState extends State<SelesaiPembayaran> {
                                         colorBtn: Utility.primaryDefault,
                                         textBtn: "Transaksi Baru",
                                         onTap: () {
-                                          if (simpanPembayaranCt
-                                                  .informasiSelesaiPembayaran
-                                                  .value[0]['status'] ==
-                                              true) {
-                                            Get.back();
-                                          }
+                                          // if (simpanPembayaranCt
+                                          //         .informasiSelesaiPembayaran
+                                          //         .value[0]['status'] ==
+                                          //     true) {
+                                          //   Get.back();
+                                          // }
                                           pembayaranCt.transkasiBaru();
                                         }),
                                   )

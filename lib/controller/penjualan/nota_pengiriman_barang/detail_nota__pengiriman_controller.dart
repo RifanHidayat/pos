@@ -31,11 +31,16 @@ class DetailNotaPenjualanController extends BaseController {
 
   var persenDiskonHeaderRincian = TextEditingController().obs;
   var nominalDiskonHeaderRincian = TextEditingController().obs;
+  var persenDiskonHeaderRincianView = TextEditingController().obs;
+  var nominalDiskonHeaderRincianView = TextEditingController().obs;
 
   var persenPPNHeaderRincian = TextEditingController().obs;
   var nominalPPNHeaderRincian = TextEditingController().obs;
+  var persenPPNHeaderRincianView = TextEditingController().obs;
+  var nominalPPNHeaderRincianView = TextEditingController().obs;
 
   var nominalOngkosHeaderRincian = TextEditingController().obs;
+  var nominalOngkosHeaderRincianView = TextEditingController().obs;
 
   var keterangan1 = TextEditingController().obs;
   var keterangan2 = TextEditingController().obs;
@@ -236,116 +241,194 @@ class DetailNotaPenjualanController extends BaseController {
     }
   }
 
-  Future<bool> perhitunganMenyeluruhDO() {
+  Future<bool> perhitunganMenyeluruhDO() async {
+    Future<List> updateInformasiDOHD = GetDataController().getSpesifikData(
+        "DOHD",
+        "PK",
+        "${dashboardPenjualanCt.dohdSelected[0]['PK']}",
+        "get_spesifik_data_transaksi");
+    List infoDOHD = await updateInformasiDOHD;
+
     print('perhitungan data dodt ${dodtSelected.value.length}');
 
+    // perhitungan HRGTOT
     double subtotalKeranjang = 0.0;
-    double hargaTotheader = 0.0;
-    double qtyallheader = 0.0;
     double discdHeader = 0.0;
     double dischHeader = 0.0;
-    double discnHeader = 0.0;
-    double taxnHeader = 0.0;
-    double biayaHeader = 0.0;
+    double allQty = 0.0;
+
+    // double subtotalKeranjang = 0.0;
+    // double hargaTotheader = 0.0;
+    // double qtyallheader = 0.0;
+    // double discdHeader = 0.0;
+    // double dischHeader = 0.0;
+    // double discnHeader = 0.0;
+    // double taxnHeader = 0.0;
+    // double biayaHeader = 0.0;
 
     for (var element in dodtSelected) {
       double hargaBarang = double.parse("${element['HARGA']}");
+      double persenDiskonBarang = double.parse("${element['DISC1']}");
+      double qtyBarang = double.parse("${element['QTY']}");
+      var hitungSubtotal =
+          qtyBarang * (hargaBarang - (hargaBarang * persenDiskonBarang * 0.01));
+      subtotalKeranjang += hitungSubtotal;
+      discdHeader = discdHeader +
+          (double.parse("${element['QTY']}") *
+              double.parse("${element['DISCD']}"));
+      dischHeader = dischHeader +
+          (double.parse("${element['QTY']}") *
+              double.parse("${element['DISCH']}"));
+      allQty += double.parse("${element['QTY']}");
+
       double discdBarang = double.parse("${element['DISCD']}");
       double dischBarang = double.parse("${element['DISCH']}");
-      double qtyBarang = double.parse("${element['QTY']}");
-      var hitung1 = hargaBarang * qtyBarang;
-      var hitung2 = discdBarang * qtyBarang;
-      var finalHitung = hitung1 - hitung2;
-      var hitungDiscn = hitung2 + dischBarang;
-      var hitungDiscnDODT = discdBarang + dischBarang;
 
-      subtotalKeranjang = subtotalKeranjang + finalHitung;
-      hargaTotheader = hargaTotheader + hitung1;
-      qtyallheader = qtyallheader + qtyBarang;
-      discdHeader = discdHeader + hitung2;
-      dischHeader = dischHeader + dischBarang;
-      discnHeader = discnHeader + hitungDiscn;
-      taxnHeader = taxnHeader + double.parse("${element['TAXN']}");
-      biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
+      var hitungDiscnJldt = discdBarang + dischBarang;
+      var valueFinalDiscnJldt = hitungDiscnJldt;
 
-      // update SODT
+      // updateJldt(element['NOKEY'], valueFinalDiscnJldt);
 
-      var ongkosSodt = double.parse("${element['BIAYA']}");
-      var discnSodt = hitungDiscnDODT;
-      var ppnSodt = double.parse("${element['TAXN']}");
+      // double hargaBarang = double.parse("${element['HARGA']}");
+      // double discdBarang = double.parse("${element['DISCD']}");
+      // double dischBarang = double.parse("${element['DISCH']}");
+      // double qtyBarang = double.parse("${element['QTY']}");
+      // var hitung1 = hargaBarang * qtyBarang;
+      // var hitung2 = discdBarang * qtyBarang;
+      // var finalHitung = hitung1 - hitung2;
+      // var hitungDiscn = hitung2 + dischBarang;
+      // var hitungDiscnDODT = discdBarang + dischBarang;
 
-      GetDataController().updateDodt(
-          element['NOMOR'], element['NOURUT'], discnSodt, ppnSodt, ongkosSodt);
+      // subtotalKeranjang = subtotalKeranjang + finalHitung;
+      // hargaTotheader = hargaTotheader + hitung1;
+      // qtyallheader = qtyallheader + qtyBarang;
+      // discdHeader = discdHeader + hitung2;
+      // dischHeader = dischHeader + dischBarang;
+      // discnHeader = discnHeader + hitungDiscn;
+      // taxnHeader = taxnHeader + double.parse("${element['TAXN']}");
+      // biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
+
+      // update DODT
+
+      // var ongkosSodt = double.parse("${element['BIAYA']}");
+      // var discnSodt = hitungDiscnDODT;
+      // var ppnSodt = double.parse("${element['TAXN']}");
+
+      GetDataController()
+          .updateDodt(element['NOMOR'], element['NOURUT'], valueFinalDiscnJldt);
 
       double qtyDODT = double.parse("${element["QTY"]}");
 
-      GetDataController().updateProd3(element["NOMOR"], element["NOURUT"],
-          qtyDODT, discnSodt, ppnSodt, ongkosSodt);
+      GetDataController().updateProd3(
+          element["NOMOR"], element["NOURUT"], qtyDODT, valueFinalDiscnJldt);
     }
 
-    subtotal.value = subtotalKeranjang;
+    // hitung subtotal
+    subtotal.value = "$subtotalKeranjang" == "NaN" ? 0.0 : subtotalKeranjang;
     subtotal.refresh();
 
-    hrgtotDohd.value = hargaTotheader;
-    hrgtotDohd.refresh();
-
-    allQtyBeli.value = qtyallheader;
+    // all qty
+    allQtyBeli.value = allQty;
     allQtyBeli.refresh();
 
-    // perhitungan diskon header
+    // diskon header
 
-    var fltr1 =
-        Utility.persenDiskonHeader("$subtotalKeranjang", "$dischHeader");
+    var fltr1 = Utility.persenDiskonHeader(
+        "${subtotal.value}", "${infoDOHD[0]["DISCH"]}");
 
-    persenDiskonHeaderRincian.value.text =
-        "$fltr1" == "NaN" ? "0.0" : fltr1.toStringAsFixed(2);
+    print('diskon header persen $fltr1');
+
+    persenDiskonHeaderRincian.value.text = "$fltr1" == "NaN" ? "0.0" : "$fltr1";
+    persenDiskonHeaderRincianView.value.text =
+        "$fltr1" == "NaN" ? "0.0" : "$fltr1";
     persenDiskonHeaderRincian.refresh();
+    persenDiskonHeaderRincianView.refresh();
 
-    var filterDisch = "$dischHeader" == "NaN" ? 0.0 : dischHeader;
-    nominalDiskonHeaderRincian.value.text =
-        Utility.rupiahFormat("$filterDisch", '');
+    nominalDiskonHeaderRincian.value.text = "${infoDOHD[0]["DISCH"]}";
+    nominalDiskonHeaderRincianView.value.text =
+        Utility.rupiahFormat("${infoDOHD[0]["DISCH"]}", "");
     nominalDiskonHeaderRincian.refresh();
+    nominalDiskonHeaderRincianView.refresh();
 
-    var hargaSetelahDiskonHeader = subtotalKeranjang - dischHeader;
+    // ppn header
 
-    // perhitungan ppn header
+    var taxpJLHD = infoDOHD[0]["TAXP"];
 
-    var hitungPersenPPN =
-        Utility.persenDiskonHeader("$hargaSetelahDiskonHeader", "$taxnHeader");
+    if (taxpJLHD != null || taxpJLHD != "") {
+      if (double.parse("$taxpJLHD") > 0.0) {
+        print('perhitungan ppn header jalan disini');
+        persenPPNHeaderRincian.value.text = "$taxpJLHD";
+        persenPPNHeaderRincianView.value.text = "$taxpJLHD";
+        persenPPNHeaderRincian.refresh();
+        persenPPNHeaderRincianView.refresh();
 
-    persenPPNHeaderRincian.value.text = "$hitungPersenPPN" == "NaN"
-        ? "0.0"
-        : hitungPersenPPN.toStringAsFixed(2);
-    persenPPNHeaderRincian.refresh();
+        var convert1PPN = Utility.nominalPPNHeaderView(
+            '${subtotal.value}',
+            persenDiskonPesanBarang.value.text,
+            persenPPNHeaderRincian.value.text);
 
-    var filterTaxnHeader = "$taxnHeader" == "NaN" ? 0.0 : taxnHeader;
-    nominalPPNHeaderRincian.value.text =
-        Utility.rupiahFormat("$filterTaxnHeader", '');
-    nominalPPNHeaderRincian.refresh();
+        nominalPPNHeaderRincian.value.text = "$convert1PPN";
+        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
+        nominalPPNHeaderRincian.refresh();
+        nominalPPNHeaderRincianView.refresh();
+      } else {
+        var storageCabang = AppData.cabangSelected;
+        List filter = storageCabang.split("-");
+        persenPPNHeaderRincian.value.text = filter[4];
+        persenPPNHeaderRincianView.value.text = filter[4];
+        persenPPNHeaderRincian.refresh();
+        persenPPNHeaderRincianView.refresh();
 
-    // perhitungan biaya ongkos
+        var convert1PPN = Utility.nominalPPNHeaderView(
+            '${subtotal.value}',
+            persenDiskonPesanBarang.value.text,
+            persenPPNHeaderRincian.value.text);
 
-    nominalOngkosHeaderRincian.value.text =
-        Utility.rupiahFormat("$biayaHeader", '');
+        nominalPPNHeaderRincian.value.text = "$convert1PPN";
+        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
+        nominalPPNHeaderRincian.refresh();
+        nominalPPNHeaderRincianView.refresh();
+      }
+    } else {
+      var storageCabang = AppData.cabangSelected;
+      List filter = storageCabang.split("-");
+      persenPPNHeaderRincian.value.text = filter[4];
+      persenPPNHeaderRincianView.value.text = filter[4];
+      persenPPNHeaderRincian.refresh();
+      persenPPNHeaderRincianView.refresh();
 
-    var hargaNetHeader = hargaSetelahDiskonHeader + taxnHeader + biayaHeader;
+      var convert1PPN = Utility.nominalPPNHeaderView(
+          '${subtotal.value}',
+          persenDiskonPesanBarang.value.text,
+          persenPPNHeaderRincian.value.text);
 
-    totalNetto.value = hargaNetHeader;
-    totalNetto.refresh();
+      nominalPPNHeaderRincian.value.text = "$convert1PPN";
+      nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
+      nominalPPNHeaderRincian.refresh();
+      nominalPPNHeaderRincianView.refresh();
+    }
 
-    var fixedTaxn = taxnHeader;
-    var fixedHrgNet = hargaNetHeader;
+    // biaya header
 
-    GetDataController().updateDohd(
-        dashboardPenjualanCt.nomorDoSelected.value,
-        hargaTotheader,
-        qtyallheader,
-        discdHeader,
-        dischHeader,
-        discnHeader,
-        hitungPersenPPN.toStringAsFixed(0),
-        fixedTaxn,
-        fixedHrgNet);
+    var convert1 = Utility.persenDiskonHeader(
+        "${subtotal.value}", "${infoDOHD[0]["BIAYA"]}");
+
+    var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
+
+    var convert1Charge = Utility.nominalPPNHeaderView(
+        '${subtotal.value}', persenDiskonPesanBarang.value.text, persenBiaya);
+
+    nominalOngkosHeaderRincian.value.text = "$convert1Charge";
+    nominalOngkosHeaderRincianView.value.text =
+        convert1Charge.toStringAsFixed(2);
+
+    double discnHeader = discdHeader + dischHeader;
+    // print('hasil nominal discd header $discdHeader');
+    // print('hasil nominal disch header $dischHeader');
+    // print('hasil nominal discn header $discnHeader');
+  
+    GetDataController().updateDohd(dashboardPenjualanCt.nomorDoSelected.value,
+        allQtyBeli.value, discdHeader, dischHeader, discnHeader);
 
     return Future.value(true);
   }

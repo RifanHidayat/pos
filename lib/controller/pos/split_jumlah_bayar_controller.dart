@@ -19,6 +19,7 @@ class SplitJumlahBayarController extends GetxController {
 
   var statusBack = false.obs;
 
+  var totalHarusDibayar = 0.0.obs;
   var totalSisaPembayaran = "".obs;
 
   NumberFormat currencyFormatter = NumberFormat.currency(
@@ -27,16 +28,27 @@ class SplitJumlahBayarController extends GetxController {
     decimalDigits: 0,
   );
 
+  void startLoad() {
+    listPembayaranSplit.clear();
+    perhitunganSisaTotal();
+  }
+
   void perhitunganSisaTotal() {
     var totalTagihan = Utility.hitungDetailTotalPos(
         '${dashboardCt.totalNominalDikeranjang.value}',
-        '${dashboardCt.diskonHeader.value}',
-        '${dashboardCt.ppnCabang.value}',
-        '${dashboardCt.serviceChargerCabang.value}');
+        dashboardCt.persenDiskonPesanBarang.value.text,
+        dashboardCt.ppnPesan.value.text,
+        dashboardCt.serviceChargePesan.value.text);
+    totalHarusDibayar.value = totalTagihan;
+    totalHarusDibayar.refresh();
+
+    print('total tagihan $totalTagihan');
+
     var filterTotal = currencyFormatter.format(totalTagihan);
 
     totalSisaPembayaran.value = "$filterTotal";
     totalSisaPembayaran.refresh();
+    print('hasil total $totalSisaPembayaran');
   }
 
   void validasiBack() {

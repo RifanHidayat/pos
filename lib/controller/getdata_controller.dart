@@ -91,22 +91,40 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
-  Future<List> aksiUpdatePutangDanPembelian(
-      String nomorSI, String lastNomorPPTGDT) async {
+  Future<List> aksiUpdatePutangDanPembayaran(
+      String nomorSI, String hasilNokey) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'PUTANG',
       'nomor_faktur': nomorSI,
-      'nomor_pptgdt': lastNomorPPTGDT,
+      'nokey_pptgdt': hasilNokey,
     };
-    var connect = Api.connectionApi("post", body, "update_putang_pembelian");
+    var connect = Api.connectionApi("post", body, "update_putang_pembayaran");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
-    List data = valueBody['data'];
     List dataFinal = [];
-    if (data.isNotEmpty) {
-      dataFinal = [true, valueBody['status'], data];
+    if (valueBody['status']) {
+      dataFinal = [true, valueBody['status'], valueBody['data']];
+    } else {
+      dataFinal = [false, valueBody['message']];
+    }
+    return Future.value(dataFinal);
+  }
+
+  Future<List> checkLastRecord(String tabel, String orderby) async {
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': tabel,
+      'orderby': orderby,
+    };
+    var connect = Api.connectionApi("post", body, "check_last_record");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List dataFinal = [];
+    if (valueBody['status']) {
+      dataFinal = [true, valueBody['status'], valueBody['data']];
     } else {
       dataFinal = [false, valueBody['status']];
     }
@@ -388,6 +406,121 @@ class GetDataController extends GetxController {
     return Future.value(hasilAkhir);
   }
 
+  Future<List> insertPPTGHD(List dataInsert) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PPTGHD',
+      'cabang_pptghd': '01',
+      'noref_pptghd': '',
+      'nomor_pptghd': dataInsert[0],
+      'nomorcb_pptghd': dataInsert[1],
+      'cb_pptghd': dataInsert[2],
+      'ket3_pptghd': dataInsert[3],
+      'ket4_pptghd': '',
+      'ket5_pptghd': dataInsert[4],
+      'ket6_pptghd': dataInsert[5],
+      'saldo_pptghd': dataInsert[6],
+      'bayar_pptghd': dataInsert[7],
+      'doe_pptghd': tanggalDanJam,
+      'deo_pptghd': dataInformasiSYSUSER[0],
+      'id1_pptghd': dataInformasiSYSUSER[0],
+      'id3_pptghd': dataInformasiSYSUSER[0],
+      'loe_pptghd': tanggalDanJam,
+      'toe_pptghd': jamTransaksi,
+      'tanggal_pptghd': tanggalNow,
+    };
+    var connect = Api.connectionApi("post", body, "insert_pptghd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    var hasilAkhir = [];
+    if (valueBody['status'] == true) {
+      hasilAkhir = [
+        true,
+        valueBody['message'],
+        valueBody['data'],
+        valueBody['primaryKey']
+      ];
+    } else {
+      hasilAkhir = [false];
+    }
+    return Future.value(hasilAkhir);
+  }
+
+  Future<List> insertPPTGDT(List dataInsert) async {
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'PPTGDT',
+      'pk_pptgdt': dataInsert[0],
+      'cabang_pptgdt': '01',
+      'nokey_pptgdt': dataInsert[1],
+      'cbxx_pptgdt': '01',
+      'salesm_pptgdt': dataInsert[2],
+      'custom_pptgdt': dataInsert[3],
+      'wilayah_pptgdt': dataInsert[4],
+      'nomor_pptgdt': dataInsert[5],
+      'nomorcb_pptgdt': dataInsert[6],
+      'noxx_pptgdt': dataInsert[7],
+      'nosi_pptgdt': dataInsert[8],
+      'ref_pptgdt': '',
+      'tbayar_pptgdt': '01',
+      'noref_pptgdt': '',
+      'tanggal_pptgdt': tanggalNow,
+      'tgl_pptgdt': tanggalNow,
+      'nogiro_pptgdt': '',
+      'saldo_pptgdt': dataInsert[9],
+      'appcode_pptgdt': dataInsert[10],
+      'namakartu_pptgdt': dataInsert[11],
+      'nomorkartu_pptgdt': dataInsert[12],
+      'keterangankartu_pptgdt': dataInsert[13],
+      'ket_pptgdt': dataInsert[14],
+      'doe_pptgdt': tanggalDanJam,
+      'deo_pptgdt': dataInformasiSYSUSER[0],
+      'loe_pptgdt': tanggalDanJam,
+      'toe_pptgdt': jamTransaksi,
+      'mata_pptgdt': 'RP',
+      'cb_pptgdt': dataInsert[15],
+      'uang_pptgdt': 'RP',
+      'kurs_pptgdt': '1',
+      'kurslama_pptgdt': '1',
+      'kursbaru_pptgdt': '1',
+      'jtgiro_pptgdt': tanggalDanJam,
+      'tgltjp_pptgdt': tanggalDanJam,
+      'bayar_pptgdt': dataInsert[16],
+      'byr_pptgdt': dataInsert[17],
+      'produk_pptgdt': '',
+    };
+    var connect = Api.connectionApi("post", body, "insert_pptgdt");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    var hasilAkhir = [];
+    if (valueBody['status'] == true) {
+      hasilAkhir = [
+        true,
+        valueBody['message'],
+        valueBody['data'],
+      ];
+    } else {
+      hasilAkhir = [false];
+    }
+    return Future.value(hasilAkhir);
+  }
+
   Future<List> sohdSelectedNotaPengiriman(
       String custom, String sales, String bulan, String tahun) async {
     Map<String, dynamic> body = {
@@ -620,22 +753,17 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateDohd(nomordohd, hargaTotheader, qtyallheader, discdHeader,
-      dischHeader, discnHeader, persenPPN, fixedTaxn, fixedHrgNet) async {
-    var convertPersenPPN = persenPPN == "NaN" ? 0 : persenPPN;
+  Future<bool> updateDohd(
+      nomordohd, qtyallheader, discdHeader, dischHeader, discnHeader) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'DOHD',
       'nomor': nomordohd,
-      'hargatot': hargaTotheader,
       'qty': qtyallheader,
       'discd': discdHeader,
       'disch': dischHeader,
       'discn': discnHeader,
-      'persen_ppn': convertPersenPPN,
-      'nominal_ppn': fixedTaxn,
-      'hrgnet': fixedHrgNet,
     };
     var connect = Api.connectionApi("post", body, "update_dohd");
     var getValue = await connect;
@@ -663,8 +791,8 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateDodt(String nomorDohd, String nomorUrut, double valueDiscn,
-      double valuePPN, double valueOngkos) async {
+  Future<bool> updateDodt(
+      String nomorDohd, String nomorUrut, double valueDiscn) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
@@ -672,8 +800,6 @@ class GetDataController extends GetxController {
       'nomor': nomorDohd,
       'nourut': nomorUrut,
       'value_discn': valueDiscn,
-      'nominal_ppn': valuePPN,
-      'value_ongkos': valueOngkos,
     };
     var connect = Api.connectionApi("post", body, "update_dodt");
     var getValue = await connect;
@@ -696,8 +822,8 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateProd3(String nomor, String nomorUrut, double qty,
-      double valueDiscn, double valuePPN, double valueOngkos) async {
+  Future<bool> updateProd3(
+      String nomor, String nomorUrut, double qty, double valueDiscn) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
@@ -706,8 +832,6 @@ class GetDataController extends GetxController {
       'nourut': nomorUrut,
       'value_qty': qty,
       'value_discn': valueDiscn,
-      'nominal_ppn': valuePPN,
-      'value_ongkos': valueOngkos,
     };
     var connect = Api.connectionApi("post", body, "update_prod3");
     var getValue = await connect;
@@ -860,7 +984,9 @@ class GetDataController extends GetxController {
       'nokey_putang': '',
       'cb_putang': dataInsert[6],
       'tbayar_putang': '',
-      'ceer_putang': dataInsert[7],
+      'debe_putang': dataInsert[7],
+      'ceer_putang': dataInsert[8],
+      'saldo_putang': dataInsert[9],
       'doe_putang': tanggalDanJam,
       'uang_putang': 'RP',
       'kurs_putang': '1',
@@ -927,6 +1053,38 @@ class GetDataController extends GetxController {
       'list_data': dataUpdate
     };
     var connect = Api.connectionApi("post", body, url);
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    if (valueBody['status'] == true) {
+      statusFinal = [true, valueBody['message']];
+    } else {
+      statusFinal = [false, valueBody['message']];
+    }
+    print('hasil edit data global $valueBody');
+    return Future.value(statusFinal);
+  }
+
+  Future<List> hitungHeader(
+      String tabel,
+      String nomor,
+      String subtotal,
+      String nominalDiskon,
+      String persenPPN,
+      String nominalPPN,
+      String nominalBiaya) async {
+    List statusFinal = [];
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': tabel,
+      'nomor': nomor,
+      'subtotal': subtotal,
+      'nominal_diskon': nominalDiskon,
+      'persen_ppn': persenPPN,
+      'nominal_ppn': nominalPPN,
+      'nominal_biaya': nominalBiaya,
+    };
+    var connect = Api.connectionApi("post", body, "setting_header");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     if (valueBody['status'] == true) {

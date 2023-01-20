@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
-import 'package:siscom_pos/controller/pos/simpan_pembayaran_controller.dart';
+import 'package:siscom_pos/controller/pos/simpan_pembayaran_split_ct.dart';
 import 'package:siscom_pos/controller/pos/split_jumlah_bayar_controller.dart';
 import 'package:siscom_pos/screen/pos/pembayaran.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -11,16 +11,27 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
-class SpliJumlahBayar extends StatelessWidget {
+class SpliJumlahBayar extends StatefulWidget {
+  @override
+  _SpliJumlahBayarState createState() => _SpliJumlahBayarState();
+}
+
+class _SpliJumlahBayarState extends State<SpliJumlahBayar> {
   var controller = Get.put(SplitJumlahBayarController());
   var dashboardCt = Get.put(DashbardController());
-  var simpanPembayaranCt = Get.put(SimpanPembayaran());
+  var simpanPembayaranCt = Get.put(SimpanPembayaranSplit());
 
   NumberFormat currencyFormatter = NumberFormat.currency(
     locale: 'id',
     symbol: 'Rp ',
     decimalDigits: 0,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    controller.startLoad();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +200,10 @@ class SpliJumlahBayar extends StatelessWidget {
                                 controller.listPembayaranSplit
                                     .add(dataInsertNominalSplit);
                                 controller.listPembayaranSplit.refresh();
+                                simpanPembayaranCt
+                                    .statusSelesaiPembayaranSplit.value = true;
+                                simpanPembayaranCt.statusSelesaiPembayaranSplit
+                                    .refresh();
                                 Get.to(
                                     Pembayaran(
                                       dataPembayaran: [
@@ -196,13 +211,10 @@ class SpliJumlahBayar extends StatelessWidget {
                                         idSisaPembayaran,
                                         int.parse(hasilFilter[0])
                                       ],
+                                      prosesBayar: "splitbayar",
                                     ),
                                     duration: Duration(milliseconds: 500),
                                     transition: Transition.rightToLeftWithFade);
-                                simpanPembayaranCt
-                                    .statusSelesaiPembayaranSplit.value = true;
-                                simpanPembayaranCt.statusSelesaiPembayaranSplit
-                                    .refresh();
                               } else {
                                 UtilsAlert.showToast(
                                     "Selesaikan Split Pembayaran");
@@ -239,7 +251,8 @@ class SpliJumlahBayar extends StatelessWidget {
                           style: TextStyle(color: Utility.nonAktif),
                         ),
                         Text(
-                          "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                          "${currencyFormatter.format(controller.totalHarusDibayar.value)}",
+                          // "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text, dashboardCt.serviceChargePesan.value.text))}",
                           style: TextStyle(
                               color: Utility.grey900,
                               fontWeight: FontWeight.bold),
@@ -321,17 +334,26 @@ class SpliJumlahBayar extends StatelessWidget {
                               ? Expanded(
                                   flex: 30,
                                   child: InkWell(
-                                    onTap: () => Get.to(
-                                        Pembayaran(
-                                          dataPembayaran: [
-                                            true,
-                                            idBayarSplit,
-                                            0
-                                          ],
-                                        ),
-                                        duration: Duration(milliseconds: 500),
-                                        transition:
-                                            Transition.rightToLeftWithFade),
+                                    onTap: () {
+                                      simpanPembayaranCt
+                                          .statusSelesaiPembayaranSplit
+                                          .value = false;
+                                      simpanPembayaranCt
+                                          .statusSelesaiPembayaranSplit
+                                          .refresh();
+                                      Get.to(
+                                          Pembayaran(
+                                            dataPembayaran: [
+                                              true,
+                                              idBayarSplit,
+                                              0
+                                            ],
+                                            prosesBayar: "splitbayar",
+                                          ),
+                                          duration: Duration(milliseconds: 500),
+                                          transition:
+                                              Transition.rightToLeftWithFade);
+                                    },
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                           left: 6.0, right: 6.0),

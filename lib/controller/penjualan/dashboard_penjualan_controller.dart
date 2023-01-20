@@ -174,6 +174,10 @@ class DashbardPenjualanController extends GetxController {
     keteranganSO2.value.text = "";
     keteranganSO3.value.text = "";
     keteranganSO4.value.text = "";
+    selectedIdSales.value = "";
+    selectedNameSales.value = "";
+    selectedIdPelanggan.value = "";
+    selectedNamePelanggan.value = "";
   }
 
   void checkArsipOrderPenjualan() {
@@ -227,6 +231,7 @@ class DashbardPenjualanController extends GetxController {
   }
 
   void getDataSales() async {
+    print('proses list sales');
     Future<List> prosesGetSales =
         getDataCt.getDataSales(sidebarCt.cabangKodeSelectedSide.value);
     List data = await prosesGetSales;
@@ -234,9 +239,10 @@ class DashbardPenjualanController extends GetxController {
       data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
       salesList.value = data;
       salesList.refresh();
-      var getFirst = data.first;
-      selectedIdSales.value = getFirst['KODE'];
-      selectedNameSales.value = getFirst['NAMA'];
+      // var getFirst = data.first;
+      // print(getFirst);
+      // selectedIdSales.value = getFirst['KODE'];
+      // selectedNameSales.value = getFirst['NAMA'];
       selectedIdSales.refresh();
       selectedNameSales.refresh();
       getDataPelanggan();

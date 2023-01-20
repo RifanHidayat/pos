@@ -5,9 +5,12 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/buat_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/utils/api.dart';
+import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -516,5 +519,97 @@ class GlobalController extends GetxController
       decimalDigits: decimalDigit,
     );
     return currencyFormatter.format(number);
+  }
+
+  Future<String> checkNokey(tabel, column, valCari) async {
+    String hasilFinal = "";
+
+    Future<List> checkNokey = GetDataController()
+        .getSpesifikData(tabel, column, valCari, "get_spesifik_data_transaksi");
+    List hasilCheck = await checkNokey;
+
+    if (hasilCheck.isNotEmpty) {
+      var getNokey = hasilCheck[0]['NOKEY'];
+      var hitungNokey = int.parse(getNokey) + 1;
+      if ("$hitungNokey".length == 1) {
+        hasilFinal = "0000$hitungNokey";
+      } else if ("$hitungNokey".length == 2) {
+        hasilFinal = "000$hitungNokey";
+      } else if ("$hitungNokey".length == 3) {
+        hasilFinal = "00$hitungNokey";
+      } else if ("$hitungNokey".length == 4) {
+        hasilFinal = "0$hitungNokey";
+      } else if ("$hitungNokey".length == 5) {
+        hasilFinal = "$hitungNokey";
+      }
+    } else {
+      hasilFinal = "00001";
+    }
+
+    return Future.value(hasilFinal);
+  }
+
+  Future<List> checkLastNomor(tabel, cabangSelected) async {
+    String lastNumber = "";
+    String lastNumberCb = "";
+    String asliTerakhirNomor = "";
+    String asliTerakhirNomorCB = "";
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': tabel,
+      'kode_cabang': cabangSelected,
+    };
+    var connect = Api.connectionApi("post", body, "get_last_number_pembayaran");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    if (valueBody['status'] == true) {
+      var fltr1a = "";
+      var fltr3a = "";
+
+      asliTerakhirNomor = valueBody['data'][0]['NOMOR'];
+      asliTerakhirNomorCB = valueBody['data'][0]['NOMORCB'];
+
+      var dt = DateTime.now();
+      var tahunBulan = "${DateFormat('yyyyMM').format(dt)}";
+      if (data.isNotEmpty) {
+        var tp1 = valueBody['data'][0]['NOMOR'];
+        var fltr1 = tp1.substring(0, 2);
+        var fltr2 = tp1.substring(8, 12);
+        var tambah = int.parse(fltr2) + 1;
+        var fltr3 = "$tambah".length == 3
+            ? "0$tambah"
+            : "$tambah".length == 2
+                ? "00$tambah"
+                : "$tambah".length == 1
+                    ? "000$tambah"
+                    : "$tambah";
+
+        lastNumber = "$fltr1$tahunBulan$fltr3";
+
+        var tp1a = valueBody['data'][0]['NOMORCB'];
+        fltr1a = tp1a.substring(0, 2);
+        var fltr2a = tp1a.substring(8, 12);
+        var tambaha = int.parse(fltr2a) + 1;
+        fltr3a = "$tambaha".length == 3
+            ? "0$tambah"
+            : "$tambah".length == 2
+                ? "00$tambah"
+                : "$tambah".length == 1
+                    ? "000$tambah"
+                    : "$tambah";
+        lastNumberCb = "$fltr1a$tahunBulan$fltr3a";
+      } else {
+        var kode = "DB";
+        var nomor = "0001";
+        lastNumber = "$kode$tahunBulan$nomor";
+        lastNumberCb = "$kode$tahunBulan$nomor";
+      }
+    } else {
+      UtilsAlert.showToast(valueBody['message']);
+    }
+    return Future.value(
+        [lastNumber, lastNumberCb, asliTerakhirNomor, asliTerakhirNomorCB]);
   }
 }

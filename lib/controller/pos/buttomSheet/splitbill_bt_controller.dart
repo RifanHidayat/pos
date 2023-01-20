@@ -76,8 +76,8 @@ class SplitBillBtSheetController extends BaseController {
                     InkWell(
                       onTap: () {
                         Get.back();
-                        splitJumlahBayarCt.perhitunganSisaTotal();
-                        splitJumlahBayarCt.listPembayaranSplit.value.clear();
+                        // splitJumlahBayarCt.perhitunganSisaTotal();
+                        // splitJumlahBayarCt.listPembayaranSplit.value.clear();
                         Get.to(SpliJumlahBayar(),
                             duration: Duration(milliseconds: 500),
                             transition: Transition.downToUp);

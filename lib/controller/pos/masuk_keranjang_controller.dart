@@ -65,12 +65,21 @@ class MasukKeranjangController extends BaseController {
       produkSelected, imeiData, qtySebelumEdit) async {
     setBusy();
     // check harga jual di edit
-    var convertHrgjual = dashboardCt.hargaJualPesanBarang.value.text.split(',');
-    var filter1 = convertHrgjual[0];
-    var filter2 = filter1.replaceAll("Rp", "");
-    var filter3 = filter1.replaceAll(" ", "");
-    var filter4 = filter2.replaceAll(".", "");
-    var hrgJualEditFinal = int.parse(filter4);
+    // validasi harga standar jual jika global include ppn
+    double convertHargaJual = Utility.convertStringRpToDouble(
+        dashboardCt.hargaJualPesanBarang.value.text);
+    var cabangSelected = dashboardCt.listCabang
+        .firstWhere((el) => el["KODE"] == dashboardCt.cabangKodeSelected.value);
+    double hargaJualFinal = 0.0;
+    if (dashboardCt.includePPN.value == "Y") {
+      double hitung1 = convertHargaJual *
+          (100 / (100 + double.parse("${cabangSelected['PPN']}")));
+      hargaJualFinal = hitung1;
+    } else {
+      hargaJualFinal = convertHargaJual;
+    }
+
+    var hrgJualEditFinal = hargaJualFinal;
 
     // check nomor urut keranjang
     Future<String> checkNokeyKeranjang = checkNoKey();

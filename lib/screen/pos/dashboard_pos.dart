@@ -246,7 +246,7 @@ class _DashboardState extends State<Dashboard> {
                                         controller.hitungAllArsipMenu();
                                         Get.to(RincianPemesanan(),
                                             duration:
-                                                Duration(milliseconds: 500),
+                                                Duration(milliseconds: 200),
                                             transition: Transition.zoom);
                                       },
                                       colorButton: Utility.primaryDefault,
@@ -306,6 +306,7 @@ class _DashboardState extends State<Dashboard> {
                   children: [
                     InkWell(
                         onTap: () {
+                          controller.checkArsipFaktur();
                           Get.to(ArsipFaktur());
                         },
                         child: Container(
@@ -561,7 +562,7 @@ class _DashboardState extends State<Dashboard> {
                                               .isEmpty &&
                                           controller.nomorFaktur.value == "-") {
                                         if (controller.pelayanSelected.value ==
-                                            "Data pelayan kosong") {
+                                            "-") {
                                           UtilsAlert.showToast(
                                               "Harap pilih sales terlebih dahulu...");
                                         } else if (controller

@@ -114,40 +114,7 @@ class RincianPemesananController extends BaseController
                           height: Utility.large,
                         ),
                         // SUBTOTAL
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Utility.primaryLight50,
-                              borderRadius: Utility.borderStyle1),
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 3.0, right: 3.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "Sub Total",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      "Rp ${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
+                        subtotalWidget(setState),
 
                         SizedBox(
                           height: Utility.medium,
@@ -158,191 +125,7 @@ class RincianPemesananController extends BaseController
                         SizedBox(
                           height: Utility.small,
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 30,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(right: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 80,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: FocusScope(
-                                          child: Focus(
-                                            onFocusChange: (focus) {
-                                              setState(() {
-                                                if (focus) {
-                                                  typeFocusEditRincian.value =
-                                                      "persen_header_diskon";
-                                                }
-                                              });
-                                            },
-                                            child: TextField(
-                                              textAlign: TextAlign.center,
-                                              cursorColor: Colors.black,
-                                              controller: dashboardCt
-                                                  .persenDiskonPesanBarang
-                                                  .value,
-                                              keyboardType: TextInputType
-                                                  .numberWithOptions(
-                                                      signed: true),
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              decoration: new InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: "Persentase"),
-                                              style: TextStyle(
-                                                  fontSize: 14.0,
-                                                  height: 1.0,
-                                                  color: Colors.black),
-                                              onSubmitted: (value) {
-                                                setState(() {
-                                                  aksiInputPersenDiskon(
-                                                      context, value, "diskon");
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(16),
-                                                bottomRight:
-                                                    Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("%"),
-                                          ),
-                                        )),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 70,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(left: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(16),
-                                                bottomLeft: Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("Rp"),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 80,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 6),
-                                          child: FocusScope(
-                                            child: Focus(
-                                              onFocusChange: (focus) {
-                                                setState(() {
-                                                  if (focus)
-                                                    typeFocusEditRincian.value =
-                                                        "nominal_header_diskon";
-                                                });
-                                              },
-                                              child: TextField(
-                                                inputFormatters: [
-                                                  CurrencyTextInputFormatter(
-                                                    locale: 'id',
-                                                    symbol: '',
-                                                    decimalDigits: 0,
-                                                  )
-                                                ],
-                                                cursorColor: Colors.black,
-                                                controller: dashboardCt
-                                                    .hargaDiskonPesanBarang
-                                                    .value,
-                                                keyboardType: TextInputType
-                                                    .numberWithOptions(
-                                                        signed: true),
-                                                textInputAction:
-                                                    TextInputAction.done,
-                                                decoration: new InputDecoration(
-                                                    border: InputBorder.none,
-                                                    hintText: "Nominal Diskon"),
-                                                style: TextStyle(
-                                                    fontSize: 14.0,
-                                                    height: 1.0,
-                                                    color: Colors.black),
-                                                onSubmitted: (value) {
-                                                  setState(() {
-                                                    aksiInputNominalDiskon(
-                                                        context,
-                                                        value,
-                                                        "diskon");
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      // dashboardCt.hargaDiskonPesanBarang.value.text !=
-                                      //         ""
-                                      //     ? Expanded(
-                                      //         flex: 10,
-                                      //         child: InkWell(
-                                      //           onTap: () {
-                                      //             clearInputanDiskon();
-                                      //           },
-                                      //           child: Center(
-                                      //             child: Icon(
-                                      //               Iconsax.minus_cirlce,
-                                      //               color: Colors.red,
-                                      //             ),
-                                      //           ),
-                                      //         ),
-                                      //       )
-                                      //     : SizedBox()
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                        diskonWidget(setState),
 
                         SizedBox(
                           height: Utility.medium,
@@ -351,170 +134,7 @@ class RincianPemesananController extends BaseController
                         SizedBox(
                           height: Utility.small,
                         ),
-
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 30,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(right: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 80,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: FocusScope(
-                                          child: Focus(
-                                            onFocusChange: (focus) {
-                                              setState(() {
-                                                if (focus)
-                                                  typeFocusEditRincian.value =
-                                                      "persen_header_ppn";
-                                              });
-                                            },
-                                            child: TextField(
-                                              textAlign: TextAlign.center,
-                                              cursorColor: Colors.black,
-                                              controller:
-                                                  dashboardCt.ppnPesan.value,
-                                              keyboardType: TextInputType
-                                                  .numberWithOptions(
-                                                      signed: true),
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              decoration: new InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: "Persentase"),
-                                              style: TextStyle(
-                                                  fontSize: 14.0,
-                                                  height: 1.0,
-                                                  color: Colors.black),
-                                              onSubmitted: (value) {
-                                                setState(() {
-                                                  aksiInputPersenDiskon(
-                                                      context, value, "ppn");
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(16),
-                                                bottomRight:
-                                                    Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("%"),
-                                          ),
-                                        )),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 70,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(left: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(16),
-                                                bottomLeft: Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("Rp"),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 80,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 6),
-                                          child: FocusScope(
-                                            child: Focus(
-                                              onFocusChange: (focus) {
-                                                setState(() {
-                                                  if (focus)
-                                                    typeFocusEditRincian.value =
-                                                        "nominal_header_ppn";
-                                                });
-                                              },
-                                              child: TextField(
-                                                inputFormatters: [
-                                                  CurrencyTextInputFormatter(
-                                                    locale: 'id',
-                                                    symbol: '',
-                                                    decimalDigits: 0,
-                                                  )
-                                                ],
-                                                cursorColor: Colors.black,
-                                                controller:
-                                                    dashboardCt.ppnHarga.value,
-                                                keyboardType: TextInputType
-                                                    .numberWithOptions(
-                                                        signed: true),
-                                                textInputAction:
-                                                    TextInputAction.done,
-                                                decoration: new InputDecoration(
-                                                    border: InputBorder.none,
-                                                    hintText: "Nominal"),
-                                                style: TextStyle(
-                                                    fontSize: 14.0,
-                                                    height: 1.0,
-                                                    color: Colors.black),
-                                                onSubmitted: (value) {
-                                                  setState(() {
-                                                    aksiInputNominalDiskon(
-                                                        context, value, "ppn");
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                        ppnWidget(setState),
 
                         SizedBox(
                           height: Utility.medium,
@@ -523,172 +143,7 @@ class RincianPemesananController extends BaseController
                         SizedBox(
                           height: Utility.small,
                         ),
-
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 30,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(right: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 80,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 6),
-                                        child: FocusScope(
-                                          child: Focus(
-                                            onFocusChange: (focus) {
-                                              setState(() {
-                                                if (focus)
-                                                  typeFocusEditRincian.value =
-                                                      "persen_header_service";
-                                              });
-                                            },
-                                            child: TextField(
-                                              textAlign: TextAlign.center,
-                                              cursorColor: Colors.black,
-                                              controller: dashboardCt
-                                                  .serviceChargePesan.value,
-                                              keyboardType: TextInputType
-                                                  .numberWithOptions(
-                                                      signed: true),
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              decoration: new InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: "Persentase"),
-                                              style: TextStyle(
-                                                  fontSize: 14.0,
-                                                  height: 1.0,
-                                                  color: Colors.black),
-                                              onSubmitted: (value) {
-                                                setState(() {
-                                                  aksiInputPersenDiskon(context,
-                                                      value, "service");
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topRight: Radius.circular(16),
-                                                bottomRight:
-                                                    Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("%"),
-                                          ),
-                                        )),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 70,
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.only(left: 6.0),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: Utility.borderStyle2,
-                                    border: Border.all(
-                                        width: 1.0,
-                                        color: Color.fromARGB(
-                                            255, 211, 205, 205))),
-                                child: IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 20,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Utility.grey100,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(16),
-                                                bottomLeft: Radius.circular(16),
-                                              )),
-                                          child: Center(
-                                            child: Text("Rp"),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 80,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 6),
-                                          child: FocusScope(
-                                            child: Focus(
-                                              onFocusChange: (focus) {
-                                                setState(() {
-                                                  if (focus)
-                                                    typeFocusEditRincian.value =
-                                                        "nominal_header_service";
-                                                });
-                                              },
-                                              child: TextField(
-                                                inputFormatters: [
-                                                  CurrencyTextInputFormatter(
-                                                    locale: 'id',
-                                                    symbol: '',
-                                                    decimalDigits: 0,
-                                                  )
-                                                ],
-                                                cursorColor: Colors.black,
-                                                controller: dashboardCt
-                                                    .serviceChargeHarga.value,
-                                                keyboardType: TextInputType
-                                                    .numberWithOptions(
-                                                        signed: true),
-                                                textInputAction:
-                                                    TextInputAction.done,
-                                                decoration: new InputDecoration(
-                                                    border: InputBorder.none,
-                                                    hintText: "Nominal"),
-                                                style: TextStyle(
-                                                    fontSize: 14.0,
-                                                    height: 1.0,
-                                                    color: Colors.black),
-                                                onSubmitted: (value) {
-                                                  setState(() {
-                                                    aksiInputNominalDiskon(
-                                                        context,
-                                                        value,
-                                                        "service");
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                        serviceWidget(setState),
                       ],
                     ),
                   ),
@@ -718,37 +173,528 @@ class RincianPemesananController extends BaseController
         });
   }
 
+  Widget subtotalWidget(setState) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Utility.primaryLight50, borderRadius: Utility.borderStyle1),
+      child: Padding(
+        padding: EdgeInsets.only(left: 3.0, right: 3.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Sub Total",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Rp ${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget diskonWidget(setState) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 30,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(right: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 80,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: FocusScope(
+                      child: Focus(
+                        onFocusChange: (focus) {
+                          setState(() {
+                            if (focus) {
+                              typeFocusEditRincian.value =
+                                  "persen_header_diskon";
+                            }
+                          });
+                        },
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          cursorColor: Colors.black,
+                          controller:
+                              dashboardCt.persenDiskonPesanBarangView.value,
+                          keyboardType:
+                              TextInputType.numberWithOptions(signed: true),
+                          textInputAction: TextInputAction.done,
+                          decoration: new InputDecoration(
+                              border: InputBorder.none, hintText: "Persentase"),
+                          style: TextStyle(
+                              fontSize: 14.0, height: 1.0, color: Colors.black),
+                          onSubmitted: (value) {
+                            setState(() {
+                              aksiInputPersenDiskon(
+                                  Get.context!, value, "diskon");
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("%"),
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 70,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(left: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            bottomLeft: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("Rp"),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            setState(() {
+                              if (focus)
+                                typeFocusEditRincian.value =
+                                    "nominal_header_diskon";
+                            });
+                          },
+                          child: TextField(
+                            inputFormatters: [
+                              CurrencyTextInputFormatter(
+                                locale: 'id',
+                                symbol: '',
+                                decimalDigits: 0,
+                              )
+                            ],
+                            cursorColor: Colors.black,
+                            controller:
+                                dashboardCt.hargaDiskonPesanBarangView.value,
+                            keyboardType:
+                                TextInputType.numberWithOptions(signed: true),
+                            textInputAction: TextInputAction.done,
+                            decoration: new InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Nominal Diskon"),
+                            style: TextStyle(
+                                fontSize: 14.0,
+                                height: 1.0,
+                                color: Colors.black),
+                            onSubmitted: (value) {
+                              setState(() {
+                                aksiInputNominalDiskon(
+                                    Get.context!, value, "diskon");
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // dashboardCt.hargaDiskonPesanBarang.value.text !=
+                  //         ""
+                  //     ? Expanded(
+                  //         flex: 10,
+                  //         child: InkWell(
+                  //           onTap: () {
+                  //             clearInputanDiskon();
+                  //           },
+                  //           child: Center(
+                  //             child: Icon(
+                  //               Iconsax.minus_cirlce,
+                  //               color: Colors.red,
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       )
+                  //     : SizedBox()
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget ppnWidget(setState) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 30,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(right: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 80,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: FocusScope(
+                      child: Focus(
+                        onFocusChange: (focus) {
+                          setState(() {
+                            if (focus)
+                              typeFocusEditRincian.value = "persen_header_ppn";
+                          });
+                        },
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          cursorColor: Colors.black,
+                          controller: dashboardCt.ppnPesanView.value,
+                          keyboardType:
+                              TextInputType.numberWithOptions(signed: true),
+                          textInputAction: TextInputAction.done,
+                          decoration: new InputDecoration(
+                              border: InputBorder.none, hintText: "Persentase"),
+                          style: TextStyle(
+                              fontSize: 14.0, height: 1.0, color: Colors.black),
+                          onSubmitted: (value) {
+                            setState(() {
+                              aksiInputPersenDiskon(Get.context!, value, "ppn");
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("%"),
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 70,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(left: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            bottomLeft: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("Rp"),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            setState(() {
+                              if (focus)
+                                typeFocusEditRincian.value =
+                                    "nominal_header_ppn";
+                            });
+                          },
+                          child: TextField(
+                            inputFormatters: [
+                              CurrencyTextInputFormatter(
+                                locale: 'id',
+                                symbol: '',
+                                decimalDigits: 0,
+                              )
+                            ],
+                            cursorColor: Colors.black,
+                            controller: dashboardCt.ppnHargaView.value,
+                            keyboardType:
+                                TextInputType.numberWithOptions(signed: true),
+                            textInputAction: TextInputAction.done,
+                            decoration: new InputDecoration(
+                                border: InputBorder.none, hintText: "Nominal"),
+                            style: TextStyle(
+                                fontSize: 14.0,
+                                height: 1.0,
+                                color: Colors.black),
+                            onSubmitted: (value) {
+                              setState(() {
+                                aksiInputNominalDiskon(
+                                    Get.context!, value, "ppn");
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget serviceWidget(setState) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 30,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(right: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 80,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: FocusScope(
+                      child: Focus(
+                        onFocusChange: (focus) {
+                          setState(() {
+                            if (focus)
+                              typeFocusEditRincian.value =
+                                  "persen_header_service";
+                          });
+                        },
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          cursorColor: Colors.black,
+                          controller: dashboardCt.serviceChargePesanView.value,
+                          keyboardType:
+                              TextInputType.numberWithOptions(signed: true),
+                          textInputAction: TextInputAction.done,
+                          decoration: new InputDecoration(
+                              border: InputBorder.none, hintText: "Persentase"),
+                          style: TextStyle(
+                              fontSize: 14.0, height: 1.0, color: Colors.black),
+                          onSubmitted: (value) {
+                            setState(() {
+                              aksiInputPersenDiskon(
+                                  Get.context!, value, "service");
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("%"),
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 70,
+          child: Container(
+            height: 50,
+            margin: EdgeInsets.only(left: 6.0),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle2,
+                border: Border.all(
+                    width: 1.0, color: Color.fromARGB(255, 211, 205, 205))),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 20,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Utility.grey100,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            bottomLeft: Radius.circular(16),
+                          )),
+                      child: Center(
+                        child: Text("Rp"),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            setState(() {
+                              if (focus)
+                                typeFocusEditRincian.value =
+                                    "nominal_header_service";
+                            });
+                          },
+                          child: TextField(
+                            inputFormatters: [
+                              CurrencyTextInputFormatter(
+                                locale: 'id',
+                                symbol: '',
+                                decimalDigits: 0,
+                              )
+                            ],
+                            cursorColor: Colors.black,
+                            controller:
+                                dashboardCt.serviceChargeHargaView.value,
+                            keyboardType:
+                                TextInputType.numberWithOptions(signed: true),
+                            textInputAction: TextInputAction.done,
+                            decoration: new InputDecoration(
+                                border: InputBorder.none, hintText: "Nominal"),
+                            style: TextStyle(
+                                fontSize: 14.0,
+                                height: 1.0,
+                                color: Colors.black),
+                            onSubmitted: (value) {
+                              setState(() {
+                                aksiInputNominalDiskon(
+                                    Get.context!, value, "service");
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
   void beforeShowRincian() {
-    var hitungDiskonHeader = Utility.nominalDiskonHeader(
-        "${dashboardCt.totalNominalDikeranjang.value}",
-        "${dashboardCt.diskonHeader.value}");
-    var hargaSetelahDiskon =
-        dashboardCt.totalNominalDikeranjang.value - hitungDiskonHeader;
+    // setting header
 
-    // diskon header
-    dashboardCt.persenDiskonPesanBarang.value.text =
-        dashboardCt.diskonHeader.value.toStringAsFixed(2);
-    dashboardCt.hargaDiskonPesanBarang.value.text =
-        currencyFormatter.format(hitungDiskonHeader);
-    // hitungDiskonHeader.toStringAsFixed(2);
+    // ppn header convert
+    var convert1PPN = Utility.nominalPPNHeaderView(
+        '${dashboardCt.totalNominalDikeranjang.value}',
+        dashboardCt.persenDiskonPesanBarang.value.text,
+        dashboardCt.ppnPesan.value.text);
 
-    // ppn header
-    dashboardCt.ppnPesan.value.text =
-        dashboardCt.ppnCabang.value.toStringAsFixed(2);
-    var hitungNominalPPn = Utility.nominalPPNHeader(
-        "$hargaSetelahDiskon", "${dashboardCt.ppnCabang.value}");
-    dashboardCt.ppnHarga.value.text =
-        currencyFormatter.format(hitungNominalPPn);
-    // hitungNominalPPn.toStringAsFixed(2);
+    // service charge convert
+    var convert1Charge = Utility.nominalPPNHeaderView(
+        '${dashboardCt.totalNominalDikeranjang.value}',
+        dashboardCt.persenDiskonPesanBarang.value.text,
+        dashboardCt.serviceChargePesan.value.text);
 
-    // service header
-    dashboardCt.serviceChargePesan.value.text =
-        dashboardCt.serviceChargerCabang.value.toStringAsFixed(2);
-    var hitungNominalService = Utility.nominalPPNHeader(
-        "$hargaSetelahDiskon", "${dashboardCt.serviceChargerCabang.value}");
-    dashboardCt.serviceChargeHarga.value.text =
-        currencyFormatter.format(hitungNominalService);
-    // hitungNominalService.toStringAsFixed(2);
+    dashboardCt.ppnHarga.value.text = "$convert1PPN";
+    dashboardCt.ppnHargaView.value.text = convert1PPN.toStringAsFixed(2);
+
+    dashboardCt.serviceChargeHarga.value.text = "$convert1Charge";
+    dashboardCt.serviceChargeHargaView.value.text =
+        convert1Charge.toStringAsFixed(2);
 
     showRincianDiskon();
   }
@@ -783,9 +729,11 @@ class RincianPemesananController extends BaseController
     if (type == "diskon") {
       double vld3 = Utility.validasiValueDouble(value);
       var hitung = (dashboardCt.totalNominalDikeranjang.value * vld3) / 100;
-      dashboardCt.hargaDiskonPesanBarang.value.text =
+      dashboardCt.hargaDiskonPesanBarang.value.text = "$hitung";
+      dashboardCt.hargaDiskonPesanBarangView.value.text =
           "${globalController.convertToIdr(hitung, 2)}";
       dashboardCt.hargaDiskonPesanBarang.refresh();
+      dashboardCt.hargaDiskonPesanBarangView.refresh();
       validasiPpnDanService();
     } else if (type == "ppn") {
       validasiPpnDanService();
@@ -801,28 +749,34 @@ class RincianPemesananController extends BaseController
               double.parse("${dashboardCt.totalNominalDikeranjang.value}")) *
           100;
 
-      dashboardCt.persenDiskonPesanBarang.value.text =
-          hitung.toStringAsFixed(2);
+      dashboardCt.persenDiskonPesanBarang.value.text = "$hitung";
       dashboardCt.persenDiskonPesanBarang.refresh();
+
+      dashboardCt.persenDiskonPesanBarangView.value.text =
+          hitung.toStringAsFixed(2);
+      dashboardCt.persenDiskonPesanBarangView.refresh();
+
       validasiPpnDanService();
     } else if (type == "ppn") {
       double inputNominal = Utility.convertStringRpToDouble(value);
       double nominalDiskon = Utility.convertStringRpToDouble(
-          dashboardCt.hargaDiskonPesanBarang.value.text);
+          dashboardCt.hargaDiskonPesanBarangView.value.text);
       var hitungHargaSetelahDiskon =
           dashboardCt.totalNominalDikeranjang.value - nominalDiskon;
 
       var hitung = (inputNominal / hitungHargaSetelahDiskon) * 100;
-      dashboardCt.ppnPesan.value.text = hitung.toPrecision(2).toString();
+      dashboardCt.ppnPesanView.value.text = hitung.toPrecision(2).toString();
+      dashboardCt.ppnPesan.value.text = "$hitung";
     } else if (type == "service") {
       double inputNominal = Utility.convertStringRpToDouble(value);
       double nominalDiskon = Utility.convertStringRpToDouble(
-          dashboardCt.hargaDiskonPesanBarang.value.text);
+          dashboardCt.hargaDiskonPesanBarangView.value.text);
       var hitungHargaSetelahDiskon =
           dashboardCt.totalNominalDikeranjang.value - nominalDiskon;
 
       var hitung = (inputNominal / hitungHargaSetelahDiskon) * 100;
-      dashboardCt.serviceChargePesan.value.text =
+      dashboardCt.serviceChargePesan.value.text = "$hitung";
+      dashboardCt.serviceChargePesanView.value.text =
           hitung.toPrecision(2).toString();
     }
   }
@@ -830,16 +784,22 @@ class RincianPemesananController extends BaseController
   void validasiPpnDanService() {
     var hitungHargaSetelahDiskon = dashboardCt.totalNominalDikeranjang.value -
         Utility.convertStringRpToDouble(
-            dashboardCt.hargaDiskonPesanBarang.value.text);
+            dashboardCt.hargaDiskonPesanBarangView.value.text);
+
     var hasilPpn = Utility.nominalPPNHeader(
-        "$hitungHargaSetelahDiskon", dashboardCt.ppnPesan.value.text);
-    dashboardCt.ppnHarga.value.text =
+        "$hitungHargaSetelahDiskon", dashboardCt.ppnPesanView.value.text);
+    dashboardCt.ppnPesan.value.text = dashboardCt.ppnPesanView.value.text;
+    dashboardCt.ppnHarga.value.text = "$hasilPpn";
+    dashboardCt.ppnHargaView.value.text =
         "${globalController.convertToIdr(hasilPpn, 2)}";
 
-    var hasilService = Utility.nominalPPNHeader(
-        "$hitungHargaSetelahDiskon", dashboardCt.serviceChargePesan.value.text);
+    var hasilService = Utility.nominalPPNHeader("$hitungHargaSetelahDiskon",
+        dashboardCt.serviceChargePesanView.value.text);
 
-    dashboardCt.serviceChargeHarga.value.text =
+    dashboardCt.serviceChargePesan.value.text =
+        dashboardCt.serviceChargePesanView.value.text;
+    dashboardCt.serviceChargeHarga.value.text = "$hasilService";
+    dashboardCt.serviceChargeHargaView.value.text =
         "${globalController.convertToIdr(hasilService, 2)}";
   }
 
