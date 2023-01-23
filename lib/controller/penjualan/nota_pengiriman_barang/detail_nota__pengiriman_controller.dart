@@ -26,21 +26,21 @@ class DetailNotaPenjualanController extends BaseController {
   var jumlahPesan = TextEditingController().obs;
   var hargaJualPesanBarang = TextEditingController().obs;
 
-  var persenDiskonPesanBarang = TextEditingController().obs;
-  var nominalDiskonPesanBarang = TextEditingController().obs;
+  var persenDiskonPesanBarang = TextEditingController(text: "0.0").obs;
+  var nominalDiskonPesanBarang = TextEditingController(text: "0.0").obs;
 
-  var persenDiskonHeaderRincian = TextEditingController().obs;
-  var nominalDiskonHeaderRincian = TextEditingController().obs;
-  var persenDiskonHeaderRincianView = TextEditingController().obs;
-  var nominalDiskonHeaderRincianView = TextEditingController().obs;
+  var persenDiskonHeaderRincian = TextEditingController(text: "0.0").obs;
+  var nominalDiskonHeaderRincian = TextEditingController(text: "0.0").obs;
+  var persenDiskonHeaderRincianView = TextEditingController(text: "0.0").obs;
+  var nominalDiskonHeaderRincianView = TextEditingController(text: "0.0").obs;
 
-  var persenPPNHeaderRincian = TextEditingController().obs;
-  var nominalPPNHeaderRincian = TextEditingController().obs;
-  var persenPPNHeaderRincianView = TextEditingController().obs;
-  var nominalPPNHeaderRincianView = TextEditingController().obs;
+  var persenPPNHeaderRincian = TextEditingController(text: "0.0").obs;
+  var nominalPPNHeaderRincian = TextEditingController(text: "0.0").obs;
+  var persenPPNHeaderRincianView = TextEditingController(text: "0.0").obs;
+  var nominalPPNHeaderRincianView = TextEditingController(text: "0.0").obs;
 
-  var nominalOngkosHeaderRincian = TextEditingController().obs;
-  var nominalOngkosHeaderRincianView = TextEditingController().obs;
+  var nominalOngkosHeaderRincian = TextEditingController(text: "0.0").obs;
+  var nominalOngkosHeaderRincianView = TextEditingController(text: "0.0").obs;
 
   var keterangan1 = TextEditingController().obs;
   var keterangan2 = TextEditingController().obs;
@@ -287,45 +287,28 @@ class DetailNotaPenjualanController extends BaseController {
       var hitungDiscnJldt = discdBarang + dischBarang;
       var valueFinalDiscnJldt = hitungDiscnJldt;
 
-      // updateJldt(element['NOKEY'], valueFinalDiscnJldt);
-
-      // double hargaBarang = double.parse("${element['HARGA']}");
-      // double discdBarang = double.parse("${element['DISCD']}");
-      // double dischBarang = double.parse("${element['DISCH']}");
-      // double qtyBarang = double.parse("${element['QTY']}");
-      // var hitung1 = hargaBarang * qtyBarang;
-      // var hitung2 = discdBarang * qtyBarang;
-      // var finalHitung = hitung1 - hitung2;
-      // var hitungDiscn = hitung2 + dischBarang;
-      // var hitungDiscnDODT = discdBarang + dischBarang;
-
-      // subtotalKeranjang = subtotalKeranjang + finalHitung;
-      // hargaTotheader = hargaTotheader + hitung1;
-      // qtyallheader = qtyallheader + qtyBarang;
-      // discdHeader = discdHeader + hitung2;
-      // dischHeader = dischHeader + dischBarang;
-      // discnHeader = discnHeader + hitungDiscn;
-      // taxnHeader = taxnHeader + double.parse("${element['TAXN']}");
-      // biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
-
-      // update DODT
-
-      // var ongkosSodt = double.parse("${element['BIAYA']}");
-      // var discnSodt = hitungDiscnDODT;
-      // var ppnSodt = double.parse("${element['TAXN']}");
-
       GetDataController()
           .updateDodt(element['NOMOR'], element['NOURUT'], valueFinalDiscnJldt);
 
       double qtyDODT = double.parse("${element["QTY"]}");
+      print('qty dodt $qtyDODT');
+      print('taxn dodt ${element['TAXN']}');
+      print('biaya dodt ${element['BIAYA']}');
 
       GetDataController().updateProd3(
-          element["NOMOR"], element["NOURUT"], qtyDODT, valueFinalDiscnJldt);
+          element["NOMOR"],
+          element["NOURUT"],
+          qtyDODT,
+          valueFinalDiscnJldt,
+          double.parse("${element["TAXN"]}"),
+          double.parse("${element["BIAYA"]}"));
     }
 
     // hitung subtotal
-    subtotal.value = "$subtotalKeranjang" == "NaN" ? 0.0 : subtotalKeranjang;
+    subtotal.value = "$subtotalKeranjang" == "NaN" ? 0 : subtotalKeranjang;
+    // subtotal.value = subtotalKeranjang;
     subtotal.refresh();
+    print('hasil subtotal ${subtotal.value}');
 
     // all qty
     allQtyBeli.value = allQty;
@@ -364,11 +347,11 @@ class DetailNotaPenjualanController extends BaseController {
 
         var convert1PPN = Utility.nominalPPNHeaderView(
             '${subtotal.value}',
-            persenDiskonPesanBarang.value.text,
+            persenDiskonHeaderRincian.value.text,
             persenPPNHeaderRincian.value.text);
 
-        nominalPPNHeaderRincian.value.text = "$convert1PPN";
-        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
+        nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
+        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
         nominalPPNHeaderRincian.refresh();
         nominalPPNHeaderRincianView.refresh();
       } else {
@@ -381,10 +364,10 @@ class DetailNotaPenjualanController extends BaseController {
 
         var convert1PPN = Utility.nominalPPNHeaderView(
             '${subtotal.value}',
-            persenDiskonPesanBarang.value.text,
+            persenDiskonHeaderRincian.value.text,
             persenPPNHeaderRincian.value.text);
 
-        nominalPPNHeaderRincian.value.text = "$convert1PPN";
+        nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
         nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
         nominalPPNHeaderRincian.refresh();
         nominalPPNHeaderRincianView.refresh();
@@ -399,10 +382,10 @@ class DetailNotaPenjualanController extends BaseController {
 
       var convert1PPN = Utility.nominalPPNHeaderView(
           '${subtotal.value}',
-          persenDiskonPesanBarang.value.text,
+          persenDiskonHeaderRincian.value.text,
           persenPPNHeaderRincian.value.text);
 
-      nominalPPNHeaderRincian.value.text = "$convert1PPN";
+      nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
       nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
       nominalPPNHeaderRincian.refresh();
       nominalPPNHeaderRincianView.refresh();
@@ -416,7 +399,7 @@ class DetailNotaPenjualanController extends BaseController {
     var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
 
     var convert1Charge = Utility.nominalPPNHeaderView(
-        '${subtotal.value}', persenDiskonPesanBarang.value.text, persenBiaya);
+        '${subtotal.value}', persenDiskonHeaderRincian.value.text, persenBiaya);
 
     nominalOngkosHeaderRincian.value.text = "$convert1Charge";
     nominalOngkosHeaderRincianView.value.text =
@@ -426,11 +409,72 @@ class DetailNotaPenjualanController extends BaseController {
     // print('hasil nominal discd header $discdHeader');
     // print('hasil nominal disch header $dischHeader');
     // print('hasil nominal discn header $discnHeader');
-  
+
     GetDataController().updateDohd(dashboardPenjualanCt.nomorDoSelected.value,
         allQtyBeli.value, discdHeader, dischHeader, discnHeader);
 
+    // var nominalFinal = subtotal.value -
+    //     double.parse("${infoDOHD[0]["DISCH"]}") +
+    //     double.parse("${infoDOHD[0]["TAXN"]}") +
+    //     double.parse("${infoDOHD[0]["BIAYA"]}");
+
+    print('harga net ${infoDOHD[0]["HRGNET"]}');
+
+    totalNetto.value = double.parse("${infoDOHD[0]["HRGNET"]}");
+    totalNetto.refresh();
+
+    perhitunganHeader();
+
     return Future.value(true);
+  }
+
+  void perhitunganHeader() {
+    // setting header
+    double convertDiskon =
+        Utility.validasiValueDouble(nominalDiskonHeaderRincian.value.text);
+    double ppnPPN =
+        Utility.validasiValueDouble(persenPPNHeaderRincian.value.text);
+    double convertPPN =
+        Utility.validasiValueDouble(nominalPPNHeaderRincian.value.text);
+    double convertBiaya =
+        Utility.validasiValueDouble(nominalOngkosHeaderRincian.value.text);
+
+    print("subtotal ${subtotal.value}");
+    print("diskon header $convertDiskon");
+    print("ppn header $convertPPN");
+    print("biaya header $convertBiaya");
+
+    GetDataController().hitungHeader(
+        "DOHD",
+        "DODT",
+        dashboardPenjualanCt.nomorDoSelected.value,
+        "${subtotal.value}",
+        "$convertDiskon",
+        "$ppnPPN",
+        "$convertPPN",
+        "$convertBiaya");
+
+    persenDiskonHeaderRincian.refresh();
+    nominalDiskonHeaderRincian.refresh();
+    persenDiskonHeaderRincianView.refresh();
+    nominalDiskonHeaderRincianView.refresh();
+
+    persenPPNHeaderRincian.refresh();
+    nominalPPNHeaderRincian.refresh();
+    persenPPNHeaderRincianView.refresh();
+    nominalPPNHeaderRincianView.refresh();
+
+    nominalOngkosHeaderRincian.refresh();
+    nominalOngkosHeaderRincianView.refresh();
+
+    // print('persen diskon ${persenDiskonHeaderRincian.value.text}');
+    // print('nominal diskon ${nominalDiskonHeaderRincian.value.text}');
+
+    // print('persen ppn ${persenPPNHeaderRincian.value.text}');
+    // print('nominal ppn ${nominalPPNHeaderRincian.value.text}');
+
+    // // print('persen biaya ${persenPPNHeaderRincian.value.text}');
+    // print('nominal biaya ${nominalOngkosHeaderRincian.value.text}');
   }
 
   void showKeteranganDOHD() {

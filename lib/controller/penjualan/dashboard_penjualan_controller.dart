@@ -32,6 +32,8 @@ class DashbardPenjualanController extends GetxController {
   var keteranganSO3 = TextEditingController().obs;
   var keteranganSO4 = TextEditingController().obs;
   var passwordBukaKunci = TextEditingController().obs;
+  var noseri1 = TextEditingController().obs;
+  var noseri2 = TextEditingController().obs;
 
   var selectedIdSales = "".obs;
   var selectedNameSales = "".obs;
@@ -50,6 +52,7 @@ class DashbardPenjualanController extends GetxController {
   // FAKTUR PENJUALAN
   var nomorFakturPenjualanSelected = "".obs;
   var nomoFakturPenjualanCbSelected = "".obs;
+  var pilihDataSelected = "Faktur Penjualan".obs;
 
   var checkIncludePPN = false.obs;
   var screenBuatSoKeterangan = false.obs;
@@ -78,6 +81,11 @@ class DashbardPenjualanController extends GetxController {
   var tanggalAkumulasiJatuhTempo = DateTime.now().obs;
 
   var screenAktif = 1.obs;
+
+  var pilihDataBuatFakturPenjualan = [
+    'Faktur Penjualan',
+    'Nota Pengiriman Barang'
+  ];
 
   List menuDashboardPenjualan = [
     {'id_menu': 1, 'nama_menu': "Order Penjualan", 'status': true},
@@ -148,6 +156,13 @@ class DashbardPenjualanController extends GetxController {
       Get.to(
           BuatOrderPenjualan(
             dataBuatPenjualan: [2, "Nota Pengiriman"],
+          ),
+          duration: Duration(milliseconds: 500),
+          transition: Transition.rightToLeftWithFade);
+    } else if (screenAktif.value == 3) {
+      Get.to(
+          BuatOrderPenjualan(
+            dataBuatPenjualan: [3, "Faktur Penjualan"],
           ),
           duration: Duration(milliseconds: 500),
           transition: Transition.rightToLeftWithFade);
@@ -421,29 +436,37 @@ class DashbardPenjualanController extends GetxController {
                           "hapus_order_penjualan",
                           'Hapus', () async {
                         if (screenAktif.value == 1) {
-                          Future<bool> prosesHapusSOHD = GetDataController()
-                              .hapusSOHD(dataSelected['NOMOR']);
-                          bool hasilHapusSOHD = await prosesHapusSOHD;
-                          if (hasilHapusSOHD) {
-                            UtilsAlert.showToast(
-                                "Berhasil hapus order penjualan");
-                            Get.back();
-                            Get.back();
-                            Get.back();
-                            loadData();
+                          if (statusOutStand == false) {
+                            Future<bool> prosesHapusSOHD = GetDataController()
+                                .hapusSOHD(dataSelected['NOMOR']);
+                            bool hasilHapusSOHD = await prosesHapusSOHD;
+                            if (hasilHapusSOHD) {
+                              UtilsAlert.showToast(
+                                  "Berhasil hapus order penjualan");
+                              Get.back();
+                              Get.back();
+                              Get.back();
+                              loadData();
+                            }
+                          } else {
+                            UtilsAlert.showToast("Tidak dapat di hapus");
                           }
                         } else if (screenAktif.value == 2) {
-                          Future<bool> prosesHapusDOHD = HapusSodtController()
-                              .hapusFakturDanJldt(dataSelected['NOMOR']);
-                          bool hasilHapus = await prosesHapusDOHD;
-                          if (hasilHapus) {
-                            UtilsAlert.showToast(
-                                "Berhasil hapus nota pengiriman");
-                            Get.back();
-                            Get.back();
-                            Get.back();
-                            loadData();
-                            getDataAllDOHD();
+                          if (statusOutStand == false) {
+                            Future<bool> prosesHapusDOHD = HapusSodtController()
+                                .hapusFakturDanJldt(dataSelected['NOMOR']);
+                            bool hasilHapus = await prosesHapusDOHD;
+                            if (hasilHapus) {
+                              UtilsAlert.showToast(
+                                  "Berhasil hapus nota pengiriman");
+                              Get.back();
+                              Get.back();
+                              Get.back();
+                              loadData();
+                              getDataAllDOHD();
+                            }
+                          } else {
+                            UtilsAlert.showToast("Tidak dapat di hapus");
                           }
                         } else if (screenAktif.value == 3) {}
                       });

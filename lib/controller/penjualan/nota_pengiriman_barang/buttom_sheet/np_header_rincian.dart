@@ -144,30 +144,42 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                               contentOpHitungRincian(),
                               "np_hitung_rincian",
                               'Simpan', () async {
-                            Future<bool> prosesPerhitunganRincian =
-                                GetDataController()
-                                    .hitungRincianNotaPengiriman([
-                              dashboardPenjualanCt.nomorDoSelected.value,
-                              notaPengirimanCt.allQtyBeli.value,
-                              notaPengirimanCt
-                                  .nominalDiskonHeaderRincian.value.text,
-                              notaPengirimanCt
-                                  .nominalOngkosHeaderRincian.value.text,
-                              notaPengirimanCt
-                                  .persenPPNHeaderRincian.value.text,
-                              notaPengirimanCt
-                                  .nominalPPNHeaderRincian.value.text
-                            ]);
-                            bool hasilPerhitungan =
-                                await prosesPerhitunganRincian;
-                            if (hasilPerhitungan) {
+                            UtilsAlert.loadingSimpanData(
+                                context, "Sedang proses...");
+
+                            Future<bool> proseshitung =
+                                notaPengirimanCt.perhitunganMenyeluruhDO();
+                            bool hasilhitung = await proseshitung;
+                            if (hasilhitung) {
                               Get.back();
                               Get.back();
-                              UtilsAlert.showToast("Berhasil simpan data");
-                              notaPengirimanCt.startload('');
-                            } else {
-                              UtilsAlert.showToast("Rincian gagal dihitung");
+                              Get.back();
                             }
+
+                            // Future<bool> prosesPerhitunganRincian =
+                            //     GetDataController()
+                            //         .hitungRincianNotaPengiriman([
+                            //   dashboardPenjualanCt.nomorDoSelected.value,
+                            //   notaPengirimanCt.allQtyBeli.value,
+                            //   notaPengirimanCt
+                            //       .nominalDiskonHeaderRincian.value.text,
+                            //   notaPengirimanCt
+                            //       .nominalOngkosHeaderRincian.value.text,
+                            //   notaPengirimanCt
+                            //       .persenPPNHeaderRincian.value.text,
+                            //   notaPengirimanCt
+                            //       .nominalPPNHeaderRincian.value.text
+                            // ]);
+                            // bool hasilPerhitungan =
+                            //     await prosesPerhitunganRincian;
+                            // if (hasilPerhitungan) {
+                            //   Get.back();
+                            //   Get.back();
+                            //   UtilsAlert.showToast("Berhasil simpan data");
+                            //   notaPengirimanCt.startload('');
+                            // } else {
+                            //   UtilsAlert.showToast("Rincian gagal dihitung");
+                            // }
                           });
                         },
                       ),
@@ -257,8 +269,8 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                         child: TextField(
                           textAlign: TextAlign.center,
                           cursorColor: Colors.black,
-                          controller:
-                              notaPengirimanCt.persenDiskonHeaderRincian.value,
+                          controller: notaPengirimanCt
+                              .persenDiskonHeaderRincianView.value,
                           keyboardType:
                               TextInputType.numberWithOptions(signed: true),
                           textInputAction: TextInputAction.done,
@@ -339,7 +351,7 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                             ],
                             cursorColor: Colors.black,
                             controller: notaPengirimanCt
-                                .nominalDiskonHeaderRincian.value,
+                                .nominalDiskonHeaderRincianView.value,
                             keyboardType:
                                 TextInputType.numberWithOptions(signed: true),
                             textInputAction: TextInputAction.done,
@@ -372,18 +384,26 @@ class HeaderRincianNotaPengirimanController extends GetxController {
       Future<double> prosesInputPersen = PerhitunganCt()
           .hitungNominalDiskonHeader(
               value, "${notaPengirimanCt.subtotal.value}");
-      double hasilInputQty = await prosesInputPersen;
+      double hasilNominal = await prosesInputPersen;
+      print('hasil nominal diskon $hasilNominal');
       setState(() {
         notaPengirimanCt.persenDiskonHeaderRincian.value.text = value;
-        notaPengirimanCt.nominalDiskonHeaderRincian.value.text =
-            Utility.rupiahFormat("${hasilInputQty.toDouble()}", '');
+        notaPengirimanCt.persenDiskonHeaderRincianView.value.text = value;
         notaPengirimanCt.persenDiskonHeaderRincian.refresh();
+        notaPengirimanCt.persenDiskonHeaderRincianView.refresh();
+
+        notaPengirimanCt.nominalDiskonHeaderRincian.value.text =
+            "$hasilNominal";
+        notaPengirimanCt.nominalDiskonHeaderRincianView.value.text =
+            hasilNominal.toStringAsFixed(0);
+
         notaPengirimanCt.nominalDiskonHeaderRincian.refresh();
+        notaPengirimanCt.nominalDiskonHeaderRincianView.refresh();
+        if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
+          aksiPersenPPN(
+              setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
+        }
       });
-      if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
-        aksiPersenPPN(
-            setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
-      }
     }
   }
 
@@ -395,13 +415,15 @@ class HeaderRincianNotaPengirimanController extends GetxController {
       String hasilInputQty = await prosesInputPersen;
 
       setState(() {
+        notaPengirimanCt.persenDiskonHeaderRincianView.value.text =
+            hasilInputQty;
         notaPengirimanCt.persenDiskonHeaderRincian.value.text = hasilInputQty;
         notaPengirimanCt.persenDiskonHeaderRincian.refresh();
+        if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
+          aksiPersenPPN(
+              setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
+        }
       });
-      if (notaPengirimanCt.persenPPNHeaderRincian.value.text != "") {
-        aksiPersenPPN(
-            setState, notaPengirimanCt.persenPPNHeaderRincian.value.text);
-      }
     }
   }
 
@@ -435,7 +457,7 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                           textAlign: TextAlign.center,
                           cursorColor: Colors.black,
                           controller:
-                              notaPengirimanCt.persenPPNHeaderRincian.value,
+                              notaPengirimanCt.persenPPNHeaderRincianView.value,
                           keyboardType:
                               TextInputType.numberWithOptions(signed: true),
                           textInputAction: TextInputAction.done,
@@ -514,8 +536,8 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                               )
                             ],
                             cursorColor: Colors.black,
-                            controller:
-                                notaPengirimanCt.nominalPPNHeaderRincian.value,
+                            controller: notaPengirimanCt
+                                .nominalPPNHeaderRincianView.value,
                             keyboardType:
                                 TextInputType.numberWithOptions(signed: true),
                             textInputAction: TextInputAction.done,
@@ -546,21 +568,34 @@ class HeaderRincianNotaPengirimanController extends GetxController {
   void aksiPersenPPN(setState, value) async {
     if (value != "") {
       // convert nominal diskon
-      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincian.value.text
-          .replaceAll('.', '');
-      var nd2 = nd1.replaceAll(',', '.');
-      var nd3 = double.parse('$nd2');
+      // var nd1 = notaPengirimanCt.nominalDiskonHeaderRincianView.value.text
+      //     .replaceAll('.', '');
+      // var nd2 = nd1.replaceAll(',', '.');
+      // var nd3 = double.parse('$nd2');
+      var nd3 =
+          double.parse(notaPengirimanCt.nominalDiskonHeaderRincian.value.text);
+
+      print("hasil nominal diskon $nd3");
+      print("hasil persen ppn $value");
 
       Future<double> prosesHitungNominalPPN = PerhitunganCt()
           .hitungNominalPPNHeader(
               double.parse(value), notaPengirimanCt.subtotal.value, nd3);
       double hasilNominalPPN = await prosesHitungNominalPPN;
+
       setState(() {
         notaPengirimanCt.persenPPNHeaderRincian.value.text = value;
-        notaPengirimanCt.nominalPPNHeaderRincian.value.text =
-            Utility.rupiahFormat("${hasilNominalPPN.toDouble()}", '');
+        notaPengirimanCt.persenPPNHeaderRincianView.value.text = value;
         notaPengirimanCt.persenPPNHeaderRincian.refresh();
+        notaPengirimanCt.persenPPNHeaderRincianView.refresh();
+
+        notaPengirimanCt.nominalPPNHeaderRincian.value.text =
+            hasilNominalPPN.toString();
+        notaPengirimanCt.nominalPPNHeaderRincianView.value.text =
+            hasilNominalPPN.toStringAsFixed(0);
+
         notaPengirimanCt.nominalPPNHeaderRincian.refresh();
+        notaPengirimanCt.nominalPPNHeaderRincianView.refresh();
       });
     }
   }
@@ -569,7 +604,7 @@ class HeaderRincianNotaPengirimanController extends GetxController {
     if (value != "") {
       String nominalPPN = value.replaceAll(".", "");
       // convert nominal diskon
-      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincian.value.text
+      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincianView.value.text
           .replaceAll('.', '');
       var nd2 = nd1.replaceAll(',', '.');
       var nd3 = double.parse('$nd2');
@@ -579,7 +614,9 @@ class HeaderRincianNotaPengirimanController extends GetxController {
 
       setState(() {
         notaPengirimanCt.persenPPNHeaderRincian.value.text = hasilHitung;
+        notaPengirimanCt.persenPPNHeaderRincianView.value.text = hasilHitung;
         notaPengirimanCt.persenPPNHeaderRincian.refresh();
+        notaPengirimanCt.persenPPNHeaderRincianView.refresh();
       });
     }
   }

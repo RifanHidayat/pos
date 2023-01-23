@@ -1865,6 +1865,7 @@ class BottomSheetPos extends BaseController
     UtilsAlert.loadingSimpanData(Get.context!, "Proses perhitungan");
     Future<List> prosesHitungHeader = GetDataController().hitungHeader(
         "JLHD",
+        "JLDT",
         dashboardCt.nomorFaktur.value,
         "${dashboardCt.totalNominalDikeranjang.value}",
         "$convertDiskon",

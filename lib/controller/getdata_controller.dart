@@ -760,7 +760,7 @@ class GetDataController extends GetxController {
       'periode': AppData.periodeSelected,
       'stringTabel': 'DOHD',
       'nomor': nomordohd,
-      'qty': qtyallheader,
+      'value_qty': qtyallheader,
       'discd': discdHeader,
       'disch': dischHeader,
       'discn': discnHeader,
@@ -822,8 +822,8 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateProd3(
-      String nomor, String nomorUrut, double qty, double valueDiscn) async {
+  Future<bool> updateProd3(String nomor, String nomorUrut, double qty,
+      double valueDiscn, double taxn, double biaya) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
@@ -832,6 +832,8 @@ class GetDataController extends GetxController {
       'nourut': nomorUrut,
       'value_qty': qty,
       'value_discn': valueDiscn,
+      'value_taxn': taxn,
+      'value_biaya': biaya,
     };
     var connect = Api.connectionApi("post", body, "update_prod3");
     var getValue = await connect;
@@ -1066,6 +1068,7 @@ class GetDataController extends GetxController {
 
   Future<List> hitungHeader(
       String tabel,
+      String tabelDetail,
       String nomor,
       String subtotal,
       String nominalDiskon,
@@ -1077,6 +1080,7 @@ class GetDataController extends GetxController {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': tabel,
+      'tabel_detail': tabelDetail,
       'nomor': nomor,
       'subtotal': subtotal,
       'nominal_diskon': nominalDiskon,

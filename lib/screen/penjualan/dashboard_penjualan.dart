@@ -68,6 +68,29 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                   SizedBox(
                     height: Utility.medium,
                   ),
+                  controller.screenAktif.value == 1
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
+                          child: Text("${controller.dataAllSohd.length} Data"),
+                        )
+                      : controller.screenAktif.value == 2
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 16),
+                              child:
+                                  Text("${controller.dataAllDohd.length} Data"),
+                            )
+                          : controller.screenAktif.value == 3
+                              ? Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 16, right: 16),
+                                  child: Text(
+                                      "${controller.dataFakturPenjualan.length} Data"),
+                                )
+                              : SizedBox(),
+                  SizedBox(
+                    height: Utility.medium,
+                  ),
                   Flexible(
                       child: RefreshIndicator(
                     color: Utility.primaryDefault,

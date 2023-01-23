@@ -193,7 +193,8 @@ class SimpanNotaPengirimanController extends GetxController {
 
             // CHECK DATA IMEI
 
-            if (imeiData.isNotEmpty && double.parse(qtySebelum) <= 0.0) {
+            if (imeiData.isNotEmpty && double.parse(qtySebelum) <= 0.0 ||
+                imeiData.isNotEmpty) {
               // INSERT JLIM
               List dataInsertJlim = [
                 dataDohdSelected[0]['PK'],
@@ -305,7 +306,7 @@ class SimpanNotaPengirimanController extends GetxController {
                 Get.back();
                 Get.back();
                 // Get.back();
-                notaPengirimanBarangCt.startload(false);
+                // notaPengirimanBarangCt.startload(false);
               }
             } else {
               // update data dodt
@@ -329,7 +330,7 @@ class SimpanNotaPengirimanController extends GetxController {
                 Get.back();
                 Get.back();
                 Get.back();
-                notaPengirimanBarangCt.startload(false);
+                // notaPengirimanBarangCt.startload(false);
               } else {
                 UtilsAlert.showToast("Gagal edit data barang");
               }

@@ -32,6 +32,7 @@ class NotaPengirimanBarangPesanController extends GetxController {
   var listDataImeiSelected = [].obs;
 
   void validasiEditBarang(produkSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Sedang memuat");
     typeBarangSelected.value = int.parse(produkSelected[0]['TIPE']);
     typeBarangSelected.refresh();
 
@@ -170,6 +171,7 @@ class NotaPengirimanBarangPesanController extends GetxController {
       screenCustomImei.value = 0;
       screenCustomImei.refresh();
 
+      Get.back();
       Get.back();
       sheetButtomMenu(produkSelected);
     } else {
@@ -757,6 +759,7 @@ class NotaPengirimanBarangPesanController extends GetxController {
           notaPenjualanCt.hargaJualPesanBarang.value.text);
       List hasilKurang = await prosesKurangQty;
       var valueValidasi = hasilKurang[0];
+      print('hasil perhitungan kurang $hasilKurang');
       if (valueValidasi == false || valueValidasi < 0.0) {
         UtilsAlert.showToast("Qty tidak valid");
       } else {
@@ -772,15 +775,23 @@ class NotaPengirimanBarangPesanController extends GetxController {
           double totalAkhir = await akumulasiJikaAdaDiskon;
 
           if (qty <= 0.0) {
-            notaPenjualanCt.totalPesanBarang.value = 0.0;
-            notaPenjualanCt.jumlahPesan.value.text = "0";
+            setState(() {
+              notaPenjualanCt.totalPesanBarang.value = 0.0;
+              notaPenjualanCt.jumlahPesan.value.text = "0";
+            });
           } else {
-            notaPenjualanCt.totalPesanBarang.value = totalAkhir.toPrecision(2);
-            notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+            setState(() {
+              notaPenjualanCt.totalPesanBarang.value =
+                  totalAkhir.toPrecision(2);
+              notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+            });
           }
         } else {
-          notaPenjualanCt.totalPesanBarang.value = totalNominal.toPrecision(2);
-          notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+          setState(() {
+            notaPenjualanCt.totalPesanBarang.value =
+                totalNominal.toPrecision(2);
+            notaPenjualanCt.jumlahPesan.value.text = qty.toStringAsFixed(0);
+          });
         }
       }
     }

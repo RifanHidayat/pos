@@ -872,6 +872,7 @@ class DashbardController extends BaseController {
 
     GetDataController().hitungHeader(
         "JLHD",
+        "JLDT",
         nomorFaktur.value,
         "${totalNominalDikeranjang.value}",
         "$convertDiskon",

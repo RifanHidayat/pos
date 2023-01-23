@@ -100,6 +100,22 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                             SizedBox(
                               height: Utility.medium,
                             ),
+                            widget.dataBuatPenjualan[0] == 3
+                                ? formNoseri()
+                                : SizedBox(),
+                            widget.dataBuatPenjualan[0] == 3
+                                ? SizedBox(
+                                    height: Utility.medium,
+                                  )
+                                : SizedBox(),
+                            widget.dataBuatPenjualan[0] == 3
+                                ? formPilihData()
+                                : SizedBox(),
+                            widget.dataBuatPenjualan[0] == 3
+                                ? SizedBox(
+                                    height: Utility.medium,
+                                  )
+                                : SizedBox(),
                             formPilihSales(),
                             SizedBox(
                               height: Utility.medium,
@@ -127,7 +143,9 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                           ? "Tambah item"
                           : widget.dataBuatPenjualan[0] == 2
                               ? "Detail Nota"
-                              : "",
+                              : widget.dataBuatPenjualan[0] == 3
+                                  ? "Faktur Penjualan"
+                                  : "",
                       colorBtn: Utility.primaryDefault,
                       colorText: Colors.white,
                       icon1: Icon(
@@ -137,20 +155,21 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                       radius: 8.0,
                       style: 2,
                       onTap: () {
-                        if (controller.refrensiBuatOrderPenjualan.value.text ==
-                                "" ||
-                            controller
-                                    .jatuhTempoBuatOrderPenjualan.value.text ==
-                                "" ||
+                        if (
+                            // controller.refrensiBuatOrderPenjualan.value.text ==
+                            //       "" ||
+                            //   controller
+                            //           .jatuhTempoBuatOrderPenjualan.value.text ==
+                            //       "" ||
                             controller.selectedNameSales.value == "" ||
-                            controller.selectedNamePelanggan.value == "") {
+                                controller.selectedNamePelanggan.value == "") {
                           UtilsAlert.showToast("Lengkapi form terlebih dahulu");
                         } else {
                           if (widget.dataBuatPenjualan[0] == 1) {
                             buatPenjualanCt.getAkhirNomorSo();
-                          } else {
+                          } else if (widget.dataBuatPenjualan[0] == 2) {
                             buatPenjualanCt.getAkhirNomorDo();
-                          }
+                          } else if (widget.dataBuatPenjualan[0] == 3) {}
                         }
                       })),
             )),
@@ -452,6 +471,150 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+
+  Widget formNoseri() {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "No Seri",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            height: 6.0,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 50,
+                child: Container(
+                  margin: EdgeInsets.only(right: 8.0),
+                  height: 40,
+                  width: MediaQuery.of(Get.context!).size.width,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                          width: 1.0, color: Utility.borderContainer)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: IntrinsicHeight(
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            controller.typeFocus.value = "noseri";
+                          },
+                          child: TextField(
+                            cursorColor: Colors.black,
+                            controller: controller.noseri1.value,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            decoration:
+                                const InputDecoration(border: InputBorder.none),
+                            style: const TextStyle(
+                                fontSize: 14.0, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 50,
+                child: Container(
+                  margin: EdgeInsets.only(left: 8.0),
+                  height: 40,
+                  width: MediaQuery.of(Get.context!).size.width,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                          width: 1.0, color: Utility.borderContainer)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: IntrinsicHeight(
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            controller.typeFocus.value = "noseri";
+                          },
+                          child: TextField(
+                            cursorColor: Colors.black,
+                            controller: controller.noseri2.value,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            decoration:
+                                const InputDecoration(border: InputBorder.none),
+                            style: const TextStyle(
+                                fontSize: 14.0, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget formPilihData() {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Pilih Data",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            height: 6.0,
+          ),
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: Utility.borderStyle5,
+                border: Border.all(
+                    width: 0.5, color: Color.fromARGB(255, 211, 205, 205))),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isDense: true,
+                  autofocus: true,
+                  focusColor: Colors.grey,
+                  items: controller.pilihDataBuatFakturPenjualan
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
+                  value: controller.pilihDataSelected.value,
+                  onChanged: (selectedValue) {
+                    setState(() {
+                      controller.pilihDataSelected.value = selectedValue!;
+                    });
+                  },
+                  isExpanded: true,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

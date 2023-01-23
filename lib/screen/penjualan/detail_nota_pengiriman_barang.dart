@@ -51,6 +51,12 @@ class _DetailNotaPengirimanBarangState
     super.dispose();
   }
 
+  NumberFormat currencyFormatter = NumberFormat.currency(
+    locale: 'id',
+    symbol: '',
+    decimalDigits: 2,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -744,7 +750,7 @@ class _DetailNotaPengirimanBarangState
                       padding: EdgeInsets.all(3.0),
                       child: Center(
                         child: Text(
-                          "${controller.persenDiskonHeaderRincian.value.text}%",
+                          "${controller.persenDiskonHeaderRincianView.value.text}%",
                           style: TextStyle(
                               fontSize: Utility.small, color: Colors.green),
                         ),
@@ -757,7 +763,7 @@ class _DetailNotaPengirimanBarangState
             Expanded(
               flex: 30,
               child: Text(
-                "Rp${controller.nominalDiskonHeaderRincian.value.text}",
+                "Rp${controller.nominalDiskonHeaderRincianView.value.text}",
                 textAlign: TextAlign.right,
               ),
             )
@@ -789,7 +795,7 @@ class _DetailNotaPengirimanBarangState
                       padding: EdgeInsets.all(3.0),
                       child: Center(
                         child: Text(
-                          "${controller.persenPPNHeaderRincian.value.text} %",
+                          "${controller.persenPPNHeaderRincianView.value.text} %",
                           style: TextStyle(
                               fontSize: Utility.small, color: Colors.red),
                         ),
@@ -802,8 +808,8 @@ class _DetailNotaPengirimanBarangState
             Expanded(
               flex: 30,
               child: Text(
-                // "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
-                "Rp${controller.nominalPPNHeaderRincian.value.text}",
+                "${Utility.rupiahFormat(controller.nominalPPNHeaderRincianView.value.text, 'with_rp')}",
+                // "Rp${controller.nominalPPNHeaderRincianView.value.text}",
                 textAlign: TextAlign.right,
               ),
             )
@@ -833,7 +839,7 @@ class _DetailNotaPengirimanBarangState
               flex: 30,
               child: Text(
                 // "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincian.value.text, 'with_rp')}",
-                "Rp${controller.nominalOngkosHeaderRincian.value.text}",
+                "Rp${controller.nominalOngkosHeaderRincianView.value.text}",
                 textAlign: TextAlign.right,
               ),
             )
