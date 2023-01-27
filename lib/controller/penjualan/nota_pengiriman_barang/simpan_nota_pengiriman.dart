@@ -130,12 +130,53 @@ class SimpanNotaPengirimanController extends GetxController {
                     : notaPengirimanBarangCt.persenDiskonPesanBarang.value.text;
             var dataNominalDiskon =
                 notaPengirimanBarangCt.nominalDiskonPesanBarang.value.text == ""
-                    ? "0,00"
+                    ? "0"
                     : notaPengirimanBarangCt
                         .nominalDiskonPesanBarang.value.text;
 
-            var hargaJualFinal = Utility.convertStringRpToDouble(
+            // CONVERT HARGA JUAL
+
+            // check data cabang selected
+            Future<List> getCabang = GetDataController().getSpesifikData(
+                "CABANG",
+                "KODE",
+                sidebarCt.cabangKodeSelectedSide.value,
+                "get_spesifik_data_master");
+            List hasilCabang = await getCabang;
+            int ppnCabangSelected = 0;
+            if (hasilCabang.isNotEmpty) {
+              ppnCabangSelected = hasilCabang[0]['PPN'];
+            }
+
+            double hargaJualFinal = 0.0;
+            double hargaJualFinalEdit = Utility.convertStringRpToDouble(
                 notaPengirimanBarangCt.hargaJualPesanBarang.value.text);
+
+            var convertHargaJual = Utility.convertStringRpToDouble(
+                notaPengirimanBarangCt.hargaJualPesanBarang.value.text);
+
+            if (dashboardPenjualanCt.includePPN.value == "Y") {
+              if (ppnCabangSelected > 0) {
+                double hitung1 =
+                    convertHargaJual * (100 / (100 + ppnCabangSelected));
+                hargaJualFinal = hitung1;
+              } else {
+                hargaJualFinal = convertHargaJual;
+              }
+            } else {
+              if (dashboardPenjualanCt.checkIncludePPN.value == true) {
+                if (ppnCabangSelected > 0) {
+                  double hitung1 =
+                      convertHargaJual * (100 / (100 + ppnCabangSelected));
+                  hargaJualFinal = hitung1;
+                } else {
+                  hargaJualFinal = convertHargaJual;
+                }
+              } else {
+                hargaJualFinal = convertHargaJual;
+              }
+            }
+
             var persenDiskonPesanBarangFinal =
                 Utility.validasiValueDouble(dataPersenDiskon);
             var nominalDiskonPesanBarangFinal =
@@ -238,7 +279,9 @@ class SimpanNotaPengirimanController extends GetxController {
               List hasilInsertIMEIX = await prosesInsertIMEIX;
               print("hasil insert imeix $hasilInsertIMEIX");
             } else {
-              editDataImeiBarang(dataSelected[0], imeiData);
+              if (dataSelected[0]['TIPE'] == 1) {
+                editDataImeiBarang(dataSelected[0], imeiData);
+              }
             }
 
             // UPDATE DATA WARE STOK
@@ -303,10 +346,11 @@ class SimpanNotaPengirimanController extends GetxController {
               var getValue = await connect;
               var valueBody = jsonDecode(getValue.body);
               if (valueBody['status'] == true) {
+                print('hasil insert dodt ${valueBody['status']}');
                 Get.back();
                 Get.back();
-                // Get.back();
-                // notaPengirimanBarangCt.startload(false);
+                Get.back();
+                notaPengirimanBarangCt.startload(true);
               }
             } else {
               // update data dodt
@@ -317,7 +361,7 @@ class SimpanNotaPengirimanController extends GetxController {
                 "cari2": dataSelected[0]['NOURUT'],
                 'QTY': jumlahPesanFinal,
                 'QTX': qtxDODT,
-                'HARGA': hargaJualFinal,
+                'HARGA': hargaJualFinalEdit,
                 'DISC1': persenDiskonPesanBarangFinal,
                 'DISCD': nominalDiskonPesanBarangFinal,
               };
@@ -330,7 +374,7 @@ class SimpanNotaPengirimanController extends GetxController {
                 Get.back();
                 Get.back();
                 Get.back();
-                // notaPengirimanBarangCt.startload(false);
+                notaPengirimanBarangCt.startload(true);
               } else {
                 UtilsAlert.showToast("Gagal edit data barang");
               }

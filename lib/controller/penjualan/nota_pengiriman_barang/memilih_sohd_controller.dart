@@ -48,18 +48,26 @@ class MemilihSOHDController extends BaseController {
 
   void cariBarangProses1(List detailSODT, List detailDODT, status) async {
     // tampung group dan kode barang
+    print('terpilihhhh sodt $detailSODT');
     List tampungGroupKode = [];
     for (var element in detailSODT) {
-      int hitung = element["QTY"] - element["QTZ"];
-      bool statusSelected = hitung > 0 ? true : false;
-      if (statusSelected) {
-        var data = {
-          "GROUP": element["GROUP"],
-          "KODE": element["BARANG"],
-        };
-        tampungGroupKode.add(data);
-      }
+      // int hitung = element["QTY"] - element["QTZ"];
+      // bool statusSelected = hitung > 0 ? true : false;
+      // if (statusSelected) {
+      //   var data = {
+      //     "GROUP": element["GROUP"],
+      //     "KODE": element["BARANG"],
+      //   };
+      //   tampungGroupKode.add(data);
+      // }
+      var data = {
+        "GROUP": element["GROUP"],
+        "KODE": element["BARANG"],
+      };
+      tampungGroupKode.add(data);
     }
+
+    print('list tampung group kode $tampungGroupKode');
 
     if (tampungGroupKode.isNotEmpty) {
       // proses cari barang sesuai group dan kode
@@ -68,6 +76,9 @@ class MemilihSOHDController extends BaseController {
       List hasilProsesCariBarang = await cariBarangNotaPengiriman;
 
       // validasi data final
+
+      print('hasil proses barang ${hasilProsesCariBarang.length}');
+      print('detail sodt ${detailSODT.length}');
 
       Future<List> prosesBarang1 =
           checkingBarang(hasilProsesCariBarang, detailSODT);
@@ -79,6 +90,7 @@ class MemilihSOHDController extends BaseController {
         List dataFinalBarangSelected2 = await prosesBarang2;
         prosesFinal(status, dataFinalBarangSelected2);
       } else {
+        print('masuk sini dodt kosong');
         prosesFinal(status, dataFinalBarangSelected);
       }
     }

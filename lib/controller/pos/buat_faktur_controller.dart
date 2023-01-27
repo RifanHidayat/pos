@@ -157,8 +157,12 @@ class BuatFakturController extends BaseController {
       'jlhd_loe': tanggalDanJam,
       'jlhd_deo': dataInformasiSYSUSER[0],
       'jlhd_nomorcb': "$lastNomorCB",
+      'jlhd_id1': dataInformasiSYSUSER[0],
+      'jlhd_nopj': "",
+      'jlhd_noseri': "",
       'jlhd_nomorantri': "${dashboardCt.nomorOrder.value}",
-      'jlhd_taxp': "$taxpFilter"
+      'jlhd_taxp': "$taxpFilter",
+      'jlhd_reftr': "POS"
     };
     var connect = Api.connectionApi("post", body, "buat_faktur");
 

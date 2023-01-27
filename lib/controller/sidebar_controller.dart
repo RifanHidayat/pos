@@ -19,6 +19,7 @@ class SidebarController extends BaseController {
   var cabangKodeSelectedSide = "".obs;
   var cabangNameSelectedSide = "".obs;
   var gudangSelectedSide = "".obs;
+  var ppnDefaultCabang = "".obs;
   var ipdevice = "".obs;
   final NetworkInfo _networkInfo = NetworkInfo();
 
@@ -61,6 +62,11 @@ class SidebarController extends BaseController {
         cabangKodeSelectedSide.value = element["KODE"];
         cabangNameSelectedSide.value = element["NAMA"];
         gudangSelectedSide.value = element["GUDANG"];
+        ppnDefaultCabang.value = "${element["PPN"]}";
+        cabangKodeSelectedSide.refresh();
+        cabangNameSelectedSide.refresh();
+        gudangSelectedSide.refresh();
+        ppnDefaultCabang.refresh();
       }
     }
     return Future.value(statusCabang);

@@ -146,40 +146,7 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                               'Simpan', () async {
                             UtilsAlert.loadingSimpanData(
                                 context, "Sedang proses...");
-
-                            Future<bool> proseshitung =
-                                notaPengirimanCt.perhitunganMenyeluruhDO();
-                            bool hasilhitung = await proseshitung;
-                            if (hasilhitung) {
-                              Get.back();
-                              Get.back();
-                              Get.back();
-                            }
-
-                            // Future<bool> prosesPerhitunganRincian =
-                            //     GetDataController()
-                            //         .hitungRincianNotaPengiriman([
-                            //   dashboardPenjualanCt.nomorDoSelected.value,
-                            //   notaPengirimanCt.allQtyBeli.value,
-                            //   notaPengirimanCt
-                            //       .nominalDiskonHeaderRincian.value.text,
-                            //   notaPengirimanCt
-                            //       .nominalOngkosHeaderRincian.value.text,
-                            //   notaPengirimanCt
-                            //       .persenPPNHeaderRincian.value.text,
-                            //   notaPengirimanCt
-                            //       .nominalPPNHeaderRincian.value.text
-                            // ]);
-                            // bool hasilPerhitungan =
-                            //     await prosesPerhitunganRincian;
-                            // if (hasilPerhitungan) {
-                            //   Get.back();
-                            //   Get.back();
-                            //   UtilsAlert.showToast("Berhasil simpan data");
-                            //   notaPengirimanCt.startload('');
-                            // } else {
-                            //   UtilsAlert.showToast("Rincian gagal dihitung");
-                            // }
+                            hitungHeader();
                           });
                         },
                       ),
@@ -604,10 +571,14 @@ class HeaderRincianNotaPengirimanController extends GetxController {
     if (value != "") {
       String nominalPPN = value.replaceAll(".", "");
       // convert nominal diskon
-      var nd1 = notaPengirimanCt.nominalDiskonHeaderRincianView.value.text
-          .replaceAll('.', '');
-      var nd2 = nd1.replaceAll(',', '.');
-      var nd3 = double.parse('$nd2');
+      // var nd1 = notaPengirimanCt.nominalDiskonHeaderRincianView.value.text
+      //     .replaceAll('.', '');
+      // var nd2 = nd1.replaceAll(',', '.');
+      // var nd3 = double.parse('$nd2');
+
+      var nd3 = Utility.convertStringRpToDouble(
+          notaPengirimanCt.nominalDiskonHeaderRincianView.value.text);
+
       Future<String> prosesHitung = PerhitunganCt().hitungPersenPPNHeader(
           double.parse(nominalPPN), notaPengirimanCt.subtotal.value, nd3);
       String hasilHitung = await prosesHitung;
@@ -729,6 +700,63 @@ class HeaderRincianNotaPengirimanController extends GetxController {
     } else if (valueFocus.value == "nominal_ppn_rincian") {
       aksiNominalPPN(
           setState, notaPengirimanCt.nominalPPNHeaderRincian.value.text);
+    }
+  }
+
+  void hitungHeader() async {
+    // setting header
+    double convertDiskon = Utility.validasiValueDouble(
+        notaPengirimanCt.nominalDiskonHeaderRincian.value.text);
+    double ppnPPN = Utility.validasiValueDouble(
+        notaPengirimanCt.persenPPNHeaderRincian.value.text);
+    double convertPPN = Utility.validasiValueDouble(
+        notaPengirimanCt.nominalPPNHeaderRincian.value.text);
+    double convertBiaya = Utility.validasiValueDouble(
+        notaPengirimanCt.nominalOngkosHeaderRincian.value.text);
+
+    Future<List> hitungHeader = GetDataController().hitungHeader(
+        "DOHD",
+        "DODT",
+        dashboardPenjualanCt.nomorDoSelected.value,
+        "${notaPengirimanCt.subtotal.value}",
+        "$convertDiskon",
+        "$ppnPPN",
+        "$convertPPN",
+        "$convertBiaya");
+    List hasilHitung = await hitungHeader;
+
+    if (hasilHitung[0] == true) {
+      notaPengirimanCt.persenDiskonHeaderRincian.refresh();
+      notaPengirimanCt.nominalDiskonHeaderRincian.refresh();
+      notaPengirimanCt.persenDiskonHeaderRincianView.refresh();
+      notaPengirimanCt.nominalDiskonHeaderRincianView.refresh();
+
+      notaPengirimanCt.persenPPNHeaderRincian.refresh();
+      notaPengirimanCt.nominalPPNHeaderRincian.refresh();
+      notaPengirimanCt.persenPPNHeaderRincianView.refresh();
+      notaPengirimanCt.nominalPPNHeaderRincianView.refresh();
+
+      notaPengirimanCt.nominalOngkosHeaderRincian.refresh();
+      notaPengirimanCt.nominalOngkosHeaderRincianView.refresh();
+
+      Future<List> updateInformasiDOHD = GetDataController().getSpesifikData(
+          "DOHD",
+          "PK",
+          "${dashboardPenjualanCt.dohdSelected[0]['PK']}",
+          "get_spesifik_data_transaksi");
+      List infoDOHD = await updateInformasiDOHD;
+
+      print('data dohd $infoDOHD');
+
+      notaPengirimanCt.totalNetto.value =
+          double.parse("${infoDOHD[0]["HRGNET"]}");
+      notaPengirimanCt.totalNetto.refresh();
+
+      dashboardPenjualanCt.loadDOHDSelected();
+
+      Get.back();
+      Get.back();
+      Get.back();
     }
   }
 }

@@ -157,29 +157,6 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
               ),
             ),
           ),
-          // Expanded(
-          //   flex: 10,
-          //   child: Stack(
-          //     children: [
-          //       InkWell(
-          //           onTap: () {},
-          //           child: Container(
-          //               alignment: Alignment.center,
-          //               margin: EdgeInsets.only(bottom: 2.0),
-          //               child: Icon(Iconsax.menu_board))),
-          //       Padding(
-          //         padding: const EdgeInsets.only(left: 2.0),
-          //         child: Text(
-          //           "${controller.jumlahArsipOrderPenjualan.value}",
-          //           style: TextStyle(
-          //               fontWeight: FontWeight.bold,
-          //               color: Colors.red,
-          //               fontSize: Utility.medium),
-          //         ),
-          //       )
-          //     ],
-          //   ),
-          // )
         ],
       ),
     );
@@ -405,11 +382,11 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: Utility.borderStyle1,
-                                  color: ipStatus == ""
+                                  color: ipStatus == "" || ipStatus == null
                                       ? Colors.white
                                       : Utility.greyLight300,
                                 ),
-                                child: ipStatus == ""
+                                child: ipStatus == "" || ipStatus == null
                                     ? SizedBox()
                                     : Center(
                                         child: Icon(
@@ -563,11 +540,11 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: Utility.borderStyle1,
-                                  color: ipStatus == ""
+                                  color: ipStatus == "" || ipStatus == null
                                       ? Colors.white
                                       : Utility.greyLight300,
                                 ),
-                                child: ipStatus == ""
+                                child: ipStatus == "" || ipStatus == null
                                     ? SizedBox()
                                     : Center(
                                         child: Icon(
@@ -688,6 +665,7 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                   var tanggal =
                       controller.dataFakturPenjualan[index]['TANGGAL'];
                   var qty = controller.dataFakturPenjualan[index]['QTY'];
+                  var ipStatus = controller.dataFakturPenjualan[index]['IP'];
                   var paid = controller.dataFakturPenjualan[index]['PAIDPOS'];
                   var namaPelanggan =
                       controller.dataFakturPenjualan[index]['nama_pelanggan'];
@@ -703,88 +681,111 @@ class _DashboardPenjualanState extends State<DashboardPenjualan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         InkWell(
-                          // onTap: () => controller.lanjutkanSoPenjualan(
-                          //     controller.dataFakturPenjualan[index], false),
+                          onTap: () => controller.lanjutkanSoPenjualan(
+                              controller.dataFakturPenjualan[index], false),
                           child: IntrinsicHeight(
-                              child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 60,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${Utility.convertNoFaktur(nomor)}",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: Utility.medium),
-                                      ),
-                                      Text(
-                                        "$namaPelanggan",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: Utility.medium),
-                                      ),
-                                      Text(
-                                        "${Utility.convertDate(tanggal)}",
-                                        style:
-                                            TextStyle(color: Utility.nonAktif),
-                                      )
-                                    ],
-                                  ),
+                              child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: Utility.borderStyle1,
+                                  color: ipStatus == ""
+                                      ? Colors.white
+                                      : Utility.greyLight300,
                                 ),
-                                Expanded(
-                                  flex: 40,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        "${controller.currencyFormatter.format(hargaNet)}",
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                child: ipStatus == ""
+                                    ? SizedBox()
+                                    : Center(
+                                        child: Icon(
+                                          Iconsax.lock,
+                                          color: Utility.primaryDefault,
+                                        ),
                                       ),
-                                      Text(
-                                        "Qty : $qty",
-                                        textAlign: TextAlign.right,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 60,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "${Utility.convertNoFaktur(nomor)}",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: Utility.medium),
+                                          ),
+                                          Text(
+                                            "$namaPelanggan",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: Utility.medium),
+                                          ),
+                                          Text(
+                                            "${Utility.convertDate(tanggal)}",
+                                            style: TextStyle(
+                                                color: Utility.nonAktif),
+                                          )
+                                        ],
                                       ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      paid != "Y"
-                                          ? SizedBox()
-                                          : Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 30.0),
-                                              child: CardCustom(
-                                                radiusBorder:
-                                                    Utility.borderStyle1,
-                                                colorBg: paid == "Y"
-                                                    ? Utility.primaryDefault
-                                                    : Utility.nonAktif,
-                                                widgetCardCustom: Center(
-                                                  child: Text(
-                                                    "PAID",
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.bold),
+                                    ),
+                                    Expanded(
+                                      flex: 40,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            "${controller.currencyFormatter.format(hargaNet)}",
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            "Qty : $qty",
+                                            textAlign: TextAlign.right,
+                                          ),
+                                          SizedBox(
+                                            height: 6,
+                                          ),
+                                          paid != "Y"
+                                              ? SizedBox()
+                                              : Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 30.0),
+                                                  child: CardCustom(
+                                                    radiusBorder:
+                                                        Utility.borderStyle1,
+                                                    colorBg: paid == "Y"
+                                                        ? Utility.primaryDefault
+                                                        : Utility.nonAktif,
+                                                    widgetCardCustom: Center(
+                                                      child: Text(
+                                                        "PAID",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                      SizedBox(
-                                        height: 6,
+                                          SizedBox(
+                                            height: 6,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
                           )),
                         ),
                         Divider(),

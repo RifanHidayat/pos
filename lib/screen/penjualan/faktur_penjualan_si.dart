@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/faktur_penjualan_si/faktur_penjualan_si_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_header_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
@@ -14,24 +15,24 @@ import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
-class ItemOrderPenjualan extends StatefulWidget {
+class FakturPenjualanSI extends StatefulWidget {
   bool dataForm;
-  ItemOrderPenjualan({Key? key, required this.dataForm}) : super(key: key);
+  FakturPenjualanSI({Key? key, required this.dataForm}) : super(key: key);
   @override
-  _ItemOrderPenjualanState createState() => _ItemOrderPenjualanState();
+  _FakturPenjualanSIState createState() => _FakturPenjualanSIState();
 }
 
-class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
+class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  var controller = Get.put(ItemOrderPenjualanController());
+  var controller = Get.put(FakturPenjualanSIController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
 
   @override
   void initState() {
-    dashboardPenjualanCt.loadSOHDSelected();
+    dashboardPenjualanCt.loadFakturPenjualanSelected();
     controller.getDataBarang(widget.dataForm);
     super.initState();
   }
@@ -53,7 +54,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                 automaticallyImplyLeading: false,
                 elevation: 2,
                 flexibleSpace: AppbarMenu1(
-                  title: "Buat Order Penjualan",
+                  title: "Buat Faktur Penjualan",
                   colorTitle: Utility.primaryDefault,
                   colorIcon: Utility.primaryDefault,
                   icon: 1,
@@ -85,9 +86,9 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  controller.statusInformasiSo.value =
-                                      !controller.statusInformasiSo.value;
-                                  controller.statusInformasiSo.refresh();
+                                  controller.statusInformasiSI.value =
+                                      !controller.statusInformasiSI.value;
+                                  controller.statusInformasiSI.refresh();
                                 },
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,14 +96,14 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                     Expanded(
                                       flex: 90,
                                       child: Text(
-                                        "INFORMASI SO",
+                                        "INFORMASI FAKTUR",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                     Expanded(
                                       flex: 10,
-                                      child: !controller.statusInformasiSo.value
+                                      child: !controller.statusInformasiSI.value
                                           ? Icon(
                                               Iconsax.arrow_right_3,
                                               size: 18,
@@ -115,7 +116,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                   ],
                                 ),
                               ),
-                              !controller.statusInformasiSo.value
+                              !controller.statusInformasiSI.value
                                   ? SizedBox()
                                   : Padding(
                                       padding: const EdgeInsets.only(
@@ -146,10 +147,12 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       child: InkWell(
                         onTap: () {
                           if (controller.listBarang.isNotEmpty) {
+                            controller.typeAksi.value = "tambah_barang";
+                            controller.typeAksi.refresh();
                             globalCt.buttomSheet1(
                                 controller.listBarang,
                                 "Pilih Barang",
-                                "pilih_barang_so_penjualan",
+                                "pilih_barang_faktur_penjualan_si",
                                 "");
                           } else {
                             controller.getDataBarang(false);
@@ -189,7 +192,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                     ),
                     Flexible(
                         child: controller.barangTerpilih.isEmpty &&
-                                controller.statusSODTKosong.value == true
+                                controller.statusJLDTKosong.value == true
                             ? SizedBox(
                                 height: 400,
                                 child: Center(
@@ -255,17 +258,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                         : Padding(
                                             padding: const EdgeInsets.only(
                                                 left: 16, right: 16),
-                                            child: detailNominalBayar()
-
-                                            // Center(
-                                            //     child:
-                                            //         CircularProgressIndicator(
-                                            //       strokeWidth: 3,
-                                            //       color: Utility
-                                            //           .primaryDefault,
-                                            //     ),
-                                            //   )
-                                            ),
+                                            child: detailNominalBayar()),
                                     SizedBox(
                                       height: Utility.medium,
                                     ),
@@ -327,13 +320,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: Utility.large),
-                              )
-                              // Center(
-                              //     child: CircularProgressIndicator(
-                              //       strokeWidth: 3,
-                              //       color: Utility.primaryDefault,
-                              //     ),
-                              //   ),
+                              ),
                             ],
                           ),
                         ),
@@ -386,11 +373,11 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Nomor SO",
+                          "Nomor Faktur",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          "${Utility.convertNoFaktur('${dashboardPenjualanCt.nomorSoSelected.value}')}",
+                          "${Utility.convertNoFaktur('${dashboardPenjualanCt.nomorFakturPenjualanSelected.value}')}",
                           style: TextStyle(color: Utility.grey600),
                         )
                       ],
@@ -571,7 +558,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
               var nourut = controller.barangTerpilih.value[index]["NOURUT"];
               double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
                   "$hargaJual", "$qtyBeli", "$discd");
-              double filterTotalBarang = hargaTotalBarang;
+              int filterTotalBarang = hargaTotalBarang.toInt();
               return Slidable(
                 endActionPane: ActionPane(
                   extentRatio: 0.3,
@@ -682,7 +669,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat('${controller.subtotal.value}', 'with_rp')}",
+                      "${Utility.rupiahFormat('${controller.subtotal.value.toInt()}', 'with_rp')}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -729,7 +716,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                     flex: 30,
                     child: Text(
                       "${Utility.rupiahFormat(controller.nominalDiskonHeaderRincianView.value.text, 'with_rp')}",
-                      // "Rp${controller.nominalDiskonHeaderRincianView.value.text}",
+                      // "Rp${controller.nominalDiskonHeaderRincian.value.text}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -774,8 +761,8 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat(controller.nominalPPNHeaderRincianView.value.text, 'with_rp')}",
-                      // "Rp${controller.nominalPPNHeaderRincianView.value.text}",
+                      "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
+                      // "Rp${controller.nominalPPNHeaderRincian.value.text}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -805,7 +792,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                     flex: 30,
                     child: Text(
                       "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincianView.value.text, 'with_rp')}",
-                      // "Rp${controller.nominalOngkosHeaderRincianView.value.text}",
+                      // "Rp${controller.nominalOngkosHeaderRincian.value.text}",
                       textAlign: TextAlign.right,
                     ),
                   )

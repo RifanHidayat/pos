@@ -12,6 +12,7 @@ import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penju
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/buat_penjualan.dart';
 import 'package:siscom_pos/screen/penjualan/detail_nota_pengiriman_barang.dart';
+import 'package:siscom_pos/screen/penjualan/faktur_penjualan_si.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -26,14 +27,14 @@ class DashbardPenjualanController extends GetxController {
 
   var cari = TextEditingController().obs;
   var refrensiBuatOrderPenjualan = TextEditingController().obs;
-  var jatuhTempoBuatOrderPenjualan = TextEditingController().obs;
+  var jatuhTempoBuatOrderPenjualan = TextEditingController(text: "0").obs;
   var keteranganSO1 = TextEditingController().obs;
   var keteranganSO2 = TextEditingController().obs;
   var keteranganSO3 = TextEditingController().obs;
   var keteranganSO4 = TextEditingController().obs;
   var passwordBukaKunci = TextEditingController().obs;
-  var noseri1 = TextEditingController().obs;
-  var noseri2 = TextEditingController().obs;
+  var noseri1 = TextEditingController(text: "").obs;
+  var noseri2 = TextEditingController(text: "").obs;
 
   var selectedIdSales = "".obs;
   var selectedNameSales = "".obs;
@@ -63,6 +64,7 @@ class DashbardPenjualanController extends GetxController {
   var screenStatusFakturPenjualan = true.obs;
 
   var jumlahArsipOrderPenjualan = 0.obs;
+  var statusBuatPenjualan = 0.obs;
 
   var menuShowonTop = [].obs;
   var salesList = [].obs;
@@ -96,7 +98,7 @@ class DashbardPenjualanController extends GetxController {
   void loadData() {
     getDataMenuPenjualan();
     checkArsipOrderPenjualan();
-    getDataSales();
+    getDataSales("load_first");
     getDataAllSOHD();
     checkSysdata();
   }
@@ -143,8 +145,13 @@ class DashbardPenjualanController extends GetxController {
     menuShowonTop.refresh();
   }
 
+  void changeStatusBuatPenjualan(value) {
+    statusBuatPenjualan.value = value;
+    statusBuatPenjualan.refresh();
+  }
+
   void addPenjualan() {
-    getDataSales();
+    getDataSales("load_first");
     if (screenAktif.value == 1) {
       Get.to(
           BuatOrderPenjualan(
@@ -214,6 +221,8 @@ class DashbardPenjualanController extends GetxController {
       periode.value = "SO$year$bulan";
     } else if (screenAktif.value == 2) {
       periode.value = "DO$year$bulan";
+    } else if (screenAktif.value == 3) {
+      periode.value = "SI$year$bulan";
     }
   }
 
@@ -245,7 +254,7 @@ class DashbardPenjualanController extends GetxController {
     }
   }
 
-  void getDataSales() async {
+  void getDataSales(type) async {
     print('proses list sales');
     Future<List> prosesGetSales =
         getDataCt.getDataSales(sidebarCt.cabangKodeSelectedSide.value);
@@ -254,29 +263,84 @@ class DashbardPenjualanController extends GetxController {
       data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
       salesList.value = data;
       salesList.refresh();
-      // var getFirst = data.first;
-      // print(getFirst);
-      // selectedIdSales.value = getFirst['KODE'];
-      // selectedNameSales.value = getFirst['NAMA'];
       selectedIdSales.refresh();
       selectedNameSales.refresh();
-      getDataPelanggan();
+      getDataPelanggan(type);
     }
   }
 
-  void getDataPelanggan() async {
-    Future<List> prosesGetPelanggan =
-        getDataCt.getDataPelanggan(selectedIdSales.value);
-    List data = await prosesGetPelanggan;
-    if (data.isNotEmpty) {
-      data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
-      pelangganList.value = data;
+  void getDataPelanggan(type) async {
+    if (type == "load_first") {
+      Future<List> checkDataCabang = GetDataController().getSpesifikData(
+          "CABANG",
+          "KODE",
+          sidebarCt.cabangKodeSelectedSide.value,
+          "get_spesifik_data_master");
+      List hasilDataCabang = await checkDataCabang;
+
+      if (hasilDataCabang.isNotEmpty) {
+        Future<List> checkPelanggan = GetDataController().getSpesifikData(
+            "CUSTOM",
+            "KODE",
+            hasilDataCabang[0]['CUSTOM'],
+            "get_spesifik_data_master");
+        List hasilDataPelanggan = await checkPelanggan;
+
+        if (hasilDataPelanggan.isNotEmpty) {
+          selectedNamePelanggan.value = hasilDataPelanggan[0]['NAMA'];
+          selectedNamePelanggan.refresh();
+
+          selectedIdPelanggan.value = hasilDataPelanggan[0]['KODE'];
+          selectedIdPelanggan.refresh();
+
+          wilayahCustomerSelected.value = hasilDataPelanggan[0]['WILAYAH'];
+          wilayahCustomerSelected.refresh();
+
+          var kodeSales = hasilDataPelanggan[0]['SALESM'];
+
+          Future<List> checkSales = GetDataController().getSpesifikData(
+              "SALESM", "KODE", kodeSales, "get_spesifik_data_master");
+          List hasilDataSales = await checkSales;
+
+          if (hasilDataSales.isNotEmpty) {
+            selectedNameSales.value = hasilDataSales[0]['NAMA'];
+            selectedNameSales.refresh();
+
+            selectedIdSales.value = hasilDataSales[0]['KODE'];
+            selectedIdSales.refresh();
+
+            Future<List> listSalesSelected = GetDataController()
+                .getSpesifikData("CUSTOM", "SALESM", selectedIdSales.value,
+                    "get_spesifik_data_master");
+            List tampungData = await listSalesSelected;
+            tampungData.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
+
+            pelangganList.value = tampungData;
+            pelangganList.refresh();
+          }
+        }
+      }
+    } else {
+      pelangganList.clear();
       pelangganList.refresh();
-      var getFirst = data.first;
-      selectedIdPelanggan.value = getFirst['KODE'];
-      selectedNamePelanggan.value = getFirst['NAMA'];
-      selectedIdPelanggan.refresh();
-      selectedNamePelanggan.refresh();
+      selectedIdPelanggan.value = "";
+      selectedNamePelanggan.value = "";
+      wilayahCustomerSelected.value = "";
+      Future<List> prosesGetPelanggan =
+          getDataCt.getDataPelanggan(selectedIdSales.value);
+      List data = await prosesGetPelanggan;
+      if (data.isNotEmpty) {
+        data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
+        pelangganList.value = data;
+        pelangganList.refresh();
+        var getFirst = data.first;
+        selectedIdPelanggan.value = getFirst['KODE'];
+        selectedNamePelanggan.value = getFirst['NAMA'];
+        wilayahCustomerSelected.value = getFirst['WILAYAH'];
+        selectedIdPelanggan.refresh();
+        selectedNamePelanggan.refresh();
+        wilayahCustomerSelected.refresh();
+      }
     }
   }
 
@@ -286,7 +350,8 @@ class DashbardPenjualanController extends GetxController {
     dataAllSohd.refresh();
     screenStatusOrderPenjualan.value = false;
     screenStatusOrderPenjualan.refresh();
-    Future<List> prosesDataAllSOHD = getDataCt.getDataAllSOHD();
+    Future<List> prosesDataAllSOHD =
+        getDataCt.getDataAllSOHD(sidebarCt.cabangKodeSelectedSide.value);
     List data = await prosesDataAllSOHD;
     bool hasil = false;
     if (data.isNotEmpty) {
@@ -309,7 +374,8 @@ class DashbardPenjualanController extends GetxController {
     dataAllDohd.refresh();
     screenStatusNotaPengiriman.value = false;
     screenStatusNotaPengiriman.refresh();
-    Future<List> prosesDataAllDOHD = getDataCt.getDataAllDOHD();
+    Future<List> prosesDataAllDOHD =
+        getDataCt.getDataAllDOHD(sidebarCt.cabangKodeSelectedSide.value);
     List data = await prosesDataAllDOHD;
     bool hasil = false;
     if (data.isNotEmpty) {
@@ -453,7 +519,7 @@ class DashbardPenjualanController extends GetxController {
                           }
                         } else if (screenAktif.value == 2) {
                           if (statusOutStand == false) {
-                            Future<bool> prosesHapusDOHD = HapusSodtController()
+                            Future<bool> prosesHapusDOHD = HapusDodtController()
                                 .hapusFakturDanJldt(dataSelected['NOMOR']);
                             bool hasilHapus = await prosesHapusDOHD;
                             if (hasilHapus) {
@@ -468,7 +534,9 @@ class DashbardPenjualanController extends GetxController {
                           } else {
                             UtilsAlert.showToast("Tidak dapat di hapus");
                           }
-                        } else if (screenAktif.value == 3) {}
+                        } else if (screenAktif.value == 3) {
+                          print('hapus faktur penjualan');
+                        }
                       });
                     },
                   ),
@@ -481,10 +549,26 @@ class DashbardPenjualanController extends GetxController {
                     textBtn: "Edit",
                     colorBtn: Utility.primaryDefault,
                     colorText: Colors.white,
-                    onTap: () {
+                    onTap: () async {
                       if (statusOutStand == false) {
                         Get.back();
-                        prosesLanjutkanSoPenjualan(dataSelected);
+                        if (screenAktif.value == 3) {
+                          Future<List> getDataSI = GetDataController()
+                              .getSpesifikData(
+                                  "JLHD",
+                                  "NOMOR",
+                                  dataSelected['NOMOR'],
+                                  "get_spesifik_data_transaksi");
+                          List hasilCheck = await getDataSI;
+                          if (hasilCheck.isNotEmpty) {
+                            prosesLanjutkanSoPenjualan(hasilCheck[0]);
+                          } else {
+                            UtilsAlert.showToast(
+                                'Data penjualan tidak di temukan');
+                          }
+                        } else {
+                          prosesLanjutkanSoPenjualan(dataSelected);
+                        }
                       } else {
                         UtilsAlert.showToast("Penjualan tidak dapat di edit");
                       }
@@ -737,8 +821,8 @@ class DashbardPenjualanController extends GetxController {
       nomorSoSelected.value = dataSelected["NOMOR"];
       nomoCbSelected.value = "${dataSelected["CB"]}";
 
-      Future<bool> prosesDeviceIp =
-          getDataCt.closeSODH(sidebarCt.ipdevice.value, nomorSoSelected.value);
+      Future<bool> prosesDeviceIp = getDataCt.closePenjualan("SOHD",
+          sidebarCt.ipdevice.value, nomorSoSelected.value, "close_sohd");
       bool hasilProsesDevice = await prosesDeviceIp;
       print("ip device $hasilProsesDevice");
 
@@ -750,14 +834,30 @@ class DashbardPenjualanController extends GetxController {
       nomorDoSelected.value = dataSelected["NOMOR"];
       nomoDoCbSelected.value = "${dataSelected["CB"]}";
 
-      Future<bool> prosesDeviceIp =
-          getDataCt.closeDODH(sidebarCt.ipdevice.value, nomorDoSelected.value);
+      Future<bool> prosesDeviceIp = getDataCt.closePenjualan("DOHD",
+          sidebarCt.ipdevice.value, nomorDoSelected.value, "close_dohd");
       bool hasilProsesDevice = await prosesDeviceIp;
       print("ip device $hasilProsesDevice");
 
       dohdSelected.refresh();
       nomorDoSelected.refresh();
       nomoDoCbSelected.refresh();
+    } else if (screenAktif.value == 3) {
+      nomorFakturPenjualanSelected.value = dataSelected["NOMOR"];
+      nomoFakturPenjualanCbSelected.value = dataSelected["CB"];
+      fakturPenjualanSelected.value = [dataSelected];
+
+      Future<bool> prosesDeviceIp = getDataCt.closePenjualan(
+          "JLHD",
+          sidebarCt.ipdevice.value,
+          nomorFakturPenjualanSelected.value,
+          "close_jlhd");
+      bool hasilProsesDevice = await prosesDeviceIp;
+      print("ip device $hasilProsesDevice");
+
+      fakturPenjualanSelected.refresh();
+      nomorFakturPenjualanSelected.refresh();
+      nomoFakturPenjualanCbSelected.refresh();
     }
 
     selectedIdSales.value = dataSales[0]["KODE"];
@@ -795,6 +895,12 @@ class DashbardPenjualanController extends GetxController {
         Get.to(DetailNotaPengirimanBarang(dataForm: true),
             duration: Duration(milliseconds: 500),
             transition: Transition.rightToLeftWithFade);
+      } else if (screenAktif.value == 3) {
+        if (dataSelected["REFTR"] == "SI") {
+          Get.to(FakturPenjualanSI(dataForm: true),
+              duration: Duration(milliseconds: 500),
+              transition: Transition.rightToLeftWithFade);
+        } else if (dataSelected["REFTR"] == "DO") {}
       }
     }
   }
@@ -806,13 +912,26 @@ class DashbardPenjualanController extends GetxController {
     if (hasilValidasi) {
       Get.back();
       if (statusOutStand == false) {
-        prosesLanjutkanSoPenjualan(dataSelected);
+        if (screenAktif.value == 3) {
+          Future<List> getDataSI = GetDataController().getSpesifikData("JLHD",
+              "NOMOR", dataSelected['NOMOR'], "get_spesifik_data_transaksi");
+          List hasilCheck = await getDataSI;
+          if (hasilCheck.isNotEmpty) {
+            prosesLanjutkanSoPenjualan(hasilCheck[0]);
+          } else {
+            UtilsAlert.showToast('Data penjualan tidak di temukan');
+          }
+        } else {
+          prosesLanjutkanSoPenjualan(dataSelected);
+        }
       } else {
         String judul = screenAktif.value == 1
             ? "Order Penjualan"
             : screenAktif.value == 2
                 ? "Nota Pengiriman Barang"
-                : "";
+                : screenAktif.value == 2
+                    ? "Faktur Penjualan"
+                    : "";
         ButtonSheetController().validasiButtonSheet(
             judul,
             contentValidasiLanjutkan(dataSelected, statusOutStand),

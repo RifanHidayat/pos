@@ -111,8 +111,8 @@ class _PembayaranState extends State<Pembayaran> {
 
   NumberFormat currencyFormatter = NumberFormat.currency(
     locale: 'id',
-    symbol: 'Rp ',
-    decimalDigits: 0,
+    symbol: '',
+    decimalDigits: 2,
   );
 
   @override
@@ -291,13 +291,14 @@ class _PembayaranState extends State<Pembayaran> {
                           ),
                           widget.dataPembayaran[0] == false
                               ? Text(
-                                  "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                                  "Rp ${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text, dashboardCt.serviceChargePesan.value.text))}",
+                                  // "${currencyFormatter.format(Utility.hitungDetailTotalPos('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
                                   style: TextStyle(
                                       color: Utility.grey900,
                                       fontWeight: FontWeight.bold),
                                 )
                               : Text(
-                                  "${currencyFormatter.format(controller.totalTagihanSplit.value)}",
+                                  "Rp ${currencyFormatter.format(controller.totalTagihanSplit.value)}",
                                   style: TextStyle(
                                       color: Utility.grey900,
                                       fontWeight: FontWeight.bold)),
@@ -359,7 +360,7 @@ class _PembayaranState extends State<Pembayaran> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
+                      "Rp  ${currencyFormatter.format(dashboardCt.totalNominalDikeranjang.value)}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -391,7 +392,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.diskonHeader.value.toStringAsFixed(2)}%",
+                                "${currencyFormatter.format(double.parse(dashboardCt.persenDiskonPesanBarang.value.text))}%",
                                 style: TextStyle(
                                     fontSize: Utility.small,
                                     color: Colors.green),
@@ -405,7 +406,7 @@ class _PembayaranState extends State<Pembayaran> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}'))}",
+                      "Rp ${currencyFormatter.format(Utility.nominalDiskonHeader('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text))}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -437,7 +438,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.ppnCabang.value.toStringAsFixed(2)}%",
+                                "${currencyFormatter.format(double.parse(dashboardCt.ppnPesan.value.text))}%",
                                 style: TextStyle(
                                     fontSize: Utility.small, color: Colors.red),
                               ),
@@ -450,7 +451,7 @@ class _PembayaranState extends State<Pembayaran> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.ppnCabang.value}'))}",
+                      "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.ppnPesan.value.text))}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -468,7 +469,7 @@ class _PembayaranState extends State<Pembayaran> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Service Charger",
+                          "Service Charge",
                           style: TextStyle(
                               fontSize: Utility.semiMedium,
                               color: Utility.greyLight300),
@@ -482,7 +483,7 @@ class _PembayaranState extends State<Pembayaran> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${dashboardCt.serviceChargerCabang.value.toStringAsFixed(2)}%",
+                                "${currencyFormatter.format(double.parse(dashboardCt.serviceChargePesan.value.text))}%",
                                 style: TextStyle(
                                     fontSize: Utility.small, color: Colors.red),
                               ),
@@ -495,7 +496,7 @@ class _PembayaranState extends State<Pembayaran> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', '${dashboardCt.diskonHeader.value}', '${dashboardCt.serviceChargerCabang.value}'))}",
+                      "Rp ${currencyFormatter.format(Utility.nominalPPNHeaderView('${dashboardCt.totalNominalDikeranjang.value}', dashboardCt.persenDiskonPesanBarang.value.text, dashboardCt.serviceChargePesan.value.text))}",
                       textAlign: TextAlign.right,
                     ),
                   )

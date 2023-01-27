@@ -57,8 +57,6 @@ class SimpanFakturController extends BaseController {
   Future<bool> prosesClearSimpanFaktur(type) {
     if (type != "proses_split_bill") {
       dashboardCt.nomorCbLastSelected.value = "";
-      // dashboardCt.kodePelayanSelected.value = "";
-      // dashboardCt.customSelected.value = "";
       dashboardCt.ppnCabang.value = 0;
       dashboardCt.serviceChargerCabang.value = 0;
     }
@@ -81,8 +79,6 @@ class SimpanFakturController extends BaseController {
     dashboardCt.listKeranjangArsip.refresh();
     dashboardCt.jumlahItemDikeranjang.refresh();
     dashboardCt.totalNominalDikeranjang.refresh();
-    // dashboardCt.customSelected.refresh();
-    // dashboardCt.kodePelayanSelected.refresh();
     dashboardCt.primaryKeyFaktur.refresh();
     dashboardCt.diskonHeader.refresh();
     dashboardCt.ppnCabang.refresh();

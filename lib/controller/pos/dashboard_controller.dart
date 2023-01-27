@@ -235,37 +235,42 @@ class DashbardController extends BaseController {
       'stringTabel': 'CABANG',
     };
     var connect = Api.connectionApi("post", body, "cabang");
-    connect.then((dynamic res) {
+    connect.then((dynamic res) async {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         var data = valueBody['data'];
         if (type == "arsip") {
-          var filterDataCabang = [];
-          for (var element in data) {
-            if ("${element["KODE"]}" == "${informasiJlhd[0]["CB"]}") {
-              filterDataCabang.add(element);
+          List filterDataCabang = [];
+          if (informasiJlhd.isNotEmpty) {
+            for (var element in data) {
+              if ("${element["KODE"]}" == "${informasiJlhd[0]["CB"]}") {
+                filterDataCabang.add(element);
+              }
             }
           }
-          cabangKodeSelected.value = "${filterDataCabang[0]["KODE"]}";
-          cabangNameSelected.value = filterDataCabang[0]["NAMA"];
-          customSelected.value = "${informasiJlhd[0]["CUSTOM"]}";
-          gudangSelected.value = "${filterDataCabang[0]["GUDANG"]}";
-          ppnCabang.value = double.parse("${filterDataCabang[0]["PPN"]}");
-          serviceChargerCabang.value =
-              double.parse("${filterDataCabang[0]["SCHARGE"]}");
-          midQrisCabang.value = "${filterDataCabang[0]["MID"]}";
+          if (filterDataCabang.isNotEmpty) {
+            cabangKodeSelected.value = "${filterDataCabang[0]["KODE"]}";
+            cabangNameSelected.value = filterDataCabang[0]["NAMA"];
+            customSelected.value = "${informasiJlhd[0]["CUSTOM"]}";
+            gudangSelected.value = "${filterDataCabang[0]["GUDANG"]}";
+            ppnCabang.value = double.parse("${filterDataCabang[0]["PPN"]}");
+            serviceChargerCabang.value =
+                double.parse("${filterDataCabang[0]["SCHARGE"]}");
+            midQrisCabang.value = "${filterDataCabang[0]["MID"]}";
 
-          cabangKodeSelected.refresh();
-          cabangNameSelected.refresh();
-          customSelected.refresh();
-          gudangSelected.refresh();
-          ppnCabang.refresh();
-          midQrisCabang.refresh();
-          serviceChargerCabang.refresh();
+            cabangKodeSelected.refresh();
+            cabangNameSelected.refresh();
+            customSelected.refresh();
+            gudangSelected.refresh();
+            ppnCabang.refresh();
+            midQrisCabang.refresh();
+            serviceChargerCabang.refresh();
 
-          aksiGetSalesman(cabangKodeSelected.value, informasiJlhd[0]["SALESM"],
-              'loadArsip');
-          aksiGetCustomer(informasiJlhd[0]["SALESM"], 'loadArsip');
+            aksiGetSalesman(cabangKodeSelected.value,
+                informasiJlhd[0]["SALESM"], 'loadArsip');
+            aksiGetCustomer(informasiJlhd[0]["SALESM"], 'loadArsip');
+          }
+
           getKelompokBarang(type);
         } else {
           var sysUser = AppData.sysuserInformasi.split("-");
@@ -280,6 +285,7 @@ class DashbardController extends BaseController {
           }
           listCabang.value = filter;
           print('akses cabang kamu $listCabang');
+          print('type load $type');
           listCabang.refresh();
           getSalesman(type);
         }
@@ -415,7 +421,7 @@ class DashbardController extends BaseController {
       'kode_sales': '$kode',
     };
     var connect = Api.connectionApi("post", body, "pelanggan");
-    connect.then((dynamic res) {
+    connect.then((dynamic res) async {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
@@ -440,6 +446,49 @@ class DashbardController extends BaseController {
             if ("${element["KODE"]}" == "${customSelected.value}") {
               namaPelanggan.value = element['NAMA'];
               wilayahCustomerSelected.value = element['WILAYAH'];
+            }
+          }
+        }
+        if (stringType == "") {
+          var getFirstCabang = listCabang.first;
+          var custom = getFirstCabang["CUSTOM"];
+
+          // CUSTOM SELECTED
+
+          Future<List> checkPelanggan = GetDataController().getSpesifikData(
+              "CUSTOM", "KODE", custom, "get_spesifik_data_master");
+          List hasilDataPelanggan = await checkPelanggan;
+
+          if (hasilDataPelanggan.isNotEmpty) {
+            namaPelanggan.value = hasilDataPelanggan[0]['NAMA'];
+            namaPelanggan.refresh();
+
+            customSelected.value = hasilDataPelanggan[0]['KODE'];
+            customSelected.refresh();
+
+            wilayahCustomerSelected.value = hasilDataPelanggan[0]['WILAYAH'];
+            wilayahCustomerSelected.refresh();
+
+            var kodeSales = hasilDataPelanggan[0]['SALESM'];
+
+            Future<List> checkSales = GetDataController().getSpesifikData(
+                "SALESM", "KODE", kodeSales, "get_spesifik_data_master");
+            List hasilDataSales = await checkSales;
+
+            if (hasilDataSales.isNotEmpty) {
+              kodePelayanSelected.value = hasilDataSales[0]['KODE'];
+              kodePelayanSelected.refresh();
+
+              pelayanSelected.value = hasilDataSales[0]['NAMA'];
+              pelayanSelected.refresh();
+
+              Future<List> listSalesSelected = GetDataController()
+                  .getSpesifikData("CUSTOM", "SALESM",
+                      kodePelayanSelected.value, "get_spesifik_data_master");
+              List tampungData = await listSalesSelected;
+              tampungData.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
+              listPelanggan.value = tampungData;
+              listPelanggan.refresh();
             }
           }
         }
@@ -530,45 +579,50 @@ class DashbardController extends BaseController {
         List data = valueBody['data'];
         loadingString.value =
             data.isEmpty ? "Tidak ada barang" : "Sedang memuat...";
-        List tampungMenu = [];
-        for (var element in data) {
-          var filter = {
-            'GROUP': element['GROUP'],
-            'KODE': element['KODE'],
-            'INISIAL': element['INISIAL'],
-            'INGROUP': element['INGROUP'],
-            'NAMA': element['NAMA'],
-            'BARCODE': element['BARCODE'],
-            'TIPE': element['TIPE'],
-            'SAT': element['SAT'],
-            'STDBELI': element['STDBELI'],
-            'STDJUAL': element['STDJUAL'],
-            'NAMAGAMBAR': element['NAMAGAMBAR'],
-            'MEREK': element['MEREK'],
-            'STOKWARE': element['STOKWARE'],
-            'nama_merek': element['nama_merek'],
-            'status': false,
-            'jumlah_beli': 0,
-          };
-          tampungMenu.add(filter);
-        }
-        listMenu.value = tampungMenu;
-        listMenu.refresh();
-        viewButtonKeranjang.value = true;
-        viewButtonKeranjang.refresh();
-        if (type != 'simpan_faktur') {
-          if (listKeranjangArsip.value.isEmpty &&
-              nomorFaktur.value == "-" &&
-              primaryKeyFaktur.value == "") {
-            checkingKeranjang();
-          } else {
-            if (nomorFaktur.value != "-" && primaryKeyFaktur.value != "") {
-              checkingDetailKeranjangArsip(primaryKeyFaktur.value);
+        if (data.isNotEmpty) {
+          List tampungMenu = [];
+          for (var element in data) {
+            if (element['INGROUP'] == kodeInisial) {
+              var filter = {
+                'GROUP': element['GROUP'],
+                'KODE': element['KODE'],
+                'INISIAL': element['INISIAL'],
+                'INGROUP': element['INGROUP'],
+                'NAMA': element['NAMA'],
+                'BARCODE': element['BARCODE'],
+                'TIPE': element['TIPE'],
+                'SAT': element['SAT'],
+                'STDBELI': element['STDBELI'],
+                'STDJUAL': element['STDJUAL'],
+                'NAMAGAMBAR': element['NAMAGAMBAR'],
+                'MEREK': element['MEREK'],
+                'STOKWARE': element['STOKWARE'],
+                'nama_merek': element['nama_merek'],
+                'status': false,
+                'jumlah_beli': 0,
+              };
+              tampungMenu.add(filter);
             }
           }
-        }
 
-        refreshController.loadComplete();
+          listMenu.value = tampungMenu;
+          listMenu.refresh();
+          viewButtonKeranjang.value = true;
+          viewButtonKeranjang.refresh();
+          if (type != 'simpan_faktur') {
+            if (listKeranjangArsip.value.isEmpty &&
+                nomorFaktur.value == "-" &&
+                primaryKeyFaktur.value == "") {
+              checkingKeranjang();
+            } else {
+              if (nomorFaktur.value != "-" && primaryKeyFaktur.value != "") {
+                checkingDetailKeranjangArsip(primaryKeyFaktur.value);
+              }
+            }
+          }
+
+          refreshController.loadComplete();
+        }
       } else {
         UtilsAlert.showToast("Terjadi kesalahan");
       }
@@ -708,8 +762,13 @@ class DashbardController extends BaseController {
 
     // diskon header
 
+    double valueDISCH =
+        infoJlhd[0]["DISCH"] == null || infoJlhd[0]["DISCH"] == 0
+            ? dischHeader
+            : infoJlhd[0]["DISCH"].toDouble();
+
     var fltr1 = Utility.persenDiskonHeader(
-        "${totalNominalDikeranjang.value}", "${infoJlhd[0]["DISCH"]}");
+        "${totalNominalDikeranjang.value}", "$valueDISCH");
 
     print('diskon header persen $fltr1');
 
@@ -719,58 +778,60 @@ class DashbardController extends BaseController {
     persenDiskonPesanBarang.refresh();
     persenDiskonPesanBarangView.refresh();
 
-    hargaDiskonPesanBarang.value.text = "${infoJlhd[0]["DISCH"]}";
+    hargaDiskonPesanBarang.value.text = "$valueDISCH";
     hargaDiskonPesanBarangView.value.text =
-        Utility.rupiahFormat("${infoJlhd[0]["DISCH"]}", "");
+        Utility.rupiahFormat("$valueDISCH", "");
     hargaDiskonPesanBarang.refresh();
     hargaDiskonPesanBarangView.refresh();
 
     // ppn header
 
-    var taxpJLHD = infoJlhd[0]["TAXP"];
+    var taxpJLHD = infoJlhd[0]["TAXP"] == null || infoJlhd[0]["TAXP"] == 0
+        ? 0.0
+        : infoJlhd[0]["TAXP"].toDouble();
 
-    if (taxpJLHD != null || taxpJLHD != "") {
-      if (double.parse("$taxpJLHD") > 0.0) {
-        print('perhitungan ppn header jalan disini');
-        ppnPesan.value.text = "$taxpJLHD";
-        ppnPesanView.value.text = "$taxpJLHD";
-        ppnPesan.refresh();
-        ppnPesanView.refresh();
-
-        var convert1PPN = Utility.nominalPPNHeaderView(
-            '${totalNominalDikeranjang.value}',
-            persenDiskonPesanBarang.value.text,
-            ppnPesan.value.text);
-
-        ppnHarga.value.text = "$convert1PPN";
-        ppnHargaView.value.text = convert1PPN.toStringAsFixed(2);
-        ppnHarga.refresh();
-        ppnHargaView.refresh();
-      } else {
-        var storageCabang = AppData.cabangSelected;
-        List filter = storageCabang.split("-");
-        ppnPesan.value.text = filter[4];
-        ppnPesanView.value.text = filter[4];
-        ppnPesan.refresh();
-        ppnPesanView.refresh();
-
-        var convert1PPN = Utility.nominalPPNHeaderView(
-            '${totalNominalDikeranjang.value}',
-            persenDiskonPesanBarang.value.text,
-            ppnPesan.value.text);
-
-        ppnHarga.value.text = "$convert1PPN";
-        ppnHargaView.value.text = convert1PPN.toStringAsFixed(2);
-        ppnHarga.refresh();
-        ppnHargaView.refresh();
-      }
-    } else {
-      var storageCabang = AppData.cabangSelected;
-      List filter = storageCabang.split("-");
-      ppnPesan.value.text = filter[4];
-      ppnPesanView.value.text = filter[4];
+    if (taxpJLHD > 0.0) {
+      print('perhitungan ppn header jalan disini');
+      ppnPesan.value.text = "$taxpJLHD";
+      ppnPesanView.value.text = "$taxpJLHD";
       ppnPesan.refresh();
       ppnPesanView.refresh();
+
+      var convert1PPN = Utility.nominalPPNHeaderView(
+          '${totalNominalDikeranjang.value}',
+          persenDiskonPesanBarang.value.text,
+          ppnPesan.value.text);
+
+      ppnHarga.value.text = "$convert1PPN";
+      ppnHargaView.value.text = convert1PPN.toStringAsFixed(2);
+      ppnHarga.refresh();
+      ppnHargaView.refresh();
+    } else {
+      print('masuk lah kesini ppn');
+      print('cabang selected ${cabangKodeSelected.value}');
+      Future<List> checkDataCabang = GetDataController().getSpesifikData(
+          "CABANG",
+          "KODE",
+          cabangKodeSelected.value,
+          "get_spesifik_data_master");
+      List hasilDataCabang = await checkDataCabang;
+
+      print('hasil data $hasilDataCabang');
+
+      String ppnCabang = hasilDataCabang[0]['PPN'].toString();
+
+      ppnPesan.value.text =
+          ppnCabang == "null" || ppnCabang == "" || ppnCabang == "0"
+              ? "0"
+              : ppnCabang;
+      ppnPesanView.value.text =
+          ppnCabang == "null" || ppnCabang == "" || ppnCabang == "0"
+              ? "0"
+              : ppnCabang;
+      ppnPesan.refresh();
+      ppnPesanView.refresh();
+
+      print('hasil ppn ${ppnPesan.value.text}');
 
       var convert1PPN = Utility.nominalPPNHeaderView(
           '${totalNominalDikeranjang.value}',
@@ -785,8 +846,12 @@ class DashbardController extends BaseController {
 
     // biaya header
 
+    var valueBIAYA = infoJlhd[0]["BIAYA"] == null || infoJlhd[0]["BIAYA"] == 0
+        ? 0.0
+        : infoJlhd[0]["BIAYA"].toDouble();
+
     var convert1 = Utility.persenDiskonHeader(
-        "${totalNominalDikeranjang.value}", "${infoJlhd[0]["BIAYA"]}");
+        "${totalNominalDikeranjang.value}", "$valueBIAYA");
 
     serviceChargePesan.value.text = "$convert1" == "NaN" ? "0.0" : "$convert1";
     serviceChargePesanView.value.text =
@@ -820,43 +885,6 @@ class DashbardController extends BaseController {
 
   void perhitunganHeader() {
     // setting header
-
-    // var hitungDiskonHeader = Utility.nominalDiskonHeader(
-    //     "${totalNominalDikeranjang.value}", "${diskonHeader.value}");
-    // var hargaSetelahDiskon = totalNominalDikeranjang.value - hitungDiskonHeader;
-
-    // // diskon header
-    // persenDiskonPesanBarang.value.text = diskonHeader.value.toStringAsFixed(2);
-    // hargaDiskonPesanBarang.value.text = "$hitungDiskonHeader";
-
-    // persenDiskonPesanBarangView.value.text =
-    //     diskonHeader.value.toStringAsFixed(2);
-    // hargaDiskonPesanBarangView.value.text =
-    //     Utility.rupiahFormat("$hitungDiskonHeader", "");
-
-    // // ppn header
-    // ppnPesan.value.text = ppnCabang.value.toStringAsFixed(2);
-    // var hitungNominalPPn =
-    //     Utility.nominalPPNHeader("$hargaSetelahDiskon", "${ppnCabang.value}");
-    // ppnHarga.value.text = "$hitungNominalPPn";
-
-    // ppnPesanView.value.text = ppnCabang.value.toStringAsFixed(2);
-    // var hitungNominalPPnView =
-    //     Utility.nominalPPNHeader("$hargaSetelahDiskon", "${ppnCabang.value}");
-    // ppnHargaView.value.text = Utility.rupiahFormat("$hitungNominalPPnView", "");
-
-    // // service header
-    // serviceChargePesan.value.text =
-    //     serviceChargerCabang.value.toStringAsFixed(2);
-    // var hitungNominalService = Utility.nominalPPNHeader(
-    //     "$hargaSetelahDiskon", "${serviceChargerCabang.value}");
-    // serviceChargeHarga.value.text = "$hitungNominalService";
-
-    // serviceChargePesanView.value.text =
-    //     serviceChargerCabang.value.toStringAsFixed(2);
-    // var hitungNominalServiceView = Utility.nominalPPNHeader(
-    //     "$hargaSetelahDiskon", "${serviceChargerCabang.value}");
-    // serviceChargeHargaView.value.text = "$hitungNominalServiceView";
 
     double convertDiskon =
         Utility.validasiValueDouble(hargaDiskonPesanBarang.value.text);

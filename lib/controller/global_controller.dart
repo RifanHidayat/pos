@@ -17,6 +17,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import 'penjualan/dashboard_penjualan_controller.dart';
+import 'penjualan/faktur_penjualan_si/buttom_sheet/fpsi_pesan_barang_ct.dart';
 import 'penjualan/nota_pengiriman_barang/memilih_sohd_controller.dart';
 import 'penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'penjualan/order_penjualan/item_order_penjualan_controller.dart';
@@ -236,6 +237,9 @@ class GlobalController extends GetxController
                                               "pilih_so_nota_pengiriman") {
                                         aksiPenjualan(
                                             dataShow[index], stringController);
+                                      } else if (stringController ==
+                                          "pilih_barang_faktur_penjualan_si") {
+                                        aksiFakturPenjualanSI(dataShow[index]);
                                       } else {
                                         checkingAksi(
                                             stringController,
@@ -362,7 +366,7 @@ class GlobalController extends GetxController
         dashboardPenjualanCt.selectedNameSales.value = nama;
         dashboardPenjualanCt.selectedIdSales.refresh();
         dashboardPenjualanCt.selectedNameSales.refresh();
-        dashboardPenjualanCt.getDataPelanggan();
+        dashboardPenjualanCt.getDataPelanggan("load_next");
         Get.back();
       } else if (judul == "Pilih Pelanggan") {
         dashboardPenjualanCt.selectedIdPelanggan.value = kode;
@@ -370,6 +374,7 @@ class GlobalController extends GetxController
         dashboardPenjualanCt.wilayahCustomerSelected.value = wilayah;
         dashboardPenjualanCt.selectedIdPelanggan.refresh();
         dashboardPenjualanCt.selectedNamePelanggan.refresh();
+        dashboardPenjualanCt.wilayahCustomerSelected.refresh();
         Get.back();
       }
     }
@@ -391,6 +396,11 @@ class GlobalController extends GetxController
         MemilihSOHDController().mencariDataSODT([dataTerpilih]);
       });
     }
+  }
+
+  void aksiFakturPenjualanSI(dataTerpilih) {
+    FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);
+    Get.back();
   }
 
   Widget contentValidasiPilihSO(dataTerpilih) {

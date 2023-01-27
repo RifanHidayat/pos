@@ -131,11 +131,12 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
-  Future<List> getDataAllSOHD() async {
+  Future<List> getDataAllSOHD(String cabang) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'SOHD',
+      'cabang': cabang,
     };
     var connect = Api.connectionApi("post", body, "all_sohd");
     var getValue = await connect;
@@ -150,11 +151,12 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
-  Future<List> getDataAllDOHD() async {
+  Future<List> getDataAllDOHD(String cabang) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'DOHD',
+      'cabang': cabang,
     };
     var connect = Api.connectionApi("post", body, "all_dohd");
     var getValue = await connect;
@@ -691,27 +693,28 @@ class GetDataController extends GetxController {
     return Future.value(dataFinal);
   }
 
-  Future<bool> closeSODH(String ipDevice, String nomoSODH) async {
+  Future<bool> closePenjualan(
+      String tabel, String ipDevice, String nomor, String url) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
-      'stringTabel': 'SOHD',
+      'stringTabel': tabel,
       'ip_device': ipDevice,
-      'nomor': nomoSODH,
+      'nomor': nomor,
     };
-    var connect = Api.connectionApi("post", body, "close_sohd");
+    var connect = Api.connectionApi("post", body, url);
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> closeDODH(String ipDevice, String nomorDODH) async {
+  Future<bool> closeJLHD(String ipDevice, String nomorJLHD) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
-      'stringTabel': 'DOHD',
+      'stringTabel': 'JLHD',
       'ip_device': ipDevice,
-      'nomor': nomorDODH,
+      'nomor': nomorJLHD,
     };
     var connect = Api.connectionApi("post", body, "close_dohd");
     var getValue = await connect;
@@ -730,21 +733,17 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateSohd(nomorsohd, hargaTotheader, qtyallheader, discdHeader,
-      dischHeader, discnHeader, persenPPN, fixedTaxn, fixedHrgNet) async {
+  Future<bool> updateSohd(
+      nomorsohd, qtyallheader, discdHeader, dischHeader, discnHeader) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
       'stringTabel': 'SOHD',
       'nomor_sohd': nomorsohd,
-      'hargatot_sohd': hargaTotheader,
       'qty_sohd': qtyallheader,
       'discd_sohd': discdHeader,
       'disch_sohd': dischHeader,
       'discn_sohd': discnHeader,
-      'persen_ppn': persenPPN,
-      'nominal_ppn': fixedTaxn,
-      'hrgnet_sohd': fixedHrgNet,
     };
     var connect = Api.connectionApi("post", body, "update_sohd");
     var getValue = await connect;
@@ -772,8 +771,44 @@ class GetDataController extends GetxController {
     return Future.value(valueBody['status']);
   }
 
-  Future<bool> updateSodt(String nomorSohd, String nomorUrut, double valueDiscn,
-      double valuePPN, double valueOngkos) async {
+  Future<bool> updateJlhd(String keyFaktur, String allQty, String discd,
+      String disch, String discn) async {
+    Map<String, dynamic> body = {
+      "database": AppData.databaseSelected,
+      "periode": AppData.periodeSelected,
+      "stringTabel": 'JLHD',
+      'pk': keyFaktur,
+      'qty_update_jlhd': allQty,
+      'discd_update_jlhd': discd,
+      'disch_update_jlhd': disch,
+      'discn_update_jlhd': discn,
+    };
+    var connect = Api.connectionApi("post", body, "update_jlhd");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print('hasil update sodt $valueBody');
+    return Future.value(valueBody['status']);
+  }
+
+  Future<bool> updateJldt(
+      String keyFaktur, String nokey, double valueDiscn) async {
+    Map<String, dynamic> body = {
+      "database": AppData.databaseSelected,
+      "periode": AppData.periodeSelected,
+      "stringTabel": 'JLDT',
+      'pk_update_jldt': keyFaktur,
+      'nokey_update_jldt': nokey,
+      'discn_update_jldt': valueDiscn,
+    };
+    var connect = Api.connectionApi("post", body, "update_jldt");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    print('hasil update sodt $valueBody');
+    return Future.value(valueBody['status']);
+  }
+
+  Future<bool> updateSodt(
+      String nomorSohd, String nomorUrut, double valueDiscn) async {
     Map<String, dynamic> body = {
       'database': AppData.databaseSelected,
       'periode': AppData.periodeSelected,
@@ -781,8 +816,6 @@ class GetDataController extends GetxController {
       'nomor_sohd': nomorSohd,
       'nomor_urut': nomorUrut,
       'value_discn': valueDiscn,
-      'nominal_ppn': valuePPN,
-      'value_ongkos': valueOngkos,
     };
     var connect = Api.connectionApi("post", body, "update_sodt");
     var getValue = await connect;
@@ -1111,6 +1144,68 @@ class GetDataController extends GetxController {
       'list_data': dataUpdate
     };
     var connect = Api.connectionApi("post", body, url);
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    if (valueBody['status'] == true) {
+      statusFinal = [true, valueBody['message']];
+    } else {
+      statusFinal = [false, valueBody['message']];
+    }
+
+    return Future.value(statusFinal);
+  }
+
+  Future<List> kirimJLDT(List dataInsertJLDT) async {
+    List statusFinal = [];
+
+    var dt = DateTime.now();
+    var tanggalNow = "${DateFormat('yyyy-MM-dd').format(dt)}";
+    var tanggalDanJam = "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dt)}";
+    var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
+
+    var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
+
+    Map<String, dynamic> body = {
+      'database': AppData.databaseSelected,
+      'periode': AppData.periodeSelected,
+      'stringTabel': 'JLDT',
+      'jldt_pk': dataInsertJLDT[0],
+      'jldt_cabang': dataInsertJLDT[1],
+      'jldt_nomor': dataInsertJLDT[2],
+      'jldt_nourut': dataInsertJLDT[3],
+      'jldt_nokey': dataInsertJLDT[4],
+      'jldt_cbxx': dataInsertJLDT[5],
+      'jldt_noxx': dataInsertJLDT[6],
+      'jldt_nosub': dataInsertJLDT[7],
+      'jldt_tanggal': tanggalNow,
+      'jldt_tgl': tanggalNow,
+      'jldt_custom': dataInsertJLDT[8],
+      'jldt_wilayah': dataInsertJLDT[9],
+      'jldt_salesm': dataInsertJLDT[10],
+      'jldt_gudang': dataInsertJLDT[11],
+      'jldt_group': dataInsertJLDT[12],
+      'jldt_barang': dataInsertJLDT[13],
+      'jldt_qty': dataInsertJLDT[14],
+      'jldt_sat': dataInsertJLDT[15],
+      'jldt_uang': "RP",
+      'jldt_kurs': "1",
+      'jldt_harga': dataInsertJLDT[16],
+      'jldt_disc1': dataInsertJLDT[17],
+      'jldt_discd': dataInsertJLDT[18],
+      'jldt_doe': tanggalDanJam,
+      'jldt_toe': jamTransaksi,
+      'jldt_loe': tanggalDanJam,
+      'jldt_deo': dataInformasiSYSUSER[0],
+      'jldt_cb': dataInsertJLDT[19],
+      'jldt_nomorcb': dataInsertJLDT[20],
+      'jldt_htg': dataInsertJLDT[21],
+      'jldt_ptg': "1",
+      'jldt_hgpak': dataInsertJLDT[22],
+      'valuepak': dataInsertJLDT[23],
+      'jldt_keterangan': dataInsertJLDT[24],
+    };
+    var connect = Api.connectionApi("post", body, "insert_jldt");
+
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     if (valueBody['status'] == true) {

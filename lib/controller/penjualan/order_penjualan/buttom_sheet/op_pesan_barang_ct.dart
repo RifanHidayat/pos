@@ -10,6 +10,7 @@ import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penju
 import 'package:siscom_pos/controller/penjualan/order_penjualan/simpan_sodt_controller.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -868,117 +869,205 @@ class OrderPenjualanPesanBarangController extends GetxController {
     );
   }
 
-  Future<bool> perhitunganMenyeluruhOrderPenjualan(List hasilSodt) async {
-    if (hasilSodt.isNotEmpty) {
-      double subtotalKeranjang = 0.0;
-      double hargaTotheader = 0.0;
-      double qtyallheader = 0.0;
-      double discdHeader = 0.0;
-      double dischHeader = 0.0;
-      double discnHeader = 0.0;
-      double taxnHeader = 0.0;
-      double biayaHeader = 0.0;
+  Future<bool> perhitunganMenyeluruhOrderPenjualan() async {
+    Future<List> updateInformasiSOHD = GetDataController().getSpesifikData(
+        "SOHD",
+        "PK",
+        "${dashboardPenjualanCt.dataSohd[0]['PK']}",
+        "get_spesifik_data_transaksi");
+    List infoSOHD = await updateInformasiSOHD;
 
-      for (var element in hasilSodt) {
-        double hargaBarang = double.parse("${element['HARGA']}");
-        double discdBarang = double.parse("${element['DISCD']}");
-        double dischBarang = double.parse("${element['DISCH']}");
-        double qtyBarang = double.parse("${element['QTY']}");
-        var hitung1 = hargaBarang * qtyBarang;
-        var hitung2 = discdBarang * qtyBarang;
-        var finalHitung = hitung1 - hitung2;
-        var hitungDiscn = hitung2 + dischBarang;
-        var hitungDiscnJldt = discdBarang + dischBarang;
+    print('data SOHD $infoSOHD');
 
-        print('sodt taxn ${double.parse("${element['TAXN']}")}');
-        print('sodt biaya ${double.parse("${element['BIAYA']}")}');
+    // perhitungan HRGTOT
+    double subtotalKeranjang = 0.0;
+    double discdHeader = 0.0;
+    double dischHeader = 0.0;
+    double allQty = 0.0;
 
-        subtotalKeranjang = subtotalKeranjang + finalHitung;
-        hargaTotheader = hargaTotheader + hitung1;
-        qtyallheader = qtyallheader + qtyBarang;
-        discdHeader = discdHeader + hitung2;
-        dischHeader = dischHeader + dischBarang;
-        discnHeader = discnHeader + hitungDiscn;
-        taxnHeader = taxnHeader + double.parse("${element['TAXN']}");
-        biayaHeader = biayaHeader + double.parse("${element['BIAYA']}");
+    for (var element in itemOrderPenjualanCt.sodtSelected) {
+      double hargaBarang = double.parse("${element['HARGA']}");
+      double persenDiskonBarang = double.parse("${element['DISC1']}");
+      double qtyBarang = double.parse("${element['QTY']}");
+      var hitungSubtotal =
+          qtyBarang * (hargaBarang - (hargaBarang * persenDiskonBarang * 0.01));
+      subtotalKeranjang += hitungSubtotal;
+      discdHeader = discdHeader +
+          (double.parse("${element['QTY']}") *
+              double.parse("${element['DISCD']}"));
+      dischHeader = dischHeader +
+          (double.parse("${element['QTY']}") *
+              double.parse("${element['DISCH']}"));
+      allQty += double.parse("${element['QTY']}");
 
-        // update SODT
+      double discdBarang = double.parse("${element['DISCD']}");
+      double dischBarang = double.parse("${element['DISCH']}");
 
-        double hrgSetelahDiskon = finalHitung - dischBarang;
-        double hitungPpnSodt = 0.0;
+      var hitungDiscnJldt = discdBarang + dischBarang;
+      var valueFinalDiscnJldt = hitungDiscnJldt;
 
-        var ongkosSodt = double.parse("${element['BIAYA']}");
-        var discnSodt = hitungDiscnJldt;
-        var ppnSodt = double.parse("${element['TAXN']}");
-        GetDataController().updateSodt(element['NOMOR'], element['NOURUT'],
-            discnSodt, ppnSodt, ongkosSodt);
-      }
-
-      itemOrderPenjualanCt.subtotal.value = subtotalKeranjang;
-      itemOrderPenjualanCt.subtotal.refresh();
-
-      itemOrderPenjualanCt.hrgtotSohd.value = hargaTotheader;
-      itemOrderPenjualanCt.hrgtotSohd.refresh();
-
-      itemOrderPenjualanCt.allQtyBeli.value = qtyallheader;
-      itemOrderPenjualanCt.allQtyBeli.refresh();
-
-      // perhitungan diskon header
-
-      var fltr1 =
-          Utility.persenDiskonHeader("$subtotalKeranjang", "$dischHeader");
-
-      itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text =
-          fltr1.toStringAsFixed(2);
-      itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
-
-      itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text =
-          "${Utility.rupiahFormat("$dischHeader", '')}";
-      itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
-
-      var hargaSetelahDiskonHeader = subtotalKeranjang - dischHeader;
-
-      // perhitungan ppn header
-
-      var hitungPersenPPN = Utility.persenDiskonHeader(
-          "$hargaSetelahDiskonHeader", "$taxnHeader");
-
-      itemOrderPenjualanCt.persenPPNHeaderRincian.value.text =
-          hitungPersenPPN.toStringAsFixed(2);
-      itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
-
-      itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
-          "${Utility.rupiahFormat("$taxnHeader", '')}";
-      itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
-
-      // print('persen ppn $hitungPersenPPN');
-      // print('nominal ppn $taxnHeader');
-
-      // perhitungan biaya ongkos
-
-      itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text =
-          "${Utility.rupiahFormat("$biayaHeader", '')}";
-
-      var hargaNetHeader = hargaSetelahDiskonHeader + taxnHeader + biayaHeader;
-
-      itemOrderPenjualanCt.totalNetto.value = hargaNetHeader;
-      itemOrderPenjualanCt.totalNetto.refresh();
-
-      var fixedTaxn = taxnHeader;
-      var fixedHrgNet = hargaNetHeader;
-
-      GetDataController().updateSohd(
-          dashboardPenjualanCt.nomorSoSelected.value,
-          hargaTotheader,
-          qtyallheader,
-          discdHeader,
-          dischHeader,
-          discnHeader,
-          hitungPersenPPN.toStringAsFixed(2),
-          fixedTaxn,
-          fixedHrgNet);
+      GetDataController()
+          .updateSodt(element['NOMOR'], element['NOURUT'], valueFinalDiscnJldt);
     }
 
+    itemOrderPenjualanCt.subtotal.value =
+        "$subtotalKeranjang" == "NaN" ? 0 : subtotalKeranjang;
+    itemOrderPenjualanCt.subtotal.refresh();
+
+    itemOrderPenjualanCt.allQtyBeli.value = allQty;
+    itemOrderPenjualanCt.allQtyBeli.refresh();
+
+    // diskon header
+
+    double valueDICSH =
+        infoSOHD[0]["DISCH"] == null || infoSOHD[0]["DISCH"] == 0
+            ? dischHeader
+            : infoSOHD[0]["DISCH"].toDouble();
+
+    var fltr1 = Utility.persenDiskonHeader(
+        "${itemOrderPenjualanCt.subtotal.value}", "$valueDICSH");
+
+    print('diskon header persen $fltr1');
+
+    itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text =
+        "$fltr1" == "NaN" ? "0.0" : "$fltr1";
+    itemOrderPenjualanCt.persenDiskonHeaderRincianView.value.text =
+        "$fltr1" == "NaN" ? "0.0" : "$fltr1";
+    itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+    itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
+
+    itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text = "$valueDICSH";
+    itemOrderPenjualanCt.nominalDiskonHeaderRincianView.value.text =
+        valueDICSH.toStringAsFixed(2);
+    // Utility.rupiahFormat("${infoSOHD[0]["DISCH"]}", "");
+    itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+    itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
+
+    // ppn header
+
+    double taxpJLHD = infoSOHD[0]["TAXP"] == null || infoSOHD[0]["TAXP"] == 0
+        ? 0.0
+        : infoSOHD[0]["TAXP"].toDouble();
+
+    if (taxpJLHD > 0.0) {
+      print('perhitungan ppn header jalan disini');
+      itemOrderPenjualanCt.persenPPNHeaderRincian.value.text = "$taxpJLHD";
+      itemOrderPenjualanCt.persenPPNHeaderRincianView.value.text = "$taxpJLHD";
+      itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
+
+      var convert1PPN = Utility.nominalPPNHeaderView(
+          '${itemOrderPenjualanCt.subtotal.value}',
+          itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text,
+          itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
+          convert1PPN.toString();
+      itemOrderPenjualanCt.nominalPPNHeaderRincianView.value.text =
+          convert1PPN.toStringAsFixed(2);
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.nominalPPNHeaderRincianView.refresh();
+    } else {
+      itemOrderPenjualanCt.persenPPNHeaderRincian.value.text =
+          sidebarCt.ppnDefaultCabang.value;
+      itemOrderPenjualanCt.persenPPNHeaderRincianView.value.text =
+          sidebarCt.ppnDefaultCabang.value;
+      itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
+
+      var convert1PPN = Utility.nominalPPNHeaderView(
+          '${itemOrderPenjualanCt.subtotal.value}',
+          itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text,
+          itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
+          convert1PPN.toString();
+      itemOrderPenjualanCt.nominalPPNHeaderRincianView.value.text =
+          convert1PPN.toStringAsFixed(2);
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.nominalPPNHeaderRincianView.refresh();
+    }
+
+    // biaya header
+
+    double valueBiaya =
+        infoSOHD[0]["BIAYA"] == null || infoSOHD[0]["BIAYA"] == 0
+            ? 0.0
+            : infoSOHD[0]["BIAYA"].toDouble();
+
+    var convert1 = Utility.persenDiskonHeader(
+        "${itemOrderPenjualanCt.subtotal.value}", "$valueBiaya");
+
+    var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
+
+    var convert1Charge = Utility.nominalPPNHeaderView(
+        '${itemOrderPenjualanCt.subtotal.value}',
+        itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text,
+        persenBiaya);
+
+    itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text =
+        "$convert1Charge";
+    itemOrderPenjualanCt.nominalOngkosHeaderRincianView.value.text =
+        convert1Charge.toStringAsFixed(2);
+
+    double discnHeader = discdHeader + dischHeader;
+
+    GetDataController().updateSohd(
+        dashboardPenjualanCt.nomorSoSelected.value,
+        itemOrderPenjualanCt.allQtyBeli.value,
+        discdHeader,
+        dischHeader,
+        discnHeader);
+
+    perhitunganHeader();
+
     return Future.value(true);
+  }
+
+  void perhitunganHeader() {
+    // setting header
+    double convertDiskon = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text);
+    double ppnPPN = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+    double convertPPN = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text);
+    double convertBiaya = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text);
+
+    print("nomor so ${dashboardPenjualanCt.nomorSoSelected.value}");
+    print("subtotal ${itemOrderPenjualanCt.subtotal.value}");
+    print("diskon header $convertDiskon");
+    print("ppn header $convertPPN");
+    print("biaya header $convertBiaya");
+
+    itemOrderPenjualanCt.totalNetto.value =
+        (itemOrderPenjualanCt.subtotal.value - convertDiskon) +
+            convertPPN +
+            convertBiaya;
+    itemOrderPenjualanCt.totalNetto.refresh();
+
+    GetDataController().hitungHeader(
+        "SOHD",
+        "SODT",
+        dashboardPenjualanCt.nomorSoSelected.value,
+        "${itemOrderPenjualanCt.subtotal.value}",
+        "$convertDiskon",
+        "$ppnPPN",
+        "$convertPPN",
+        "$convertBiaya");
+
+    itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+    itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+    itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
+    itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
+
+    itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+    itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+    itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
+    itemOrderPenjualanCt.nominalPPNHeaderRincianView.refresh();
+
+    itemOrderPenjualanCt.nominalOngkosHeaderRincian.refresh();
+    itemOrderPenjualanCt.nominalOngkosHeaderRincianView.refresh();
   }
 }

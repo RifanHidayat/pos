@@ -233,10 +233,14 @@ class DetailNotaPenjualanController extends BaseController {
           "${element['GROUP']}${element['KODE']}" ==
           "${dataSelected['GROUP']}${dataSelected['KODE']}");
       barangTerpilih.refresh();
+      if (barangTerpilih.isEmpty) {
+        statusDODTKosong.value = true;
+        statusDODTKosong.refresh();
+      }
     } else {
       ButtonSheetController().validasiButtonSheet("Hapu Barang",
           Text("Yakin hapus barang ini ?"), "hapus_barang_dodt", 'Hapus', () {
-        HapusSodtController().hapusBarangOnce(dataSelected, '');
+        HapusDodtController().hapusBarangOnce(dataSelected, '');
       });
     }
   }
@@ -256,15 +260,6 @@ class DetailNotaPenjualanController extends BaseController {
     double discdHeader = 0.0;
     double dischHeader = 0.0;
     double allQty = 0.0;
-
-    // double subtotalKeranjang = 0.0;
-    // double hargaTotheader = 0.0;
-    // double qtyallheader = 0.0;
-    // double discdHeader = 0.0;
-    // double dischHeader = 0.0;
-    // double discnHeader = 0.0;
-    // double taxnHeader = 0.0;
-    // double biayaHeader = 0.0;
 
     for (var element in dodtSelected) {
       double hargaBarang = double.parse("${element['HARGA']}");
@@ -316,8 +311,12 @@ class DetailNotaPenjualanController extends BaseController {
 
     // diskon header
 
-    var fltr1 = Utility.persenDiskonHeader(
-        "${subtotal.value}", "${infoDOHD[0]["DISCH"]}");
+    double valueDICSH =
+        infoDOHD[0]["DISCH"] == null || infoDOHD[0]["DISCH"] == 0
+            ? dischHeader
+            : infoDOHD[0]["DISCH"].toDouble();
+
+    var fltr1 = Utility.persenDiskonHeader("${subtotal.value}", "$valueDICSH");
 
     print('diskon header persen $fltr1');
 
@@ -327,56 +326,21 @@ class DetailNotaPenjualanController extends BaseController {
     persenDiskonHeaderRincian.refresh();
     persenDiskonHeaderRincianView.refresh();
 
-    nominalDiskonHeaderRincian.value.text = "${infoDOHD[0]["DISCH"]}";
-    nominalDiskonHeaderRincianView.value.text =
-        Utility.rupiahFormat("${infoDOHD[0]["DISCH"]}", "");
+    nominalDiskonHeaderRincian.value.text = "$valueDICSH";
+    nominalDiskonHeaderRincianView.value.text = valueDICSH.toStringAsFixed(2);
     nominalDiskonHeaderRincian.refresh();
     nominalDiskonHeaderRincianView.refresh();
 
     // ppn header
 
-    var taxpJLHD = infoDOHD[0]["TAXP"];
+    double taxpJLHD = infoDOHD[0]["TAXP"] == null || infoDOHD[0]["TAXP"] == 0
+        ? 0.0
+        : infoDOHD[0]["TAXP"].toDouble();
 
-    if (taxpJLHD != null || taxpJLHD != "") {
-      if (double.parse("$taxpJLHD") > 0.0) {
-        print('perhitungan ppn header jalan disini');
-        persenPPNHeaderRincian.value.text = "$taxpJLHD";
-        persenPPNHeaderRincianView.value.text = "$taxpJLHD";
-        persenPPNHeaderRincian.refresh();
-        persenPPNHeaderRincianView.refresh();
-
-        var convert1PPN = Utility.nominalPPNHeaderView(
-            '${subtotal.value}',
-            persenDiskonHeaderRincian.value.text,
-            persenPPNHeaderRincian.value.text);
-
-        nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
-        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
-        nominalPPNHeaderRincian.refresh();
-        nominalPPNHeaderRincianView.refresh();
-      } else {
-        var storageCabang = AppData.cabangSelected;
-        List filter = storageCabang.split("-");
-        persenPPNHeaderRincian.value.text = filter[4];
-        persenPPNHeaderRincianView.value.text = filter[4];
-        persenPPNHeaderRincian.refresh();
-        persenPPNHeaderRincianView.refresh();
-
-        var convert1PPN = Utility.nominalPPNHeaderView(
-            '${subtotal.value}',
-            persenDiskonHeaderRincian.value.text,
-            persenPPNHeaderRincian.value.text);
-
-        nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
-        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
-        nominalPPNHeaderRincian.refresh();
-        nominalPPNHeaderRincianView.refresh();
-      }
-    } else {
-      var storageCabang = AppData.cabangSelected;
-      List filter = storageCabang.split("-");
-      persenPPNHeaderRincian.value.text = filter[4];
-      persenPPNHeaderRincianView.value.text = filter[4];
+    if (taxpJLHD > 0.0) {
+      print('perhitungan ppn header jalan disini');
+      persenPPNHeaderRincian.value.text = "$taxpJLHD";
+      persenPPNHeaderRincianView.value.text = "$taxpJLHD";
       persenPPNHeaderRincian.refresh();
       persenPPNHeaderRincianView.refresh();
 
@@ -385,7 +349,22 @@ class DetailNotaPenjualanController extends BaseController {
           persenDiskonHeaderRincian.value.text,
           persenPPNHeaderRincian.value.text);
 
-      nominalPPNHeaderRincian.value.text = convert1PPN.toStringAsFixed(0);
+      nominalPPNHeaderRincian.value.text = convert1PPN.toString();
+      nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
+      nominalPPNHeaderRincian.refresh();
+      nominalPPNHeaderRincianView.refresh();
+    } else {
+      persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
+      persenPPNHeaderRincianView.value.text = sidebarCt.ppnDefaultCabang.value;
+      persenPPNHeaderRincian.refresh();
+      persenPPNHeaderRincianView.refresh();
+
+      var convert1PPN = Utility.nominalPPNHeaderView(
+          '${subtotal.value}',
+          persenDiskonHeaderRincian.value.text,
+          persenPPNHeaderRincian.value.text);
+
+      nominalPPNHeaderRincian.value.text = convert1PPN.toString();
       nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
       nominalPPNHeaderRincian.refresh();
       nominalPPNHeaderRincianView.refresh();
@@ -393,8 +372,13 @@ class DetailNotaPenjualanController extends BaseController {
 
     // biaya header
 
-    var convert1 = Utility.persenDiskonHeader(
-        "${subtotal.value}", "${infoDOHD[0]["BIAYA"]}");
+    double valueBiaya =
+        infoDOHD[0]["BIAYA"] == null || infoDOHD[0]["BIAYA"] == 0
+            ? 0.0
+            : infoDOHD[0]["BIAYA"].toDouble();
+
+    var convert1 =
+        Utility.persenDiskonHeader("${subtotal.value}", "$valueBiaya");
 
     var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
 
@@ -406,22 +390,9 @@ class DetailNotaPenjualanController extends BaseController {
         convert1Charge.toStringAsFixed(2);
 
     double discnHeader = discdHeader + dischHeader;
-    // print('hasil nominal discd header $discdHeader');
-    // print('hasil nominal disch header $dischHeader');
-    // print('hasil nominal discn header $discnHeader');
 
     GetDataController().updateDohd(dashboardPenjualanCt.nomorDoSelected.value,
         allQtyBeli.value, discdHeader, dischHeader, discnHeader);
-
-    // var nominalFinal = subtotal.value -
-    //     double.parse("${infoDOHD[0]["DISCH"]}") +
-    //     double.parse("${infoDOHD[0]["TAXN"]}") +
-    //     double.parse("${infoDOHD[0]["BIAYA"]}");
-
-    print('harga net ${infoDOHD[0]["HRGNET"]}');
-
-    totalNetto.value = double.parse("${infoDOHD[0]["HRGNET"]}");
-    totalNetto.refresh();
 
     perhitunganHeader();
 
@@ -443,6 +414,10 @@ class DetailNotaPenjualanController extends BaseController {
     print("diskon header $convertDiskon");
     print("ppn header $convertPPN");
     print("biaya header $convertBiaya");
+
+    totalNetto.value =
+        (subtotal.value - convertDiskon) + convertPPN + convertBiaya;
+    totalNetto.refresh();
 
     GetDataController().hitungHeader(
         "DOHD",
@@ -700,8 +675,8 @@ class DetailNotaPenjualanController extends BaseController {
 
   void backValidasi() async {
     UtilsAlert.loadingSimpanData(Get.context!, "Loading...");
-    Future<bool> prosesClose =
-        getDataCt.closeDODH("", dashboardPenjualanCt.nomorDoSelected.value);
+    Future<bool> prosesClose = getDataCt.closePenjualan(
+        "DOHD", "", dashboardPenjualanCt.nomorDoSelected.value, "close_dohd");
     bool hasilClose = await prosesClose;
     if (hasilClose == true) {
       dashboardPenjualanCt.changeMenu(2);

@@ -33,7 +33,9 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
   void initState() {
     controller.timeNow();
     controller.clearAllBuatOrderPenjualan();
-    controller.getDataSales();
+    controller.checkSysdata();
+    controller.getDataSales("load_first");
+    controller.changeStatusBuatPenjualan(widget.dataBuatPenjualan[0]);
     super.initState();
   }
 
@@ -75,10 +77,10 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                   },
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
-                    child: Obx(
-                      () => Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                        child: Column(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                      child: Obx(
+                        () => Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
@@ -100,18 +102,18 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                             SizedBox(
                               height: Utility.medium,
                             ),
-                            widget.dataBuatPenjualan[0] == 3
+                            controller.statusBuatPenjualan.value == 3
                                 ? formNoseri()
                                 : SizedBox(),
-                            widget.dataBuatPenjualan[0] == 3
+                            controller.statusBuatPenjualan.value == 3
                                 ? SizedBox(
                                     height: Utility.medium,
                                   )
                                 : SizedBox(),
-                            widget.dataBuatPenjualan[0] == 3
+                            controller.statusBuatPenjualan.value == 3
                                 ? formPilihData()
                                 : SizedBox(),
-                            widget.dataBuatPenjualan[0] == 3
+                            controller.statusBuatPenjualan.value == 3
                                 ? SizedBox(
                                     height: Utility.medium,
                                   )
@@ -139,11 +141,11 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
               child: Container(
                   height: 50,
                   child: Button2(
-                      textBtn: widget.dataBuatPenjualan[0] == 1
+                      textBtn: controller.statusBuatPenjualan.value == 1
                           ? "Tambah item"
-                          : widget.dataBuatPenjualan[0] == 2
+                          : controller.statusBuatPenjualan.value == 2
                               ? "Detail Nota"
-                              : widget.dataBuatPenjualan[0] == 3
+                              : controller.statusBuatPenjualan.value == 3
                                   ? "Faktur Penjualan"
                                   : "",
                       colorBtn: Utility.primaryDefault,
@@ -165,11 +167,15 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                                 controller.selectedNamePelanggan.value == "") {
                           UtilsAlert.showToast("Lengkapi form terlebih dahulu");
                         } else {
-                          if (widget.dataBuatPenjualan[0] == 1) {
+                          if (controller.statusBuatPenjualan.value == 1) {
                             buatPenjualanCt.getAkhirNomorSo();
-                          } else if (widget.dataBuatPenjualan[0] == 2) {
+                          } else if (controller.statusBuatPenjualan.value ==
+                              2) {
                             buatPenjualanCt.getAkhirNomorDo();
-                          } else if (widget.dataBuatPenjualan[0] == 3) {}
+                          } else if (controller.statusBuatPenjualan.value ==
+                              3) {
+                            buatPenjualanCt.getAkhirNomorSi();
+                          }
                         }
                       })),
             )),
@@ -513,7 +519,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                           child: TextField(
                             cursorColor: Colors.black,
                             controller: controller.noseri1.value,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
                             textInputAction: TextInputAction.done,
                             decoration:
                                 const InputDecoration(border: InputBorder.none),
@@ -548,7 +554,7 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
                           child: TextField(
                             cursorColor: Colors.black,
                             controller: controller.noseri2.value,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
                             textInputAction: TextInputAction.done,
                             decoration:
                                 const InputDecoration(border: InputBorder.none),
@@ -658,68 +664,70 @@ class _BuatOrderPenjualanState extends State<BuatOrderPenjualan> {
   }
 
   Widget formPilihPelanggan() {
-    return SizedBox(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Pelanggan",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 6.0,
-          ),
-          InkWell(
-            onTap: () {
-              globalCt.buttomSheet1(
-                  controller.pelangganList.value,
-                  "Pilih Pelanggan",
-                  "penjualan",
-                  controller.selectedNamePelanggan.value);
-            },
-            child: Container(
-                height: 40,
-                width: MediaQuery.of(Get.context!).size.width,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: Utility.borderStyle1,
-                    border:
-                        Border.all(width: 1.0, color: Utility.borderContainer)),
-                child: Padding(
-                  padding: EdgeInsets.only(left: 8.0, top: 8.0),
-                  child: Text(
-                    "${controller.selectedNamePelanggan.value}",
-                  ),
-                )),
-          ),
-          SizedBox(
-            height: Utility.medium,
-          ),
-          controller.includePPN.value == "Y"
-              ? SizedBox()
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      "Include PPN",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+    return Obx(
+      () => SizedBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Pelanggan",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+              height: 6.0,
+            ),
+            InkWell(
+              onTap: () {
+                globalCt.buttomSheet1(
+                    controller.pelangganList.value,
+                    "Pilih Pelanggan",
+                    "penjualan",
+                    controller.selectedNamePelanggan.value);
+              },
+              child: Container(
+                  height: 40,
+                  width: MediaQuery.of(Get.context!).size.width,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                          width: 1.0, color: Utility.borderContainer)),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.0, top: 8.0),
+                    child: Text(
+                      "${controller.selectedNamePelanggan.value}",
                     ),
-                    SizedBox(
-                      height: 25,
-                      child: Checkbox(
-                        checkColor: Colors.white,
-                        activeColor: Utility.primaryDefault,
-                        value: controller.checkIncludePPN.value,
-                        onChanged: (value) {
-                          controller.checkIncludePPN.value =
-                              !controller.checkIncludePPN.value;
-                        },
+                  )),
+            ),
+            SizedBox(
+              height: Utility.medium,
+            ),
+            controller.includePPN.value == "Y"
+                ? SizedBox()
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Include PPN",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ],
-                ),
-        ],
+                      SizedBox(
+                        height: 25,
+                        child: Checkbox(
+                          checkColor: Colors.white,
+                          activeColor: Utility.primaryDefault,
+                          value: controller.checkIncludePPN.value,
+                          onChanged: (value) {
+                            controller.checkIncludePPN.value =
+                                !controller.checkIncludePPN.value;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+          ],
+        ),
       ),
     );
   }

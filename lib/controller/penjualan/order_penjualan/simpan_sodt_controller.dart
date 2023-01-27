@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
@@ -65,10 +66,45 @@ class SimpanSODTController extends GetxController {
     double hargaJualBarangFilter = 0.0;
     double nominalDiskonFilter = 0.0;
 
-    if (itemOrderPenjualanCt.hargaJualPesanBarang.value.text != "") {
-      hargaJualBarangFilter = Utility.convertStringRpToDouble(
-          itemOrderPenjualanCt.hargaJualPesanBarang.value.text);
+    // check data cabang selected
+    Future<List> getCabang = GetDataController().getSpesifikData(
+        "CABANG",
+        "KODE",
+        sidebarCt.cabangKodeSelectedSide.value,
+        "get_spesifik_data_master");
+    List hasilCabang = await getCabang;
+    int ppnCabangSelected = 0;
+    if (hasilCabang.isNotEmpty) {
+      ppnCabangSelected = hasilCabang[0]['PPN'];
     }
+
+    if (itemOrderPenjualanCt.hargaJualPesanBarang.value.text != "") {
+      var tampungHargaJual1 = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.hargaJualPesanBarang.value.text);
+
+      if (dashboardPenjualanCt.includePPN.value == "Y") {
+        if (ppnCabangSelected > 0) {
+          double hitung1 =
+              tampungHargaJual1 * (100 / (100 + ppnCabangSelected));
+          hargaJualBarangFilter = hitung1;
+        } else {
+          hargaJualBarangFilter = tampungHargaJual1;
+        }
+      } else {
+        if (dashboardPenjualanCt.checkIncludePPN.value == true) {
+          if (ppnCabangSelected > 0) {
+            double hitung1 =
+                tampungHargaJual1 * (100 / (100 + ppnCabangSelected));
+            hargaJualBarangFilter = hitung1;
+          } else {
+            hargaJualBarangFilter = tampungHargaJual1;
+          }
+        } else {
+          hargaJualBarangFilter = tampungHargaJual1;
+        }
+      }
+    }
+
     if (itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text != "") {
       nominalDiskonFilter = Utility.convertStringRpToDouble(
           itemOrderPenjualanCt.nominalDiskonPesanBarang.value.text);
@@ -110,9 +146,9 @@ class SimpanSODTController extends GetxController {
       'sodt_sat': produkSelected[0]['SAT'],
       'sodt_uang': "RP",
       'sodt_kurs': "1",
-      'sodt_harga': hargaJualBarangFilter.toStringAsFixed(2),
-      'sodt_disc1': disc1Final.toStringAsFixed(2),
-      'sodt_discd': nominalDiskonFilter.toStringAsFixed(2),
+      'sodt_harga': hargaJualBarangFilter,
+      'sodt_disc1': disc1Final,
+      'sodt_discd': nominalDiskonFilter,
       'sodt_doe': tanggalDanJam,
       'sodt_toe': jamTransaksi,
       'sodt_loe': tanggalDanJam,
@@ -121,7 +157,7 @@ class SimpanSODTController extends GetxController {
       'sodt_htg': itemOrderPenjualanCt.htgBarangSelected.value,
       'sodt_ptg': "1",
       'sodt_pak': itemOrderPenjualanCt.pakBarangSelected.value,
-      'sodt_hgpak': hargaJualBarangFilter.toStringAsFixed(0),
+      'sodt_hgpak': hargaJualBarangFilter,
     };
     var connect = Api.connectionApi("post", body, "insert_sodt");
     var getValue = await connect;

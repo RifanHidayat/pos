@@ -181,10 +181,16 @@ class NotaPengirimanBarangPesanController extends GetxController {
   }
 
   Future<double> checkOutsSodtSelected(produkSelected) {
+    double outsQty = 0.0;
     var getdata = notaPenjualanCt.sodtTerpilih.firstWhere((element) =>
         "${element['GROUP']}${element['BARANG']}" ==
         "${produkSelected[0]['GROUP']}${produkSelected[0]['KODE']}");
-    double outsQty = double.parse("${getdata['QTY']}");
+    if (produkSelected[0]['QTY'] != 0) {
+      outsQty = double.parse("${getdata['QTY']}");
+    } else {
+      outsQty =
+          double.parse("${getdata['QTY']}") - double.parse("${getdata['QTZ']}");
+    }
     return Future.value(outsQty);
   }
 

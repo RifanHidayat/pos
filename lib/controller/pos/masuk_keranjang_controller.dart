@@ -495,7 +495,7 @@ class MasukKeranjangController extends BaseController {
       print(dashboardCt.listKeranjangArsip.value);
       if (dashboardCt.listKeranjangArsip.value.length <= 9) {
         var valueLast = dashboardCt.listKeranjangArsip.value.last;
-        var getNoKey = valueLast["NOKEY"];
+        var getNoKey = valueLast["NOURUT"];
         var hitung = int.parse(getNoKey) + 1;
         norutKeranjang = "0000$hitung";
       } else if (dashboardCt.listKeranjangArsip.value.length <= 99) {

@@ -7,6 +7,7 @@ import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/detail_nota__pengiriman_controller.dart';
+import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -137,30 +138,9 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                                 contentOpHitungRincian(),
                                 "op_hitung_rincian",
                                 'Simpan', () async {
-                              Future<bool> prosesPerhitunganRincian =
-                                  GetDataController()
-                                      .hitungRincianOrderPenjualan([
-                                dashboardPenjualanCt.nomorSoSelected.value,
-                                itemOrderPenjualanCt.allQtyBeli.value,
-                                itemOrderPenjualanCt
-                                    .nominalDiskonHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .nominalOngkosHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .persenPPNHeaderRincian.value.text,
-                                itemOrderPenjualanCt
-                                    .nominalPPNHeaderRincian.value.text
-                              ]);
-                              bool hasilPerhitungan =
-                                  await prosesPerhitunganRincian;
-                              if (hasilPerhitungan) {
-                                itemOrderPenjualanCt.loadDataSODT();
-                                Get.back();
-                                Get.back();
-                                UtilsAlert.showToast("Berhasil simpan data");
-                              } else {
-                                UtilsAlert.showToast("Rincian gagal dihitung");
-                              }
+                              UtilsAlert.loadingSimpanData(
+                                  context, "Sedang proses...");
+                              hitungHeader();
                             });
                           },
                         ),
@@ -365,12 +345,19 @@ class HeaderRincianOrderPenjualanController extends GetxController {
           .hitungNominalDiskonHeader(
               value, "${itemOrderPenjualanCt.subtotal.value}");
       double hasilInputQty = await prosesInputPersen;
+
       setState(() {
         itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text = value;
         itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text =
-            Utility.rupiahFormat("${hasilInputQty.toDouble()}", '');
+            hasilInputQty.toString();
         itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
         itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+
+        itemOrderPenjualanCt.persenDiskonHeaderRincianView.value.text = value;
+        itemOrderPenjualanCt.nominalDiskonHeaderRincianView.value.text =
+            hasilInputQty.toStringAsFixed(0);
+        itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
+        itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
       });
       if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
         aksiPersenPPN(
@@ -390,6 +377,10 @@ class HeaderRincianOrderPenjualanController extends GetxController {
         itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text =
             hasilInputQty;
         itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+
+        itemOrderPenjualanCt.persenDiskonHeaderRincianView.value.text =
+            hasilInputQty;
+        itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
       });
       if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
         aksiPersenPPN(
@@ -539,10 +530,12 @@ class HeaderRincianOrderPenjualanController extends GetxController {
   void aksiPersenPPN(setState, value) async {
     if (value != "") {
       // convert nominal diskon
-      var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
-          .replaceAll('.', '');
-      var nd2 = nd1.replaceAll(',', '.');
-      var nd3 = double.parse('$nd2');
+      // var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
+      //     .replaceAll('.', '');
+      // var nd2 = nd1.replaceAll(',', '.');
+      // var nd3 = double.parse('$nd2');
+      var nd3 = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text);
 
       Future<double> prosesHitungNominalPPN = PerhitunganCt()
           .hitungNominalPPNHeader(
@@ -551,9 +544,15 @@ class HeaderRincianOrderPenjualanController extends GetxController {
       setState(() {
         itemOrderPenjualanCt.persenPPNHeaderRincian.value.text = value;
         itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text =
-            Utility.rupiahFormat("${hasilNominalPPN.toDouble()}", '');
+            hasilNominalPPN.toString();
         itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
         itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+
+        itemOrderPenjualanCt.persenPPNHeaderRincianView.value.text = value;
+        itemOrderPenjualanCt.nominalPPNHeaderRincianView.value.text =
+            hasilNominalPPN.toStringAsFixed(0);
+        itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
+        itemOrderPenjualanCt.nominalPPNHeaderRincianView.refresh();
       });
     }
   }
@@ -562,10 +561,14 @@ class HeaderRincianOrderPenjualanController extends GetxController {
     if (value != "") {
       String nominalPPN = value.replaceAll(".", "");
       // convert nominal diskon
-      var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
-          .replaceAll('.', '');
-      var nd2 = nd1.replaceAll(',', '.');
-      var nd3 = double.parse('$nd2');
+      // var nd1 = itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text
+      //     .replaceAll('.', '');
+      // var nd2 = nd1.replaceAll(',', '.');
+      // var nd3 = double.parse('$nd2');
+
+      var nd3 = Utility.convertStringRpToDouble(
+          itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text);
+
       Future<String> prosesHitung = PerhitunganCt().hitungPersenPPNHeader(
           double.parse(nominalPPN), itemOrderPenjualanCt.subtotal.value, nd3);
       String hasilHitung = await prosesHitung;
@@ -573,6 +576,9 @@ class HeaderRincianOrderPenjualanController extends GetxController {
       setState(() {
         itemOrderPenjualanCt.persenPPNHeaderRincian.value.text = hasilHitung;
         itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+        itemOrderPenjualanCt.persenPPNHeaderRincianView.value.text =
+            hasilHitung;
+        itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
       });
     }
   }
@@ -685,6 +691,69 @@ class HeaderRincianOrderPenjualanController extends GetxController {
     } else if (valueFocus.value == "nominal_ppn_rincian") {
       aksiNominalPPN(
           setState, itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text);
+    }
+  }
+
+  void hitungHeader() async {
+    double convertDiskon = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text);
+    double ppnPPN = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
+    double convertPPN = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalPPNHeaderRincian.value.text);
+    double convertBiaya = Utility.validasiValueDouble(
+        itemOrderPenjualanCt.nominalOngkosHeaderRincian.value.text);
+
+    print("nomor so ${dashboardPenjualanCt.nomorSoSelected.value}");
+    print("subtotal ${itemOrderPenjualanCt.subtotal.value}");
+    print("diskon header $convertDiskon");
+    print("ppn header $convertPPN");
+    print("biaya header $convertBiaya");
+
+    Future<List> hitungHeader = GetDataController().hitungHeader(
+        "SOHD",
+        "SODT",
+        dashboardPenjualanCt.nomorSoSelected.value,
+        "${itemOrderPenjualanCt.subtotal.value}",
+        "$convertDiskon",
+        "$ppnPPN",
+        "$convertPPN",
+        "$convertBiaya");
+    List hasilHitung = await hitungHeader;
+
+    if (hasilHitung[0] == true) {
+      itemOrderPenjualanCt.persenDiskonHeaderRincian.refresh();
+      itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+      itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
+      itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
+
+      itemOrderPenjualanCt.persenPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.nominalPPNHeaderRincian.refresh();
+      itemOrderPenjualanCt.persenPPNHeaderRincianView.refresh();
+      itemOrderPenjualanCt.nominalPPNHeaderRincianView.refresh();
+
+      itemOrderPenjualanCt.nominalOngkosHeaderRincian.refresh();
+      itemOrderPenjualanCt.nominalOngkosHeaderRincianView.refresh();
+
+      Future<List> updateInformasiSOHD = GetDataController().getSpesifikData(
+          "SOHD",
+          "PK",
+          "${dashboardPenjualanCt.dataSohd[0]['PK']}",
+          "get_spesifik_data_transaksi");
+      List infoSOHD = await updateInformasiSOHD;
+
+      itemOrderPenjualanCt.totalNetto.value =
+          double.parse("${infoSOHD[0]["HRGNET"]}");
+      itemOrderPenjualanCt.totalNetto.refresh();
+
+      dashboardPenjualanCt.loadSOHDSelected();
+
+      OrderPenjualanPesanBarangController()
+          .perhitunganMenyeluruhOrderPenjualan();
+
+      Get.back();
+      Get.back();
+      Get.back();
     }
   }
 }

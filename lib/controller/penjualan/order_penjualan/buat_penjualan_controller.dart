@@ -8,6 +8,7 @@ import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.d
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/detail_nota_pengiriman_barang.dart';
+import 'package:siscom_pos/screen/penjualan/faktur_penjualan_si.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -112,6 +113,10 @@ class BuatPenjualanController extends BaseController {
     var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
 
     var ppnSo = dashboardPenjualanCt.checkIncludePPN.value == false ? "N" : "Y";
+    var termValue =
+        dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text == ""
+            ? "0"
+            : dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text;
 
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
@@ -123,7 +128,7 @@ class BuatPenjualanController extends BaseController {
       'sohd_noref': dashboardPenjualanCt.refrensiBuatOrderPenjualan.value.text,
       'sohd_tanggal': tanggalNow,
       'sohd_tglinv': tanggalNow,
-      'sohd_term': dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text,
+      'sohd_term': termValue,
       'sohd_tgltjp': tanggalNow,
       'sohd_custom': dashboardPenjualanCt.selectedIdPelanggan.value,
       'sohd_wilayah': dashboardPenjualanCt.wilayahCustomerSelected.value,
@@ -150,7 +155,7 @@ class BuatPenjualanController extends BaseController {
 
     if (valueBody['status'] == true) {
       Get.back();
-      UtilsAlert.showToast("SO Berhasil di buat");
+      UtilsAlert.showToast("Order Penjualan Berhasil di buat");
       dashboardPenjualanCt.nomorSoSelected.value = nomorSoFinal;
       dashboardPenjualanCt.nomorSoSelected.refresh();
       Future<bool> prosesGetAllSOHD = dashboardPenjualanCt.getDataAllSOHD();
@@ -260,6 +265,10 @@ class BuatPenjualanController extends BaseController {
     var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
 
     var ppnDo = dashboardPenjualanCt.checkIncludePPN.value == false ? "N" : "Y";
+    var termValue =
+        dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text == ""
+            ? "0"
+            : dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text;
 
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
@@ -270,7 +279,7 @@ class BuatPenjualanController extends BaseController {
       'dohd_noref': dashboardPenjualanCt.refrensiBuatOrderPenjualan.value.text,
       'dohd_tanggal': tanggalNow,
       'dohd_tglinv': tanggalNow,
-      'dohd_term': dashboardPenjualanCt.jatuhTempoBuatOrderPenjualan.value.text,
+      'dohd_term': termValue,
       'dohd_tgltjp': tanggalNow,
       'dohd_custom': dashboardPenjualanCt.selectedIdPelanggan.value,
       'dohd_wilayah': dashboardPenjualanCt.wilayahCustomerSelected.value,
@@ -297,7 +306,7 @@ class BuatPenjualanController extends BaseController {
 
     if (valueBodyNota['status'] == true) {
       Get.back();
-      UtilsAlert.showToast("DO Berhasil di buat");
+      UtilsAlert.showToast("Nota Pengiriman Barang berhasil di buat");
       dashboardPenjualanCt.nomorDoSelected.value = nomorDoFinal;
       dashboardPenjualanCt.nomorDoSelected.refresh();
       Future<bool> prosesGetAllDOHD = dashboardPenjualanCt.getDataAllDOHD();
@@ -341,7 +350,7 @@ class BuatPenjualanController extends BaseController {
 
         var filterNmr1 = lastNomorDo.substring(2);
         var filterNmr2 = int.parse(filterNmr1) + 1;
-        nomorSIFinal = "DO$filterNmr2";
+        nomorSIFinal = "SI$filterNmr2";
       }
 
       var nomorAntriLastFaktur = data[0]['NOMORANTRI'];
@@ -355,7 +364,7 @@ class BuatPenjualanController extends BaseController {
           print('nomor antri tidak valid');
           nomorAntriFinal = "${DateFormat('yyyyMMdd').format(dt)}001";
         } else {
-          print('nomor antri valid');
+          // print('nomor antri valid');
           var ft1 =
               nomorAntriLastFaktur.substring(nomorAntriLastFaktur.length - 3);
           var ft2 = int.parse(ft1) + 1;
@@ -371,9 +380,9 @@ class BuatPenjualanController extends BaseController {
         nomorAntriFinal = "${DateFormat('yyyyMMdd').format(dt)}001";
       }
 
-      print('tanggal $tanggalLastFaktur');
-      print('nomor si $nomorSIFinal');
-      // print('nomor si $nomorCbSIFinal');
+      // print('tanggal $tanggalLastFaktur');
+      // print('nomor si $nomorSIFinal');
+      // print('nomor antri si $nomorAntriFinal');
 
       Future<bool> prosesPenjualan =
           checkNomorCBSI(nomorSIFinal, nomorAntriFinal);
@@ -429,6 +438,11 @@ class BuatPenjualanController extends BaseController {
     var jamTransaksi = "${DateFormat('HH:mm:ss').format(dt)}";
     var dataInformasiSYSUSER = AppData.sysuserInformasi.split("-");
 
+    String statusPilihData =
+        dashboardPenjualanCt.pilihDataSelected.value == "Faktur Penjualan"
+            ? "SI"
+            : "DO";
+
     Map<String, dynamic> body = {
       'database': '${AppData.databaseSelected}',
       'periode': '${AppData.periodeSelected}',
@@ -453,15 +467,41 @@ class BuatPenjualanController extends BaseController {
       'jlhd_loe': tanggalDanJam,
       'jlhd_deo': dataInformasiSYSUSER[0],
       'jlhd_nomorcb': "$nomorCbSIFinal",
+      'jlhd_id1': dataInformasiSYSUSER[0],
       'jlhd_nopj': dashboardPenjualanCt.noseri1.value.text,
       'jlhd_noseri': dashboardPenjualanCt.noseri2.value.text,
       'jlhd_nomorantri': nomorAntriFinal,
-      'jlhd_taxp': ""
+      'jlhd_taxp': 0.0,
+      'jlhd_reftr': statusPilihData
     };
     var connect = Api.connectionApi("post", body, "buat_faktur");
 
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
+
+    if (valueBody['status'] == true) {
+      Get.back();
+      UtilsAlert.showToast("Faktur Penjualan berhasil di buat");
+      dashboardPenjualanCt.nomorFakturPenjualanSelected.value = "";
+      dashboardPenjualanCt.nomoFakturPenjualanCbSelected.value = "";
+
+      Future<bool> prosesGetAllFakturPenjualan =
+          dashboardPenjualanCt.getDataFakturPenjualan();
+      bool hasilGetAll = await prosesGetAllFakturPenjualan;
+      if (hasilGetAll) {
+        if (statusPilihData == "SI") {
+          Get.to(FakturPenjualanSI(dataForm: true),
+              duration: Duration(milliseconds: 500),
+              transition: Transition.rightToLeftWithFade);
+        } else {
+          // Get.to(FakturPenjualanSI(dataForm: true),
+          //     duration: Duration(milliseconds: 500),
+          //     transition: Transition.rightToLeftWithFade);
+        }
+      }
+    } else {
+      getAkhirNomorSi();
+    }
 
     return Future.value(hasilInsertSI);
   }

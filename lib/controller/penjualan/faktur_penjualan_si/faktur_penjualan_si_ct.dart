@@ -1,23 +1,17 @@
-import 'dart:convert';
-
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
-import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
-import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:siscom_pos/utils/widget/modal_popup.dart';
 
-class ItemOrderPenjualanController extends BaseController {
+class FakturPenjualanSIController extends BaseController {
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var getDataCt = Get.put(GetDataController());
   var sidebarCt = Get.put(SidebarController());
@@ -38,9 +32,10 @@ class ItemOrderPenjualanController extends BaseController {
   var persenPPNHeaderRincianView = TextEditingController(text: "0.0").obs;
   var nominalPPNHeaderRincianView = TextEditingController(text: "0.0").obs;
 
-  var nominalOngkosHeaderRincian = TextEditingController(text: "0.0").obs;
-  var nominalOngkosHeaderRincianView = TextEditingController(text: "0.0").obs;
+  var nominalOngkosHeaderRincian = TextEditingController().obs;
+  var nominalOngkosHeaderRincianView = TextEditingController().obs;
 
+  var catatan = TextEditingController().obs;
   var keterangan1 = TextEditingController().obs;
   var keterangan2 = TextEditingController().obs;
   var keterangan3 = TextEditingController().obs;
@@ -50,15 +45,17 @@ class ItemOrderPenjualanController extends BaseController {
 
   var listBarang = [].obs;
   var barangTerpilih = [].obs;
-  var sodtSelected = [].obs;
+  var jldtSelected = [].obs;
+  var listTypeBarang = [].obs;
 
   var statusBack = false.obs;
-  var statusInformasiSo = false.obs;
+  var statusInformasiSI = false.obs;
   var statusEditBarang = false.obs;
-  var statusAksiItemOrderPenjualan = false.obs;
-  var statusSODTKosong = false.obs;
+  var statusAksiItemFakturPenjualan = false.obs;
+  var statusJLDTKosong = false.obs;
 
   var totalPesanBarang = 0.0.obs;
+  var totalPesanBarangNoEdit = 0.0.obs;
   var totalNetto = 0.0.obs;
   var hrgtotSohd = 0.0.obs;
   var subtotal = 0.0.obs;
@@ -68,44 +65,61 @@ class ItemOrderPenjualanController extends BaseController {
   var typeBarangSelected = "".obs;
   var htgBarangSelected = "".obs;
   var pakBarangSelected = "".obs;
+  var typeAksi = "".obs;
+  var includePPN = "".obs;
 
   void getDataBarang(status) async {
     listBarang.value.clear();
     barangTerpilih.value.clear();
-    sodtSelected.value.clear();
+    jldtSelected.value.clear();
     listBarang.refresh();
     barangTerpilih.refresh();
-    sodtSelected.refresh();
-    statusAksiItemOrderPenjualan.value = status;
-    statusAksiItemOrderPenjualan.refresh();
+    jldtSelected.refresh();
+    statusAksiItemFakturPenjualan.value = status;
+    statusAksiItemFakturPenjualan.refresh();
+    checkSysdata();
     Future<List> prosesGetDataBarang = getDataCt.getAllBarang();
     List data = await prosesGetDataBarang;
     if (data.isNotEmpty) {
       listBarang.value = data;
       listBarang.refresh();
       if (status == true) {
-        loadDataSODT();
+        loadDataJLDT();
       } else {
-        statusSODTKosong.value = true;
-        statusSODTKosong.refresh();
+        statusJLDTKosong.value = true;
+        statusJLDTKosong.refresh();
       }
     }
   }
 
-  void loadDataSODT() async {
+  void checkSysdata() {
+    List dataSysdata = AppData.infosysdatacabang!;
+    if (dataSysdata.isNotEmpty) {
+      for (var element in dataSysdata) {
+        if (element.kode == "037") {
+          print('sysdata terpilih ${element.nama}');
+          includePPN.value = element.nama;
+          includePPN.refresh();
+          print('include ppn ${includePPN.value}');
+        }
+      }
+    }
+  }
+
+  void loadDataJLDT() async {
     barangTerpilih.value.clear();
-    sodtSelected.value.clear();
+    jldtSelected.value.clear();
     barangTerpilih.refresh();
-    sodtSelected.refresh();
+    jldtSelected.refresh();
     Future<List> prosesGetDataSODT = getDataCt.getSpesifikData(
-        "SODT",
+        "JLDT",
         "NOMOR",
-        dashboardPenjualanCt.nomorSoSelected.value,
+        dashboardPenjualanCt.nomorFakturPenjualanSelected.value,
         "get_spesifik_data_transaksi");
     List hasilData = await prosesGetDataSODT;
     if (hasilData.isNotEmpty) {
-      sodtSelected.value = hasilData;
-      sodtSelected.refresh();
+      jldtSelected.value = hasilData;
+      jldtSelected.refresh();
       List groupKodeBarang = [];
       for (var element in hasilData) {
         var data = {
@@ -113,7 +127,6 @@ class ItemOrderPenjualanController extends BaseController {
           'KODE': element['BARANG'],
           'NOURUT': element['NOURUT'],
           'qty_beli': element['QTY'],
-          'harga': element['HARGA'],
           'DISC1': element['DISC1'],
           'DISCD': element['DISCD'],
         };
@@ -135,7 +148,7 @@ class ItemOrderPenjualanController extends BaseController {
                 "BARCODE": element["BARCODE"],
                 "TIPE": element["TIPE"],
                 "SAT": element["SAT"],
-                "STDJUAL": element1["harga"],
+                "STDJUAL": element["STDJUAL"],
                 "qty_beli": element1["qty_beli"],
                 "DISC1": element1["DISC1"],
                 "DISCD": element1["DISCD"],
@@ -145,19 +158,18 @@ class ItemOrderPenjualanController extends BaseController {
           }
         }
         tampung = tampung.toSet().toList();
+        print('tampung data $tampung');
         barangTerpilih.value = tampung;
         barangTerpilih.refresh();
-        Future<bool> prosesHitungMenyeluruh =
-            OrderPenjualanPesanBarangController()
-                .perhitunganMenyeluruhOrderPenjualan();
+        Future<bool> prosesHitungMenyeluruh = perhitunganMenyeluruh();
         bool hasilProsesHitung = await prosesHitungMenyeluruh;
-        if (hasilProsesHitung) statusSODTKosong.value = false;
+        if (hasilProsesHitung) statusJLDTKosong.value = false;
         // hitungSubtotal();
       }
     } else {
       var dataUpdate = {
         'column1': 'NOMOR',
-        'cari1': dashboardPenjualanCt.nomorSoSelected.value,
+        'cari1': dashboardPenjualanCt.nomorFakturPenjualanSelected.value,
         'HRGTOT': '0',
         'DISCD': '0',
         'DISCH': '0',
@@ -168,9 +180,9 @@ class ItemOrderPenjualanController extends BaseController {
         'QTY': '0',
         'QTZ': '0',
       };
-      Future<List> prosesUpdateSOHD = GetDataController().editDataGlobal(
-          "SOHD", "edit_data_global_transaksi", "1", dataUpdate);
-      List hasilproses = await prosesUpdateSOHD;
+      Future<List> prosesUpdateJLHD = GetDataController().editDataGlobal(
+          "JLHD", "edit_data_global_transaksi", "1", dataUpdate);
+      List hasilproses = await prosesUpdateJLHD;
       print(hasilproses);
 
       subtotal.value = 0.0;
@@ -185,8 +197,263 @@ class ItemOrderPenjualanController extends BaseController {
       allQtyBeli.value = 0.0;
       allQtyBeli.refresh();
       UtilsAlert.showToast("Tidak ada item yang terpilih");
-      statusSODTKosong.value = true;
+      statusJLDTKosong.value = true;
     }
+  }
+
+  Future<bool> perhitunganMenyeluruh() async {
+    if (jldtSelected.isNotEmpty) {
+      Future<List> updateInformasiJLHD = GetDataController().getSpesifikData(
+          "JLHD",
+          "NOMOR",
+          dashboardPenjualanCt.nomorFakturPenjualanSelected.value,
+          "get_spesifik_data_transaksi");
+      List infoJLHD = await updateInformasiJLHD;
+
+      // perhitungan HRGTOT
+      double subtotalKeranjang = 0.0;
+      double discdHeader = 0.0;
+      double dischHeader = 0.0;
+      double allQty = 0.0;
+
+      for (var element in jldtSelected) {
+        double hargaBarang = double.parse("${element['HARGA']}");
+        double persenDiskonBarang = double.parse("${element['DISC1']}");
+        double qtyBarang = double.parse("${element['QTY']}");
+
+        var hitungSubtotal = qtyBarang *
+            (hargaBarang - (hargaBarang * persenDiskonBarang * 0.01));
+
+        subtotalKeranjang += hitungSubtotal;
+
+        discdHeader = discdHeader +
+            (double.parse("${element['QTY']}") *
+                double.parse("${element['DISCD']}"));
+
+        dischHeader = dischHeader +
+            (double.parse("${element['QTY']}") *
+                double.parse("${element['DISCH']}"));
+
+        allQty += double.parse("${element['QTY']}");
+
+        double discdBarang = double.parse("${element['DISCD']}");
+        double dischBarang = double.parse("${element['DISCH']}");
+
+        var hitungDiscnJldt = discdBarang + dischBarang;
+
+        var valueFinalDiscnJldt = hitungDiscnJldt;
+
+        GetDataController().updateJldt(
+            "${element['PK']}", "${element['NOURUT']}", valueFinalDiscnJldt);
+
+        double qtyJLDT = double.parse("${element["QTY"]}");
+        print('qty dodt $qtyJLDT');
+        print('taxn dodt ${element['TAXN']}');
+        print('biaya dodt ${element['BIAYA']}');
+
+        GetDataController().updateProd3(
+            "${element["NOMOR"]}",
+            "${element["NOURUT"]}",
+            qtyJLDT,
+            valueFinalDiscnJldt,
+            double.parse("${element["TAXN"]}"),
+            double.parse("${element["BIAYA"]}"));
+      }
+
+      // hitung subtotal
+      subtotal.value = "$subtotalKeranjang" == "NaN" ? 0 : subtotalKeranjang;
+      // subtotal.value = subtotalKeranjang;
+      subtotal.refresh();
+      print('hasil subtotal ${subtotal.value}');
+
+      // all qty
+      allQtyBeli.value = allQty;
+      allQtyBeli.refresh();
+
+      // diskon header
+
+      var fltr1 = Utility.persenDiskonHeader(
+          "${subtotal.value}", "${infoJLHD[0]["DISCH"]}");
+
+      print('diskon header persen $fltr1');
+
+      persenDiskonHeaderRincian.value.text =
+          "$fltr1" == "NaN" ? "0.0" : "$fltr1";
+      persenDiskonHeaderRincianView.value.text =
+          "$fltr1" == "NaN" ? "0.0" : "$fltr1";
+      persenDiskonHeaderRincian.refresh();
+      persenDiskonHeaderRincianView.refresh();
+
+      nominalDiskonHeaderRincian.value.text = "${infoJLHD[0]["DISCH"]}";
+      nominalDiskonHeaderRincianView.value.text =
+          infoJLHD[0]["DISCH"].toStringAsFixed(0);
+      nominalDiskonHeaderRincian.refresh();
+      nominalDiskonHeaderRincianView.refresh();
+
+      // ppn header
+
+      var taxpJLHD = infoJLHD[0]["TAXP"];
+
+      if (taxpJLHD != null || taxpJLHD != "") {
+        if (double.parse("$taxpJLHD") > 0.0) {
+          print('perhitungan ppn header jalan disini');
+          persenPPNHeaderRincian.value.text = "$taxpJLHD";
+          persenPPNHeaderRincianView.value.text = "$taxpJLHD";
+          persenPPNHeaderRincian.refresh();
+          persenPPNHeaderRincianView.refresh();
+
+          var convert1PPN = Utility.nominalPPNHeaderView(
+              '${subtotal.value}',
+              persenDiskonHeaderRincian.value.text,
+              persenPPNHeaderRincian.value.text);
+
+          nominalPPNHeaderRincian.value.text = convert1PPN.toString();
+          nominalPPNHeaderRincianView.value.text =
+              convert1PPN.toStringAsFixed(0);
+          nominalPPNHeaderRincian.refresh();
+          nominalPPNHeaderRincianView.refresh();
+        } else {
+          persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
+          persenPPNHeaderRincianView.value.text =
+              sidebarCt.ppnDefaultCabang.value;
+          persenPPNHeaderRincian.refresh();
+          persenPPNHeaderRincianView.refresh();
+
+          var convert1PPN = Utility.nominalPPNHeaderView(
+              '${subtotal.value}',
+              persenDiskonHeaderRincian.value.text,
+              persenPPNHeaderRincian.value.text);
+
+          nominalPPNHeaderRincian.value.text = convert1PPN.toString();
+          nominalPPNHeaderRincianView.value.text =
+              convert1PPN.toStringAsFixed(0);
+          nominalPPNHeaderRincian.refresh();
+          nominalPPNHeaderRincianView.refresh();
+        }
+      } else {
+        persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
+        persenPPNHeaderRincianView.value.text =
+            sidebarCt.ppnDefaultCabang.value;
+        persenPPNHeaderRincian.refresh();
+        persenPPNHeaderRincianView.refresh();
+
+        var convert1PPN = Utility.nominalPPNHeaderView(
+            '${subtotal.value}',
+            persenDiskonHeaderRincian.value.text,
+            persenPPNHeaderRincian.value.text);
+
+        nominalPPNHeaderRincian.value.text = convert1PPN.toString();
+        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
+        nominalPPNHeaderRincian.refresh();
+        nominalPPNHeaderRincianView.refresh();
+      }
+
+      // biaya header
+
+      var convert1 = Utility.persenDiskonHeader(
+          "${subtotal.value}", "${infoJLHD[0]["BIAYA"]}");
+
+      var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
+
+      var convert1Charge = Utility.nominalPPNHeaderView('${subtotal.value}',
+          persenDiskonHeaderRincian.value.text, persenBiaya);
+
+      nominalOngkosHeaderRincian.value.text = "$convert1Charge";
+      nominalOngkosHeaderRincianView.value.text =
+          convert1Charge.toStringAsFixed(0);
+
+      double discnHeader = discdHeader + dischHeader;
+
+      GetDataController().updateJlhd(
+          "${infoJLHD[0]['PK']}",
+          "${allQtyBeli.value}",
+          "$discdHeader",
+          "$dischHeader",
+          "$discnHeader");
+
+      totalNetto.value = double.parse("${infoJLHD[0]["HRGNET"]}");
+      totalNetto.refresh();
+
+      // CHECKING PUTANG
+
+      Future<List> checkingPutang = GetDataController().getSpesifikData(
+          "PUTANG",
+          "NOMOR",
+          "${infoJLHD[0]['NOMOR']}",
+          "get_spesifik_data_transaksi");
+      List prosesCheckPutang = await checkingPutang;
+
+      if (prosesCheckPutang.isEmpty) {
+        var dataInsert = [
+          dashboardPenjualanCt.selectedIdSales.value,
+          dashboardPenjualanCt.selectedIdPelanggan.value,
+          dashboardPenjualanCt.wilayahCustomerSelected.value,
+          "${infoJLHD[0]['NOMOR']}",
+          "${infoJLHD[0]['NOMORCB']}",
+          "${infoJLHD[0]['NOMOR']}",
+          sidebarCt.cabangKodeSelectedSide.value,
+          totalNetto.value,
+          0,
+          totalNetto.value,
+        ];
+
+        GetDataController().insertPutang(dataInsert);
+      } else {
+        var dataUpdate = {
+          'column1': 'NOMOR',
+          'cari1': "${infoJLHD[0]['NOMOR']}",
+          'DEBE': totalNetto.value,
+          'SALDO': totalNetto.value,
+        };
+        Future<List> prosesUpdateJLHD = GetDataController().editDataGlobal(
+            "PUTANG", "edit_data_global_transaksi", "1", dataUpdate);
+        List hasilproses = await prosesUpdateJLHD;
+        print('hasil update putang $hasilproses');
+      }
+
+      perhitunganHeader();
+    }
+    return Future.value(true);
+  }
+
+  void perhitunganHeader() {
+    // setting header
+    double convertDiskon =
+        Utility.validasiValueDouble(nominalDiskonHeaderRincian.value.text);
+    double ppnPPN =
+        Utility.validasiValueDouble(persenPPNHeaderRincian.value.text);
+    double convertPPN =
+        Utility.validasiValueDouble(nominalPPNHeaderRincian.value.text);
+    double convertBiaya =
+        Utility.validasiValueDouble(nominalOngkosHeaderRincian.value.text);
+
+    print("subtotal ${subtotal.value}");
+    print("diskon header $convertDiskon");
+    print("ppn header $convertPPN");
+    print("biaya header $convertBiaya");
+
+    GetDataController().hitungHeader(
+        "JLHD",
+        "JLDT",
+        dashboardPenjualanCt.nomorFakturPenjualanSelected.value,
+        "${subtotal.value}",
+        "$convertDiskon",
+        "$ppnPPN",
+        "$convertPPN",
+        "$convertBiaya");
+
+    persenDiskonHeaderRincian.refresh();
+    nominalDiskonHeaderRincian.refresh();
+    persenDiskonHeaderRincianView.refresh();
+    nominalDiskonHeaderRincianView.refresh();
+
+    persenPPNHeaderRincian.refresh();
+    nominalPPNHeaderRincian.refresh();
+    persenPPNHeaderRincianView.refresh();
+    nominalPPNHeaderRincianView.refresh();
+
+    nominalOngkosHeaderRincian.refresh();
+    nominalOngkosHeaderRincianView.refresh();
   }
 
   void showDialog() {
@@ -220,12 +487,12 @@ class ItemOrderPenjualanController extends BaseController {
 
   void backValidasi() async {
     UtilsAlert.loadingSimpanData(Get.context!, "Loading...");
-    Future<bool> prosesClose = getDataCt.closePenjualan(
-        "SOHD", "", dashboardPenjualanCt.nomorSoSelected.value, "close_sohd");
+    Future<bool> prosesClose = getDataCt.closePenjualan("JLHD", "",
+        dashboardPenjualanCt.nomorFakturPenjualanSelected.value, "close_jlhd");
     bool hasilClose = await prosesClose;
     if (hasilClose == true) {
-      dashboardPenjualanCt.getDataAllSOHD();
-      if (statusAksiItemOrderPenjualan.value) {
+      dashboardPenjualanCt.getDataFakturPenjualan();
+      if (statusAksiItemFakturPenjualan.value) {
         Get.back();
         Get.back();
         Get.back();
@@ -249,7 +516,7 @@ class ItemOrderPenjualanController extends BaseController {
         .toList();
     if (editData.isNotEmpty) {
       statusEditBarang.value = true;
-      OrderPenjualanPesanBarangController().validasiEditBarang(editData);
+      // OrderPenjualanPesanBarangController().validasiEditBarang(editData);
     } else {
       UtilsAlert.showToast("Gagal edit data");
     }
@@ -264,7 +531,7 @@ class ItemOrderPenjualanController extends BaseController {
           dashboardPenjualanCt.nomorSoSelected.value, nourut);
       bool hasilHapus = await prosesHapusSODT;
       if (hasilHapus) {
-        loadDataSODT();
+        loadDataJLDT();
         Get.back();
         Get.back();
         UtilsAlert.showToast("Berhasil hapus barang");

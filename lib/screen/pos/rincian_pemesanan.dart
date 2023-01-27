@@ -1113,7 +1113,7 @@ class _RincianPemesananState extends State<RincianPemesanan> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Service Charger",
+                      "Service Charge",
                       style: TextStyle(
                           fontSize: Utility.semiMedium,
                           color: Utility.greyLight300),

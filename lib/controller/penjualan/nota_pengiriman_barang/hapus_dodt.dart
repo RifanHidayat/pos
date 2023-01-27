@@ -10,7 +10,7 @@ import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
 
-class HapusSodtController extends BaseController {
+class HapusDodtController extends BaseController {
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var sidebarCt = Get.put(SidebarController());
   var notaPengirimanBarangCt = Get.put(DetailNotaPenjualanController());
@@ -75,20 +75,22 @@ class HapusSodtController extends BaseController {
       print('hasil update sohd $hasilEditSohd');
 
       if (hasilEditSohd) {
-        notaPengirimanBarangCt.sohdTerpilih.clear();
-        notaPengirimanBarangCt.sodtTerpilih.clear();
-        notaPengirimanBarangCt.barangTerpilih.clear();
-        notaPengirimanBarangCt.dodtSelected.clear();
+        notaPengirimanBarangCt.barangTerpilih.removeWhere((element) =>
+            "${element['GROUP']}${element['KODE']}" ==
+            "${dataSelected['GROUP']}${dataSelected['KODE']}");
+        notaPengirimanBarangCt.perhitunganMenyeluruhDO();
 
-        notaPengirimanBarangCt.sohdTerpilih.refresh();
-        notaPengirimanBarangCt.sodtTerpilih.refresh();
-        notaPengirimanBarangCt.barangTerpilih.refresh();
-        notaPengirimanBarangCt.dodtSelected.refresh();
+        notaPengirimanBarangCt.dodtSelected.removeWhere((element) =>
+            "${element['GROUP']}${element['BARANG']}" ==
+            "${dataSelected['GROUP']}${dataSelected['KODE']}");
+        notaPengirimanBarangCt.perhitunganMenyeluruhDO();
+
+        notaPengirimanBarangCt.perhitunganMenyeluruhDO();
+
         Get.back();
         Get.back();
         UtilsAlert.showToast("Berhasil hapus barang");
         prosesHapusDodt = true;
-        notaPengirimanBarangCt.startload(true);
       } else {
         UtilsAlert.showToast("Gagal update order penjualan");
       }

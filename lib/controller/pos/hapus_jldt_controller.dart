@@ -153,38 +153,32 @@ class HapusJldtController extends BaseController {
       AppData.noFaktur = filter;
     }
     dashboardCt.startLoad('hapus_faktur');
-    if (AppData.noFaktur != "") {
-      // dashboardCt.checkingData();
-    } else {
-      dashboardCt.nomorFaktur.value = "-";
-      dashboardCt.primaryKeyFaktur.value = "";
-      dashboardCt.kodePelayanSelected.value = "";
-      dashboardCt.customSelected.value = "";
-      dashboardCt.jumlahItemDikeranjang.value = 0;
-      dashboardCt.totalNominalDikeranjang.value = 0;
-      dashboardCt.persenDiskonPesanBarang.value.text = "0.0";
-      dashboardCt.hargaDiskonPesanBarang.value.text = "0.0";
-      dashboardCt.persenDiskonPesanBarangView.value.text = "0.0";
-      dashboardCt.hargaDiskonPesanBarangView.value.text = "0.0";
-      dashboardCt.diskonHeader.value = 0.0;
-      dashboardCt.allQtyJldt.value = 0;
-      dashboardCt.listKeranjang.value.clear();
-      dashboardCt.listKeranjangArsip.value.clear();
 
-      dashboardCt.ppnPesan.value.text = "0.0";
-      dashboardCt.ppnHarga.value.text = "0.0";
-      dashboardCt.ppnPesanView.value.text = "0.0";
-      dashboardCt.ppnHargaView.value.text = "0.0";
+    dashboardCt.nomorFaktur.value = "-";
+    dashboardCt.primaryKeyFaktur.value = "";
+    dashboardCt.jumlahItemDikeranjang.value = 0;
+    dashboardCt.totalNominalDikeranjang.value = 0;
+    dashboardCt.persenDiskonPesanBarang.value.text = "0.0";
+    dashboardCt.hargaDiskonPesanBarang.value.text = "0.0";
+    dashboardCt.persenDiskonPesanBarangView.value.text = "0.0";
+    dashboardCt.hargaDiskonPesanBarangView.value.text = "0.0";
+    dashboardCt.diskonHeader.value = 0.0;
+    dashboardCt.allQtyJldt.value = 0;
+    dashboardCt.listKeranjang.value.clear();
+    dashboardCt.listKeranjangArsip.value.clear();
 
-      dashboardCt.serviceChargePesan.value.text = "0.0";
-      dashboardCt.serviceChargeHarga.value.text = "0.0";
-      dashboardCt.serviceChargePesanView.value.text = "0.0";
-      dashboardCt.serviceChargeHargaView.value.text = "0.0";
+    dashboardCt.ppnPesan.value.text = "0.0";
+    dashboardCt.ppnHarga.value.text = "0.0";
+    dashboardCt.ppnPesanView.value.text = "0.0";
+    dashboardCt.ppnHargaView.value.text = "0.0";
 
-      refrehVariabel();
-      dashboardCt.getKelompokBarang('');
-      // dashboardCt.arsipController.startLoad();
-    }
+    dashboardCt.serviceChargePesan.value.text = "0.0";
+    dashboardCt.serviceChargeHarga.value.text = "0.0";
+    dashboardCt.serviceChargePesanView.value.text = "0.0";
+    dashboardCt.serviceChargeHargaView.value.text = "0.0";
+
+    refrehVariabel();
+    dashboardCt.getKelompokBarang('');
   }
 
   void refrehVariabel() {
