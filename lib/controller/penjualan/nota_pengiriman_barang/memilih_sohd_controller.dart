@@ -50,25 +50,26 @@ class MemilihSOHDController extends BaseController {
     // tampung group dan kode barang
     print('terpilihhhh sodt $detailSODT');
     List tampungGroupKode = [];
-    for (var element in detailSODT) {
-      // int hitung = element["QTY"] - element["QTZ"];
-      // bool statusSelected = hitung > 0 ? true : false;
-      // if (statusSelected) {
-      //   var data = {
-      //     "GROUP": element["GROUP"],
-      //     "KODE": element["BARANG"],
-      //   };
-      //   tampungGroupKode.add(data);
-      // }
-      var data = {
-        "GROUP": element["GROUP"],
-        "KODE": element["BARANG"],
-      };
-      tampungGroupKode.add(data);
+    if (detailDODT.isNotEmpty) {
+      for (var element in detailSODT) {
+        var data = {
+          "GROUP": element["GROUP"],
+          "KODE": element["BARANG"],
+        };
+        tampungGroupKode.add(data);
+      }
+    } else {
+      for (var element in detailSODT) {
+        bool statusSelected = element["QTZ"] == 0 ? true : false;
+        if (statusSelected) {
+          var data = {
+            "GROUP": element["GROUP"],
+            "KODE": element["BARANG"],
+          };
+          tampungGroupKode.add(data);
+        }
+      }
     }
-
-    print('list tampung group kode $tampungGroupKode');
-
     if (tampungGroupKode.isNotEmpty) {
       // proses cari barang sesuai group dan kode
       Future<List> cariBarangNotaPengiriman =
@@ -78,7 +79,9 @@ class MemilihSOHDController extends BaseController {
       // validasi data final
 
       print('hasil proses barang ${hasilProsesCariBarang.length}');
-      print('detail sodt ${detailSODT.length}');
+      for (var er in detailSODT) {
+        print("test data ${er["GROUP"]}-${er["BARANG"]}-${er["NOMOR"]}");
+      }
 
       Future<List> prosesBarang1 =
           checkingBarang(hasilProsesCariBarang, detailSODT);
@@ -86,13 +89,18 @@ class MemilihSOHDController extends BaseController {
 
       if (detailDODT.isNotEmpty) {
         Future<List> prosesBarang2 =
-            checkingBarang2(dataFinalBarangSelected, detailDODT);
+            checkingBarang2(hasilProsesCariBarang, detailDODT);
         List dataFinalBarangSelected2 = await prosesBarang2;
         prosesFinal(status, dataFinalBarangSelected2);
       } else {
         print('masuk sini dodt kosong');
         prosesFinal(status, dataFinalBarangSelected);
       }
+    } else {
+      UtilsAlert.showToast("Data sudah outstanding");
+      Get.back();
+      Get.back();
+      Get.back();
     }
   }
 
@@ -108,75 +116,86 @@ class MemilihSOHDController extends BaseController {
   }
 
   Future<List> checkingBarang(hasilProsesCariBarang, detailSODT) {
-    List tampungData = [];
-    List filter = [];
-    for (var element in hasilProsesCariBarang) {
-      for (var element1 in detailSODT) {
-        if ("${element['GROUP']}${element['KODE']}" ==
-            "${element1['GROUP']}${element1['BARANG']}") {
-          filter.add("${element['GROUP']}${element['KODE']}");
-          var data = {
-            "GROUP": element["GROUP"],
-            "KODE": element["KODE"],
-            "NOURUT": element1["NOURUT"],
-            "INISIAL": element["INISIAL"],
-            "INGROUP": element["INGROUP"],
-            "NAMA": element["NAMA"],
-            "BARCODE": element["BARCODE"],
-            "TIPE": element["TIPE"],
-            "SAT": element["SAT"],
-            "STDJUAL": element["STDJUAL"],
-            "qty_beli": 0,
-            "DISC1": element1["DISC1"],
-            "DISCD": element1["DISCD"],
-          };
-          tampungData.add(data);
-        }
+    List<String> filterSODT = [];
+    for (var element1 in detailSODT) {
+      bool statusSelected = element1["QTZ"] == 0 ? true : false;
+      if (statusSelected) {
+        String validasiData =
+            "${element1['GROUP']}-${element1['BARANG']}-${element1['NOURUT']}-${element1['NOMOR']}-${element1['DISC1']}-${element1['DISCD']}";
+        filterSODT.add(validasiData);
       }
     }
-    filter = filter.toSet().toList();
+
+    // filter data barang
     List dataFinal = [];
-    for (var dataFilter in filter) {
-      var data1 = tampungData.firstWhere(
-          (element) => "${element['GROUP']}${element['KODE']}" == dataFilter);
-      dataFinal.add(data1);
+    for (var el in filterSODT) {
+      List getFilter = el.split("-");
+      var getRowBarang = hasilProsesCariBarang.firstWhere((element) =>
+          "${element['GROUP']}${element['KODE']}" ==
+          "${getFilter[0]}${getFilter[1]}");
+      var data = {
+        "GROUP": getFilter[0],
+        "KODE": getFilter[1],
+        "NOURUT": getFilter[2],
+        "NAMA": getRowBarang["NAMA"],
+        "NOMOR_SO": getFilter[3],
+        "TIPE": getRowBarang["TIPE"],
+        "SAT": getRowBarang["SAT"],
+        "STDJUAL": getRowBarang["STDJUAL"],
+        "qty_beli": 0,
+        "DISC1": getFilter[4],
+        "DISCD": getFilter[5],
+      };
+      dataFinal.add(data);
     }
+
     return Future.value(dataFinal);
   }
 
   Future<List> checkingBarang2(dataFinalBarangSelected, detailDODT) {
-    List tampungData = [];
-    List groupKodeSelected = [];
-    for (var element in dataFinalBarangSelected) {
-      for (var element1 in detailDODT) {
-        if ("${element['GROUP']}${element['KODE']}" ==
-            "${element1['GROUP']}${element1['BARANG']}") {
-          groupKodeSelected.add("${element["GROUP"]}${element["KODE"]}");
-          var data = {
-            "GROUP": element["GROUP"],
-            "KODE": element["KODE"],
-            "NOURUT": element1["NOURUT"],
-            "INISIAL": element["INISIAL"],
-            "INGROUP": element["INGROUP"],
-            "NAMA": element["NAMA"],
-            "BARCODE": element["BARCODE"],
-            "TIPE": element["TIPE"],
-            "SAT": element1["SAT"],
-            "STDJUAL": element1["HARGA"],
-            "qty_beli": element1["QTY"],
-            "DISC1": element1["DISC1"],
-            "DISCD": element1["DISCD"],
-          };
-          tampungData.add(data);
-        }
+    // filter data barang
+    List dataFinal = [];
+    String nomorSO = "";
+    for (var el in dataFinalBarangSelected) {
+      List getRowBarang = detailDODT
+          .where((element) =>
+              "${element['GROUP']}${element['BARANG']}" ==
+              "${el['GROUP']}${el['KODE']}")
+          .toList();
+      if (getRowBarang.isNotEmpty) {
+        nomorSO = getRowBarang[0]['NOXX'];
+        var data = {
+          "GROUP": getRowBarang[0]['GROUP'],
+          "KODE": getRowBarang[0]['BARANG'],
+          "NOURUT": getRowBarang[0]['NOURUT'],
+          "NAMA": el['NAMA'],
+          "NOMOR_SO": getRowBarang[0]['NOXX'],
+          "TIPE": el['TIPE'],
+          "SAT": el['SAT'],
+          "STDJUAL": getRowBarang[0]['HARGA'],
+          "qty_beli": getRowBarang[0]['QTY'],
+          "DISC1": getRowBarang[0]['DISC1'],
+          "DISCD": getRowBarang[0]['DISCD'],
+        };
+        dataFinal.add(data);
+      } else {
+        var data = {
+          "GROUP": el['GROUP'],
+          "KODE": el['KODE'],
+          "NOURUT": "0000",
+          "NAMA": el['NAMA'],
+          "NOMOR_SO": nomorSO,
+          "TIPE": el['TIPE'],
+          "SAT": el['SAT'],
+          "STDJUAL": el['STDJUAL'],
+          "qty_beli": 0,
+          "DISC1": 0,
+          "DISCD": 0,
+        };
+        dataFinal.add(data);
       }
     }
-    for (var el in groupKodeSelected) {
-      dataFinalBarangSelected.removeWhere(
-          (dataBarang) => "${dataBarang['GROUP']}${dataBarang['KODE']}" == el);
-    }
-    List hasilAll = tampungData + dataFinalBarangSelected;
 
-    return Future.value(hasilAll);
+    return Future.value(dataFinal);
   }
 }

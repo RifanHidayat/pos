@@ -605,17 +605,18 @@ class _DetailNotaPengirimanBarangState
           )
         : ListView.builder(
             physics: BouncingScrollPhysics(),
-            itemCount: controller.barangTerpilih.value.length,
+            itemCount: controller.barangTerpilih.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
-              var namaBarang = controller.barangTerpilih.value[index]["NAMA"];
-              var hargaJual = controller.barangTerpilih.value[index]["STDJUAL"];
-              var qtyBeli = controller.barangTerpilih.value[index]["qty_beli"];
-              var disc1 = controller.barangTerpilih.value[index]["DISC1"];
-              var discd = controller.barangTerpilih.value[index]["DISCD"];
-              var group = controller.barangTerpilih.value[index]["GROUP"];
-              var kode = controller.barangTerpilih.value[index]["KODE"];
-              var nourut = controller.barangTerpilih.value[index]["NOURUT"];
+              var namaBarang = controller.barangTerpilih[index]["NAMA"];
+              var hargaJual = controller.barangTerpilih[index]["STDJUAL"];
+              var qtyBeli = controller.barangTerpilih[index]["qty_beli"];
+              var disc1 = controller.barangTerpilih[index]["DISC1"];
+              var discd = controller.barangTerpilih[index]["DISCD"];
+              var nomorSO = controller.barangTerpilih[index]["NOMOR_SO"];
+              var group = controller.barangTerpilih[index]["GROUP"];
+              var kode = controller.barangTerpilih[index]["KODE"];
+              var nourut = controller.barangTerpilih[index]["NOURUT"];
               double hargaTotalBarang = Utility.hitungTotalPembelianBarang(
                   "$hargaJual", "$qtyBeli", "$discd");
               int filterTotalBarang = hargaTotalBarang.toInt();
@@ -651,7 +652,7 @@ class _DetailNotaPengirimanBarangState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "$namaBarang",
+                      "$namaBarang - $nomorSO",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IntrinsicHeight(
@@ -667,7 +668,7 @@ class _DetailNotaPengirimanBarangState
                                   child: Text(
                                       "${Utility.rupiahFormat('$hargaJual', 'with_rp')} x $qtyBeli"),
                                 ),
-                                disc1 == 0
+                                disc1 == 0 || disc1 == "0"
                                     ? SizedBox()
                                     : Expanded(
                                         child: Text(
