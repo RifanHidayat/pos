@@ -65,6 +65,7 @@ class HeaderRincianOrderPenjualanController extends GetxController {
                         SizedBox(
                           height: Utility.medium,
                         ),
+                        // WIDGET SUBTOTAL
                         Container(
                           decoration: BoxDecoration(
                               color: Utility.primaryLight50,
@@ -345,6 +346,7 @@ class HeaderRincianOrderPenjualanController extends GetxController {
           .hitungNominalDiskonHeader(
               value, "${itemOrderPenjualanCt.subtotal.value}");
       double hasilInputQty = await prosesInputPersen;
+      print(hasilInputQty);
 
       setState(() {
         itemOrderPenjualanCt.persenDiskonHeaderRincian.value.text = value;
@@ -359,7 +361,8 @@ class HeaderRincianOrderPenjualanController extends GetxController {
         itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
         itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
       });
-      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
+      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "" ||
+          itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "0") {
         aksiPersenPPN(
             setState, itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
       }
@@ -381,8 +384,17 @@ class HeaderRincianOrderPenjualanController extends GetxController {
         itemOrderPenjualanCt.persenDiskonHeaderRincianView.value.text =
             hasilInputQty;
         itemOrderPenjualanCt.persenDiskonHeaderRincianView.refresh();
+
+        itemOrderPenjualanCt.nominalDiskonHeaderRincian.value.text =
+            value.replaceAll(".", "");
+        itemOrderPenjualanCt.nominalDiskonHeaderRincian.refresh();
+
+        itemOrderPenjualanCt.nominalDiskonHeaderRincianView.value.text =
+            value.replaceAll(".", "");
+        itemOrderPenjualanCt.nominalDiskonHeaderRincianView.refresh();
       });
-      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "") {
+      if (itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "" ||
+          itemOrderPenjualanCt.persenPPNHeaderRincian.value.text != "0") {
         aksiPersenPPN(
             setState, itemOrderPenjualanCt.persenPPNHeaderRincian.value.text);
       }

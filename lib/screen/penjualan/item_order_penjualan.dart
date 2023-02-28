@@ -714,7 +714,7 @@ class _ItemOrderPenjualanState extends State<ItemOrderPenjualan> {
                             padding: EdgeInsets.all(3.0),
                             child: Center(
                               child: Text(
-                                "${controller.persenDiskonHeaderRincianView.value.text}%",
+                                "${Utility.rupiahFormat(controller.persenDiskonHeaderRincianView.value.text, '')}%",
                                 style: TextStyle(
                                     fontSize: Utility.small,
                                     color: Colors.green),
