@@ -15,7 +15,7 @@ class HapusDodtController extends BaseController {
   var sidebarCt = Get.put(SidebarController());
   var notaPengirimanBarangCt = Get.put(DetailNotaPenjualanController());
 
-  Future<bool> hapusFakturDanJldt(nomor) async {
+  Future<bool> hapusDohdDodt(nomor) async {
     setBusy();
     UtilsAlert.loadingSimpanData(Get.context!, "Hapus data");
 
