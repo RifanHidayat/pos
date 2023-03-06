@@ -32,6 +32,7 @@ class SimpanNotaPengirimanController extends GetxController {
 
     if (jumlahPesanFinal <= 0) {
       UtilsAlert.showToast("Gagal simpan barang");
+      Get.back();
     } else {
       double qtxDODT =
           double.parse('${dataSODTSelected['QTY']}') - jumlahPesanFinal;

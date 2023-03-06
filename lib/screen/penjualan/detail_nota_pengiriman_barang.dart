@@ -764,7 +764,7 @@ class _DetailNotaPengirimanBarangState
             Expanded(
               flex: 30,
               child: Text(
-                "Rp${controller.nominalDiskonHeaderRincianView.value.text}",
+                "${Utility.rupiahFormat(controller.nominalDiskonHeaderRincianView.value.text, 'with_rp')}",
                 textAlign: TextAlign.right,
               ),
             )

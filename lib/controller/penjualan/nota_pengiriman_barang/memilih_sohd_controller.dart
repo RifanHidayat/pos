@@ -29,10 +29,13 @@ class MemilihSOHDController extends BaseController {
           ? []
           : detailNotaPengirimanCt.dodtSelected;
       if (hasilProsesSODT.isNotEmpty) {
-        if (detailNotaPengirimanCt.sodtTerpilih.isEmpty) {
-          detailNotaPengirimanCt.sodtTerpilih.value = hasilProsesSODT;
-        } else {
-          for (var element in hasilProsesSODT) {
+        for (var element in hasilProsesSODT) {
+          List checkingData = detailNotaPengirimanCt.sodtTerpilih
+              .where((check) =>
+                  "${check['NOMOR']}${check['NOURUT']}" ==
+                  "${element["NOMOR"]}${element["NOURUT"]}")
+              .toList();
+          if (checkingData.isEmpty) {
             detailNotaPengirimanCt.sodtTerpilih.add(element);
           }
         }
@@ -48,54 +51,63 @@ class MemilihSOHDController extends BaseController {
 
   void cariBarangProses1(List detailSODT, List detailDODT, status) async {
     // tampung group dan kode barang
-    print('terpilihhhh sodt $detailSODT');
+    // print('terpilihhhh sodt ${detailSODT.length}');
     List tampungGroupKode = [];
-    if (detailDODT.isNotEmpty) {
-      for (var element in detailSODT) {
+    for (var element in detailSODT) {
+      bool statusSelected = element["QTZ"] == 0 ? true : false;
+      if (statusSelected) {
         var data = {
           "GROUP": element["GROUP"],
           "KODE": element["BARANG"],
         };
         tampungGroupKode.add(data);
       }
-    } else {
-      for (var element in detailSODT) {
-        bool statusSelected = element["QTZ"] == 0 ? true : false;
-        if (statusSelected) {
-          var data = {
-            "GROUP": element["GROUP"],
-            "KODE": element["BARANG"],
-          };
-          tampungGroupKode.add(data);
-        }
-      }
     }
+    // if (detailDODT.isNotEmpty) {
+    //   for (var element in detailSODT) {
+    //     var data = {
+    //       "GROUP": element["GROUP"],
+    //       "KODE": element["BARANG"],
+    //     };
+    //     tampungGroupKode.add(data);
+    //   }
+    // } else {
+    //   for (var element in detailSODT) {
+    //     bool statusSelected = element["QTZ"] == 0 ? true : false;
+    //     if (statusSelected) {
+    //       var data = {
+    //         "GROUP": element["GROUP"],
+    //         "KODE": element["BARANG"],
+    //       };
+    //       tampungGroupKode.add(data);
+    //     }
+    //   }
+    // }
     if (tampungGroupKode.isNotEmpty) {
       // proses cari barang sesuai group dan kode
       Future<List> cariBarangNotaPengiriman =
           GetDataController().cariBarangNotaPengiriman(tampungGroupKode);
       List hasilProsesCariBarang = await cariBarangNotaPengiriman;
 
-      // validasi data final
+      // // validasi data final
 
-      print('hasil proses barang ${hasilProsesCariBarang.length}');
-      for (var er in detailSODT) {
-        print("test data ${er["GROUP"]}-${er["BARANG"]}-${er["NOMOR"]}");
-      }
+      // print('hasil proses barang ${hasilProsesCariBarang.length}');
 
       Future<List> prosesBarang1 =
           checkingBarang(hasilProsesCariBarang, detailSODT);
       List dataFinalBarangSelected = await prosesBarang1;
 
-      if (detailDODT.isNotEmpty) {
-        Future<List> prosesBarang2 =
-            checkingBarang2(hasilProsesCariBarang, detailDODT);
-        List dataFinalBarangSelected2 = await prosesBarang2;
-        prosesFinal(status, dataFinalBarangSelected2);
-      } else {
-        print('masuk sini dodt kosong');
-        prosesFinal(status, dataFinalBarangSelected);
-      }
+      prosesFinal(status, dataFinalBarangSelected);
+
+      // if (detailDODT.isNotEmpty) {
+      //   Future<List> prosesBarang2 =
+      //       checkingBarang2(hasilProsesCariBarang, detailDODT);
+      //   List dataFinalBarangSelected2 = await prosesBarang2;
+      //   prosesFinal(status, dataFinalBarangSelected2);
+      // } else {
+      //   print('masuk sini dodt kosong');
+      //   prosesFinal(status, dataFinalBarangSelected);
+      // }
     } else {
       UtilsAlert.showToast("Data sudah outstanding");
       Get.back();

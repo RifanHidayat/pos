@@ -146,7 +146,11 @@ class HeaderRincianNotaPengirimanController extends GetxController {
                               'Simpan', () async {
                             UtilsAlert.loadingSimpanData(
                                 context, "Sedang proses...");
-                            hitungHeader();
+                            // hitungHeader();
+                            notaPengirimanCt.perhitunganMenyeluruhDO();
+                            Get.back();
+                            Get.back();
+                            Get.back();
                           });
                         },
                       ),
@@ -714,49 +718,49 @@ class HeaderRincianNotaPengirimanController extends GetxController {
     double convertBiaya = Utility.validasiValueDouble(
         notaPengirimanCt.nominalOngkosHeaderRincian.value.text);
 
-    Future<List> hitungHeader = GetDataController().hitungHeader(
-        "DOHD",
-        "DODT",
-        dashboardPenjualanCt.nomorDoSelected.value,
-        "${notaPengirimanCt.subtotal.value}",
-        "$convertDiskon",
-        "$ppnPPN",
-        "$convertPPN",
-        "$convertBiaya");
-    List hasilHitung = await hitungHeader;
+    // Future<List> hitungHeader = GetDataController().hitungHeader(
+    //     "DOHD",
+    //     "DODT",
+    //     dashboardPenjualanCt.nomorDoSelected.value,
+    //     "${notaPengirimanCt.subtotal.value}",
+    //     "$convertDiskon",
+    //     "$ppnPPN",
+    //     "$convertPPN",
+    //     "$convertBiaya");
+    // List hasilHitung = await hitungHeader;
 
-    if (hasilHitung[0] == true) {
-      notaPengirimanCt.persenDiskonHeaderRincian.refresh();
-      notaPengirimanCt.nominalDiskonHeaderRincian.refresh();
-      notaPengirimanCt.persenDiskonHeaderRincianView.refresh();
-      notaPengirimanCt.nominalDiskonHeaderRincianView.refresh();
+    // if (hasilHitung[0] == true) {
+    //   notaPengirimanCt.persenDiskonHeaderRincian.refresh();
+    //   notaPengirimanCt.nominalDiskonHeaderRincian.refresh();
+    //   notaPengirimanCt.persenDiskonHeaderRincianView.refresh();
+    //   notaPengirimanCt.nominalDiskonHeaderRincianView.refresh();
 
-      notaPengirimanCt.persenPPNHeaderRincian.refresh();
-      notaPengirimanCt.nominalPPNHeaderRincian.refresh();
-      notaPengirimanCt.persenPPNHeaderRincianView.refresh();
-      notaPengirimanCt.nominalPPNHeaderRincianView.refresh();
+    //   notaPengirimanCt.persenPPNHeaderRincian.refresh();
+    //   notaPengirimanCt.nominalPPNHeaderRincian.refresh();
+    //   notaPengirimanCt.persenPPNHeaderRincianView.refresh();
+    //   notaPengirimanCt.nominalPPNHeaderRincianView.refresh();
 
-      notaPengirimanCt.nominalOngkosHeaderRincian.refresh();
-      notaPengirimanCt.nominalOngkosHeaderRincianView.refresh();
+    //   notaPengirimanCt.nominalOngkosHeaderRincian.refresh();
+    //   notaPengirimanCt.nominalOngkosHeaderRincianView.refresh();
 
-      Future<List> updateInformasiDOHD = GetDataController().getSpesifikData(
-          "DOHD",
-          "PK",
-          "${dashboardPenjualanCt.dohdSelected[0]['PK']}",
-          "get_spesifik_data_transaksi");
-      List infoDOHD = await updateInformasiDOHD;
+    //   Future<List> updateInformasiDOHD = GetDataController().getSpesifikData(
+    //       "DOHD",
+    //       "PK",
+    //       "${dashboardPenjualanCt.dohdSelected[0]['PK']}",
+    //       "get_spesifik_data_transaksi");
+    //   List infoDOHD = await updateInformasiDOHD;
 
-      print('data dohd $infoDOHD');
+    //   print('data dohd $infoDOHD');
 
-      notaPengirimanCt.totalNetto.value =
-          double.parse("${infoDOHD[0]["HRGNET"]}");
-      notaPengirimanCt.totalNetto.refresh();
+    //   notaPengirimanCt.totalNetto.value =
+    //       double.parse("${infoDOHD[0]["HRGNET"]}");
+    //   notaPengirimanCt.totalNetto.refresh();
 
-      dashboardPenjualanCt.loadDOHDSelected();
+    //   dashboardPenjualanCt.loadDOHDSelected();
 
-      Get.back();
-      Get.back();
-      Get.back();
-    }
+    //   Get.back();
+    //   Get.back();
+    //   Get.back();
+    // }
   }
 }

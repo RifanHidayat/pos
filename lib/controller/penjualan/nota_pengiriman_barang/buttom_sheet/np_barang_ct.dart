@@ -59,8 +59,9 @@ class NotaPengirimanBarangPesanController extends GetxController {
     // GET OUTS
     Future<double> prosesGetOuts = checkOutsSodtSelected(produkSelected);
     double hasilGetOuts = await prosesGetOuts;
-    notaPenjualanCt.qtyOuts.value =
-        hasilGetOuts - produkSelected[0]['qty_beli'];
+    notaPenjualanCt.qtyOuts.value = hasilGetOuts;
+    // notaPenjualanCt.qtyOuts.value =
+    //     hasilGetOuts - produkSelected[0]['qty_beli'];
     notaPenjualanCt.qtyOuts.refresh();
     // GET STOK BARANG
     Future<List> getStokBarang = GetDataController().checkStokOutstanding(
@@ -183,8 +184,8 @@ class NotaPengirimanBarangPesanController extends GetxController {
   Future<double> checkOutsSodtSelected(produkSelected) {
     double outsQty = 0.0;
     var getdata = notaPenjualanCt.sodtTerpilih.firstWhere((element) =>
-        "${element['GROUP']}${element['BARANG']}" ==
-        "${produkSelected[0]['GROUP']}${produkSelected[0]['KODE']}");
+        "${element['NOMOR']}${element['GROUP']}${element['BARANG']}" ==
+        "${produkSelected[0]['NOMOR_SO']}${produkSelected[0]['GROUP']}${produkSelected[0]['KODE']}");
     if (produkSelected[0]['QTY'] != 0) {
       outsQty = double.parse("${getdata['QTY']}");
     } else {
@@ -288,11 +289,18 @@ class NotaPengirimanBarangPesanController extends GetxController {
                                 contentOpEditBarang(),
                                 "op_edit_barang",
                                 'Edit', () async {
-                              // UtilsAlert.showToast("tahap development");
-                              SimpanNotaPengirimanController().simpanDODT(
+                              // print(produkSelected);
+                              // print(qtyPesanSebelum.value);
+                              // print(listDataImeiSelected);
+                              notaPenjualanCt.updateListBarangSelected(
                                   produkSelected,
                                   qtyPesanSebelum.value,
                                   listDataImeiSelected);
+                              // UtilsAlert.showToast("tahap development");
+                              // SimpanNotaPengirimanController().simpanDODT(
+                              //     produkSelected,
+                              //     qtyPesanSebelum.value,
+                              //     listDataImeiSelected);
                             });
                           },
                         ),
@@ -808,10 +816,10 @@ class NotaPengirimanBarangPesanController extends GetxController {
     double validasiQty1 = notaPenjualanCt.qtyOuts.value - jumlahPesanan;
     double validasiQty2 =
         notaPenjualanCt.stokBarangTerpilih.value - jumlahPesanan;
-    if (validasiQty1 < 0) {
+    if (validasiQty1 <= 0) {
       UtilsAlert.showToast("Qty melebihi outstanding");
     } else {
-      if (validasiQty2 < 0) {
+      if (validasiQty2 <= 0) {
         UtilsAlert.showToast("Qty melebihi stok gudang");
       } else {
         Future<dynamic> prosesTambahQty = PerhitunganCt().tambahQty(
@@ -848,9 +856,11 @@ class NotaPengirimanBarangPesanController extends GetxController {
     double jumlahPesanan = double.parse(notaPenjualanCt.jumlahPesan.value.text);
     if (jumlahPesanan >= notaPenjualanCt.qtyOuts.value) {
       UtilsAlert.showToast("Qty melebihi outstanding");
+      notaPenjualanCt.jumlahPesan.value.text = "0";
     } else {
       if (jumlahPesanan >= notaPenjualanCt.stokBarangTerpilih.value) {
         UtilsAlert.showToast("Qty melebihi stok gudang");
+        notaPenjualanCt.jumlahPesan.value.text = "0";
       } else {
         Future<dynamic> prosesInputQty = PerhitunganCt()
             .inputQty(value, notaPenjualanCt.hargaJualPesanBarang.value.text);

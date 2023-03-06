@@ -9,6 +9,7 @@ import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/hapus_dodt.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/memilih_sohd_controller.dart';
+import 'package:siscom_pos/controller/perhitungan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
 import 'package:siscom_pos/utils/api.dart';
@@ -122,37 +123,38 @@ class DetailNotaPenjualanController extends BaseController {
 
       print("nomor sohd selected ${hasilNomorSOHD}");
       // pencarian SODT
-      if (hasilNomorSOHD.length == 1) {
-        Future<List> prosesSodtSelected = GetDataController().getSpesifikData(
-            "SODT", "NOMOR", hasilNomorSOHD[0], "get_spesifik_data_transaksi");
-        List hasilProsesSODT = await prosesSodtSelected;
-        sodtTerpilih.value = hasilProsesSODT;
-        sodtTerpilih.refresh();
-        combainData(hasilProsesSODT, hasilProsesCheck);
-      } else {
-        String nomorSohdFilter = "";
-        for (var element in hasilNomorSOHD) {
-          if (nomorSohdFilter == "") {
-            nomorSohdFilter = "$element";
-          } else {
-            nomorSohdFilter = "$nomorSohdFilter,$element";
-          }
-        }
-        Future<List> prosesSodtSelectedListValue =
-            GetDataController().pilihSodtMultipleSelected(nomorSohdFilter);
-        List hasilSodtMultiple = await prosesSodtSelectedListValue;
-        print('jalan multiple');
-        List getFilterData = [];
-        for (var ele in hasilSodtMultiple) {
-          for (var al in ele) {
-            getFilterData.add(al);
-          }
-        }
+      // if (hasilNomorSOHD.length == 1) {
+      //   print("masuk sini prosesssss");
+      //   Future<List> prosesSodtSelected = GetDataController().getSpesifikData(
+      //       "SODT", "NOMOR", hasilNomorSOHD[0], "get_spesifik_data_transaksi");
+      //   List hasilProsesSODT = await prosesSodtSelected;
+      //   sodtTerpilih.value = hasilProsesSODT;
+      //   sodtTerpilih.refresh();
+      //   combainData(hasilProsesSODT, hasilProsesCheck);
+      // } else {
+      //   String nomorSohdFilter = "";
+      //   for (var element in hasilNomorSOHD) {
+      //     if (nomorSohdFilter == "") {
+      //       nomorSohdFilter = "$element";
+      //     } else {
+      //       nomorSohdFilter = "$nomorSohdFilter,$element";
+      //     }
+      //   }
+      //   Future<List> prosesSodtSelectedListValue =
+      //       GetDataController().pilihSodtMultipleSelected(nomorSohdFilter);
+      //   List hasilSodtMultiple = await prosesSodtSelectedListValue;
+      //   print('jalan multiple');
+      //   List getFilterData = [];
+      //   for (var ele in hasilSodtMultiple) {
+      //     for (var al in ele) {
+      //       getFilterData.add(al);
+      //     }
+      //   }
 
-        sodtTerpilih.value = getFilterData;
-        sodtTerpilih.refresh();
-        combainData(sodtTerpilih.value, dodtSelected.value);
-      }
+      //   sodtTerpilih.value = getFilterData;
+      //   sodtTerpilih.refresh();
+      //   combainData(sodtTerpilih.value, dodtSelected.value);
+      // }
       statusDODTKosong.value = false;
       statusDODTKosong.refresh();
     } else {
@@ -210,28 +212,74 @@ class DetailNotaPenjualanController extends BaseController {
   }
 
   void prosesPilihBarang(List barang) async {
-    print('barang terpilih $barang');
+    // print('barang terpilih $barang');
     if (barang.isNotEmpty) {
-      barangTerpilih.value = barang;
-      barangTerpilih.refresh();
-      Future<bool> prosesAkumulasiMenyeluruh = perhitunganMenyeluruhDO();
-      bool hasilProsesAkumulasi = await prosesAkumulasiMenyeluruh;
-      if (hasilProsesAkumulasi) {
-        statusDODTKosong.value = false;
-        statusDODTKosong.refresh();
+      if (barangTerpilih.isNotEmpty) {
+        print("tambah barang lagi nih");
+        List dataSudahDiUpdate = [];
+        for (var element in barangTerpilih) {
+          if (Utility.validasiValueDouble('${element["qty_beli"]}') > 0.0) {
+            dataSudahDiUpdate.add(element);
+          }
+        }
+        for (var element in dataSudahDiUpdate) {
+          barang.removeWhere((br) =>
+              "${br['NOMOR_SO']}${br['GROUP']}${br['KODE']}" ==
+              "${element['NOMOR_SO']}${element['GROUP']}${element['KODE']}");
+        }
+
+        var hasilBarangAkhir = dataSudahDiUpdate + barang;
+        barangTerpilih.value = hasilBarangAkhir;
+        barangTerpilih.refresh();
+      } else {
+        barangTerpilih.value = barang;
+        barangTerpilih.refresh();
       }
+
+      statusDODTKosong.value = false;
+      statusDODTKosong.refresh();
+      // Future<bool> prosesAkumulasiMenyeluruh = perhitunganMenyeluruhDO();
+      // bool hasilProsesAkumulasi = await prosesAkumulasiMenyeluruh;
+      // if (hasilProsesAkumulasi) {
+      //   statusDODTKosong.value = false;
+      //   statusDODTKosong.refresh();
+      // }
     } else {
       statusDODTKosong.value = true;
       statusDODTKosong.refresh();
     }
   }
 
+  void updateListBarangSelected(
+      productSelected, qtySebelumEdit, listDataImeiSelected) {
+    print(productSelected);
+    // print(qtySebelumEdit);
+    // print(listDataImeiSelected);
+    if (Utility.validasiValueDouble(jumlahPesan.value.text) <= 0.0) {
+      UtilsAlert.showToast("Qty pemesanan tidak valid");
+    } else {
+      var getBarangSelected = barangTerpilih.firstWhere((element) =>
+          "${element['NOMOR_SO']}${element['GROUP']}${element['KODE']}" ==
+          "${productSelected[0]['NOMOR_SO']}${productSelected[0]['GROUP']}${productSelected[0]['KODE']}");
+      // print(getBarangSelected);
+      getBarangSelected["qty_beli"] =
+          Utility.validasiValueDouble(jumlahPesan.value.text);
+      getBarangSelected["DISC1"] =
+          Utility.validasiValueDouble(persenDiskonPesanBarang.value.text);
+      getBarangSelected["DISCD"] =
+          Utility.validasiValueDouble(nominalDiskonPesanBarang.value.text);
+      Get.back();
+      Get.back();
+      barangTerpilih.refresh();
+      perhitunganMenyeluruhDO();
+    }
+  }
+
   void hapusListNota(dataSelected) {
     if (dataSelected['qty_beli'] == 0 || dataSelected['qty_beli'] == null) {
-      print("Kesini 1");
       barangTerpilih.removeWhere((element) =>
-          "${element['GROUP']}${element['KODE']}" ==
-          "${dataSelected['GROUP']}${dataSelected['KODE']}");
+          "${element['NOMOR_SO']}${element['GROUP']}${element['KODE']}" ==
+          "${dataSelected['NOMOR_SO']}${dataSelected['GROUP']}${dataSelected['KODE']}");
       barangTerpilih.refresh();
       if (barangTerpilih.isEmpty) {
         statusDODTKosong.value = true;
@@ -246,155 +294,57 @@ class DetailNotaPenjualanController extends BaseController {
   }
 
   Future<bool> perhitunganMenyeluruhDO() async {
-    Future<List> updateInformasiDOHD = GetDataController().getSpesifikData(
-        "DOHD",
-        "PK",
-        "${dashboardPenjualanCt.dohdSelected[0]['PK']}",
-        "get_spesifik_data_transaksi");
-    List infoDOHD = await updateInformasiDOHD;
-
-    print('perhitungan data dodt ${dodtSelected.value.length}');
-
-    // perhitungan HRGTOT
-    double subtotalKeranjang = 0.0;
-    double discdHeader = 0.0;
-    double dischHeader = 0.0;
-    double allQty = 0.0;
-
-    for (var element in dodtSelected) {
-      double hargaBarang = double.parse("${element['HARGA']}");
-      double persenDiskonBarang = double.parse("${element['DISC1']}");
-      double qtyBarang = double.parse("${element['QTY']}");
-      var hitungSubtotal =
-          qtyBarang * (hargaBarang - (hargaBarang * persenDiskonBarang * 0.01));
-      subtotalKeranjang += hitungSubtotal;
-      discdHeader = discdHeader +
-          (double.parse("${element['QTY']}") *
-              double.parse("${element['DISCD']}"));
-      dischHeader = dischHeader +
-          (double.parse("${element['QTY']}") *
-              double.parse("${element['DISCH']}"));
-      allQty += double.parse("${element['QTY']}");
-
-      double discdBarang = double.parse("${element['DISCD']}");
-      double dischBarang = double.parse("${element['DISCH']}");
-
-      var hitungDiscnJldt = discdBarang + dischBarang;
-      var valueFinalDiscnJldt = hitungDiscnJldt;
-
-      GetDataController()
-          .updateDodt(element['NOMOR'], element['NOURUT'], valueFinalDiscnJldt);
-
-      double qtyDODT = double.parse("${element["QTY"]}");
-      print('qty dodt $qtyDODT');
-      print('taxn dodt ${element['TAXN']}');
-      print('biaya dodt ${element['BIAYA']}');
-
-      GetDataController().updateProd3(
-          element["NOMOR"],
-          element["NOURUT"],
-          qtyDODT,
-          valueFinalDiscnJldt,
-          double.parse("${element["TAXN"]}"),
-          double.parse("${element["BIAYA"]}"));
+    // perhitungan menyeluruh barang terpilih
+    double hitungSub = 0.0;
+    for (var element in barangTerpilih) {
+      if (Utility.validasiValueDouble("${element['qty_beli']}") > 0.0) {
+        Future<dynamic> prosesInputPersen = PerhitunganCt().hitungPersenDiskon(
+            "${element['DISC1']}",
+            "${element['STDJUAL']}",
+            jumlahPesan.value.text);
+        List hasilInputQty = await prosesInputPersen;
+        var hitung1 = Utility.validasiValueDouble("${element['qty_beli']}") *
+            hasilInputQty[1];
+        hitungSub += hitung1;
+      }
     }
-
-    // hitung subtotal
-    subtotal.value = "$subtotalKeranjang" == "NaN" ? 0 : subtotalKeranjang;
-    // subtotal.value = subtotalKeranjang;
+    subtotal.value = hitungSub;
     subtotal.refresh();
-    print('hasil subtotal ${subtotal.value}');
 
-    // all qty
-    allQtyBeli.value = allQty;
-    allQtyBeli.refresh();
+    // hitung diskon header
 
-    // diskon header
+    if (persenDiskonHeaderRincian.value.text != "0.0") {
+      var hasilNominalDiskon = Utility.nominalDiskonHeader(
+          "${subtotal.value}", persenDiskonHeaderRincian.value.text);
+      nominalDiskonHeaderRincian.value.text = "$hasilNominalDiskon";
+      nominalDiskonHeaderRincianView.value.text =
+          hasilNominalDiskon.toStringAsFixed(2);
 
-    double valueDICSH =
-        infoDOHD[0]["DISCH"] == null || infoDOHD[0]["DISCH"] == 0
-            ? dischHeader
-            : infoDOHD[0]["DISCH"].toDouble();
+      nominalDiskonHeaderRincian.refresh();
+      nominalDiskonHeaderRincianView.refresh();
+    }
 
-    var fltr1 = Utility.persenDiskonHeader("${subtotal.value}", "$valueDICSH");
+    // hitung ppn header
 
-    print('diskon header persen $fltr1');
+    if (persenPPNHeaderRincian.value.text != "0.0") {
+      var hasilNominalPpn = Utility.nominalDiskonHeader(
+          "${subtotal.value}", persenPPNHeaderRincian.value.text);
 
-    persenDiskonHeaderRincian.value.text = "$fltr1" == "NaN" ? "0.0" : "$fltr1";
-    persenDiskonHeaderRincianView.value.text =
-        "$fltr1" == "NaN" ? "0.0" : "$fltr1";
-    persenDiskonHeaderRincian.refresh();
-    persenDiskonHeaderRincianView.refresh();
+      nominalPPNHeaderRincian.value.text = "$hasilNominalPpn";
+      nominalPPNHeaderRincianView.value.text =
+          hasilNominalPpn.toStringAsFixed(2);
 
-    nominalDiskonHeaderRincian.value.text = "$valueDICSH";
-    nominalDiskonHeaderRincianView.value.text = valueDICSH.toStringAsFixed(2);
-    nominalDiskonHeaderRincian.refresh();
-    nominalDiskonHeaderRincianView.refresh();
-
-    // ppn header
-
-    double taxpJLHD = infoDOHD[0]["TAXP"] == null || infoDOHD[0]["TAXP"] == 0
-        ? 0.0
-        : infoDOHD[0]["TAXP"].toDouble();
-
-    if (taxpJLHD > 0.0) {
-      print('perhitungan ppn header jalan disini');
-      persenPPNHeaderRincian.value.text = "$taxpJLHD";
-      persenPPNHeaderRincianView.value.text = "$taxpJLHD";
-      persenPPNHeaderRincian.refresh();
-      persenPPNHeaderRincianView.refresh();
-
-      var convert1PPN = Utility.nominalPPNHeaderView(
-          '${subtotal.value}',
-          persenDiskonHeaderRincian.value.text,
-          persenPPNHeaderRincian.value.text);
-
-      nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-      nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
-      nominalPPNHeaderRincian.refresh();
-      nominalPPNHeaderRincianView.refresh();
-    } else {
-      persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
-      persenPPNHeaderRincianView.value.text = sidebarCt.ppnDefaultCabang.value;
-      persenPPNHeaderRincian.refresh();
-      persenPPNHeaderRincianView.refresh();
-
-      var convert1PPN = Utility.nominalPPNHeaderView(
-          '${subtotal.value}',
-          persenDiskonHeaderRincian.value.text,
-          persenPPNHeaderRincian.value.text);
-
-      nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-      nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(2);
       nominalPPNHeaderRincian.refresh();
       nominalPPNHeaderRincianView.refresh();
     }
 
-    // biaya header
+    // hitung netto
+    totalNetto.value = (Utility.validasiValueDouble("${subtotal.value}") -
+            Utility.validasiValueDouble(
+                nominalDiskonHeaderRincian.value.text)) +
+        Utility.validasiValueDouble(nominalPPNHeaderRincian.value.text);
 
-    double valueBiaya =
-        infoDOHD[0]["BIAYA"] == null || infoDOHD[0]["BIAYA"] == 0
-            ? 0.0
-            : infoDOHD[0]["BIAYA"].toDouble();
-
-    var convert1 =
-        Utility.persenDiskonHeader("${subtotal.value}", "$valueBiaya");
-
-    var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
-
-    var convert1Charge = Utility.nominalPPNHeaderView(
-        '${subtotal.value}', persenDiskonHeaderRincian.value.text, persenBiaya);
-
-    nominalOngkosHeaderRincian.value.text = "$convert1Charge";
-    nominalOngkosHeaderRincianView.value.text =
-        convert1Charge.toStringAsFixed(2);
-
-    double discnHeader = discdHeader + dischHeader;
-
-    GetDataController().updateDohd(dashboardPenjualanCt.nomorDoSelected.value,
-        allQtyBeli.value, discdHeader, dischHeader, discnHeader);
-
-    perhitunganHeader();
+    totalNetto.refresh();
 
     return Future.value(true);
   }

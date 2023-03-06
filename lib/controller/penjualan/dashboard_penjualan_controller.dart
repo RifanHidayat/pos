@@ -519,6 +519,7 @@ class DashbardPenjualanController extends GetxController {
                           }
                         } else if (screenAktif.value == 2) {
                           if (statusOutStand == false) {
+                            // print(dataSelected['NOMOR']);
                             Future<bool> prosesHapusDOHD = HapusDodtController()
                                 .hapusDohdDodt(dataSelected['NOMOR']);
                             bool hasilHapus = await prosesHapusDOHD;

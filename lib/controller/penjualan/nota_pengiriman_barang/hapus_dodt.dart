@@ -86,11 +86,16 @@ class HapusDodtController extends BaseController {
         notaPengirimanBarangCt.perhitunganMenyeluruhDO();
 
         notaPengirimanBarangCt.perhitunganMenyeluruhDO();
-
         Get.back();
         Get.back();
         UtilsAlert.showToast("Berhasil hapus barang");
         prosesHapusDodt = true;
+
+        if (notaPengirimanBarangCt.dodtSelected.value.isEmpty) {
+          UtilsAlert.showToast("Data item nota tidak ditemukan");
+          notaPengirimanBarangCt.statusDODTKosong.value = true;
+          notaPengirimanBarangCt.statusDODTKosong.refresh();
+        }
       } else {
         UtilsAlert.showToast("Gagal update order penjualan");
       }
