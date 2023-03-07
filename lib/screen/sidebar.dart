@@ -209,8 +209,11 @@ class Sidebar extends StatelessWidget {
             ListTile(
               leading: Icon(Iconsax.box_search),
               iconColor: Utility.greyDark,
-              title: Text('Stok Opname'),
-              onTap: () => null,
+                    title: Text('Stok opname'),
+              tileColor: controller.sidebarMenuSelected.value == 3
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("stock-opname"),
             ),
             // ListTile(
             //   leading: Icon(Iconsax.receipt_search),
