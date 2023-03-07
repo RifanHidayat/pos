@@ -9,6 +9,7 @@ import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/buat_faktur_controller.dart';
 import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
+import 'package:siscom_pos/controller/stok_opname_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -29,6 +30,8 @@ class GlobalController extends GetxController
   var sidebarCt = Get.put(SidebarController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
+
+  var stokOpnameCtr=Get.put(StockOpnameController());
 
   var cari = TextEditingController().obs;
 
@@ -240,7 +243,15 @@ class GlobalController extends GetxController
                                       } else if (stringController ==
                                           "pilih_barang_faktur_penjualan_si") {
                                         aksiFakturPenjualanSI(dataShow[index]);
-                                      } else {
+                                      } else if (stringController=='pilih_gudang_stok_opaname'){
+                                        aksiGudangStokOpname(dataShow[index]);
+
+                                      } else if (stringController=='pilih_kelompok_barang_stok_opaname'){
+                                        aksiKelompokBarangStokOpname(dataShow[index]);
+
+                                      } {
+                                        print(stringController);
+                                      
                                         checkingAksi(
                                             stringController,
                                             judul,
@@ -397,6 +408,23 @@ class GlobalController extends GetxController
       });
     }
   }
+  void aksiGudangStokOpname(dataTerpilih){
+    print(dataTerpilih);
+    stokOpnameCtr.gudangCodeSelected.value=dataTerpilih['KODE'].toString();
+    stokOpnameCtr.gudangCtr.text=dataTerpilih['NAMA'].toString();
+   Get.back();
+   
+
+  }
+  void aksiKelompokBarangStokOpname(dataTerpilih){
+ 
+    stokOpnameCtr.groupCodeSelected.value=dataTerpilih['KODE'].toString();
+    stokOpnameCtr.groupBarangCtr.text=dataTerpilih['NAMA'].toString();
+   Get.back();
+   
+
+  }
+
 
   void aksiFakturPenjualanSI(dataTerpilih) {
     FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);

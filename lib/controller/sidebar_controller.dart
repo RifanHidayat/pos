@@ -7,6 +7,7 @@ import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/screen/auth/login.dart';
 import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
+import 'package:siscom_pos/screen/stockopname/stockopname.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/widget/modal_popup.dart';
@@ -89,6 +90,13 @@ class SidebarController extends BaseController {
         Get.back();
         Get.offAll(DashboardPenjualan());
         sidebarMenuSelected.value = 2;
+        sidebarMenuSelected.refresh();
+      }
+    }else if (value == "stock-opname") {
+      if (sidebarMenuSelected.value != 3) {
+        Get.back();
+        Get.offAll(StockOpname());
+        sidebarMenuSelected.value = 3;
         sidebarMenuSelected.refresh();
       }
     }
