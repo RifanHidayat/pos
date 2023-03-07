@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
-import 'package:siscom_pos/controller/stok_opname_controller.dart';
+import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
 import 'package:siscom_pos/screen/stockopname/detail_barang_stok_opname.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/utility.dart';
@@ -23,20 +23,16 @@ class TambahStokOpname extends StatefulWidget {
 }
 
 class _TambahStokOpnameState extends State<TambahStokOpname> {
+  final controller = Get.put(StockOpnameController());
+  final globalController = Get.put(GlobalController());
 
-  final controller=Get.put(StockOpnameController());
-  final globalController=Get.put(GlobalController());
-
-
-
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    controller.fetchGudang();
-    controller.fetchGroup();
+    // controller.fetchGudang();
+    // controller.fetchGroup();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,89 +88,81 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
                 height: double.maxFinite,
                 child: SingleChildScrollView(
                   child: Column(
-                    children:  [
-                    InkWell(
-                      onTap: (){
-                         DatePicker.showPicker(
-                                  Get.context!,
-                                  pickerModel: CustomMonthPicker(
-                                    minTime: DateTime(2020, 1, 1),
-                                    maxTime: DateTime(2050, 1, 1),
-                                    currentTime: DateTime.now(),
-                                  ),
-                                  onConfirm: (time) {
-                                    if (time != null) {
-                                      print("$time");
-                                      var filter =
-                                          DateFormat('yyyy-MM').format(time);
-                                      var array = filter.split('-');
-                                      var bulan = array[1];
-                                      var tahun = array[0];
-                                      controller.bulanString.value =
-                                          "${DateFormat('MMMM').format(time)}";
-                
-                                      controller.tahun.value = tahun;
-                                      controller.bulan.value = bulan;
-                                      controller.dateCtr.text=tahun.toString();
-                
-                
-                                   
-                                    
-                                    }
-                                  },
-                                );
-                
-                                
-                      },
-                      child:Obx(() =>  TextFormFieldGroupApp(
-                          title: "Tanggal",
-                          isRequired: true,
-                          hintText: controller.bulanString!=""?"${controller.bulanString.value.toString().substring(0, 3)} ${controller.tahun.value}":"",
-                  
-                          enabled: false,
-                        )),
-                    ),
+                    children: [
                       InkWell(
-                        onTap: (){
-                          globalController.buttomSheet1(
-                                  controller.gudangs,
-                                  "Pilih gudang",
-                                  "pilih_gudang_stok_opaname",
-                                  controller.gudangCodeSelected.value);
-                                  
-                
+                        onTap: () {
+                          DatePicker.showPicker(
+                            Get.context!,
+                            pickerModel: CustomMonthPicker(
+                              minTime: DateTime(2020, 1, 1),
+                              maxTime: DateTime(2050, 1, 1),
+                              currentTime: DateTime.now(),
+                            ),
+                            onConfirm: (time) {
+                              if (time != null) {
+                                print("$time");
+                                var filter = DateFormat('yyyy-MM').format(time);
+                                var array = filter.split('-');
+                                var bulan = array[1];
+                                var tahun = array[0];
+                                controller.bulanString.value =
+                                    "${DateFormat('MMMM').format(time)}";
+
+                                controller.tahun.value = tahun;
+                                controller.bulan.value = bulan;
+                                controller.dateCtr.text = tahun.toString();
+                              }
+                            },
+                          );
                         },
-                        child:  TextFormFieldGroupApp(
+                        child: Obx(() => TextFormFieldGroupApp(
+                              title: "Tanggal",
+                              isRequired: true,
+                              hintText: controller.bulanString != ""
+                                  ? "${controller.bulanString.value.toString().substring(0, 3)} ${controller.tahun.value}"
+                                  : "",
+                              enabled: false,
+                            )),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          globalController.buttomSheet1(
+                              controller.gudangs,
+                              "Pilih gudang",
+                              "pilih_gudang_stok_opaname",
+                              controller.gudangCodeSelected.value);
+                        },
+                        child: TextFormFieldGroupApp(
                           title: "Gudang",
-                          hintText:controller.gudangCtr.text==""? "Pilih Gudang":controller.gudangCtr.text,
+                          hintText: controller.gudangCtr.text == ""
+                              ? "Pilih Gudang"
+                              : controller.gudangCtr.text,
                           isRequired: true,
                           enabled: false,
                           controller: controller.gudangCtr,
                         ),
                       ),
-                  InkWell(
-                    onTap: (){
-                        globalController.buttomSheet1(
-                                  controller.groups,
-                                  "Pilih kelompok barang",
-                                  "pilih_kelompok_barang_stok_opaname",
-                                  controller.groupCodeSelected.value);
-                                  
-                    },
-                    child: TextFormFieldGroupApp(
+                      InkWell(
+                        onTap: () {
+                          globalController.buttomSheet1(
+                              controller.groups,
+                              "Pilih kelompok barang",
+                              "pilih_kelompok_barang_stok_opaname",
+                              controller.groupCodeSelected.value);
+                        },
+                        child: TextFormFieldGroupApp(
                           title: "Kelompok barang",
                           hintText: "Pilih kelompok barang",
                           controller: controller.groupBarangCtr,
                           isRequired: true,
-                              enabled: false,
+                          enabled: false,
                         ),
-                  ),
-                  TextFormFieldGroupApp(
+                      ),
+                      TextFormFieldGroupApp(
                         title: "Diopname",
                         hintText: "Nama pembuat",
                         controller: controller.diopnameCtr,
                         isRequired: true,
-                        
                       ),
                     ],
                   ),
@@ -182,26 +170,35 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
               ),
             ),
             InkWell(
-              onTap: ()=>Get.to(DetailBarangStokOpname()),
+              onTap: () => Get.to(DetailBarangStokOpname()),
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                  color: Utility.primaryDefault,
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(width: 1,color: Utility.primaryDefault)
-                ),
+                    color: Utility.primaryDefault,
+                    borderRadius: BorderRadius.circular(5),
+                    border:
+                        Border.all(width: 1, color: Utility.primaryDefault)),
                 child: Padding(
-                  padding: EdgeInsets.only(top: 10,bottom: 10),
-                  child: Center(child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    
-                    children: [
-                      Icon(Icons.add,color:Colors.white,),
-                      SizedBox(width: 5,),
-                      TextLabel(text: "Detail ",color: Colors.white,size: 16.0,),
-                    ],
-                  ))),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Center(
+                        child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        TextLabel(
+                          text: "Detail ",
+                          color: Colors.white,
+                          size: 16.0,
+                        ),
+                      ],
+                    ))),
               ),
             )
           ],

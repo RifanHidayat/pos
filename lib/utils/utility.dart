@@ -137,6 +137,14 @@ class Utility {
     return outputDate;
   }
 
+  static String convertDate5(String date) {
+    var inputFormat = DateFormat('yyyy-MM-dd');
+    var inputDate = inputFormat.parse(date);
+    var outputFormat = DateFormat('dd MMMM yyyy');
+    var outputDate = outputFormat.format(inputDate);
+    return outputDate;
+  }
+
   static String convertNoFaktur(String nofaktur) {
     var getPolaType = nofaktur.substring(0, 2);
     var getTahun = nofaktur.substring(2, 6);

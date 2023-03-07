@@ -209,7 +209,7 @@ class Sidebar extends StatelessWidget {
             ListTile(
               leading: Icon(Iconsax.box_search),
               iconColor: Utility.greyDark,
-                    title: Text('Stok opname'),
+              title: Text('Stok opname'),
               tileColor: controller.sidebarMenuSelected.value == 3
                   ? Utility.infoLight50
                   : Colors.white,
@@ -229,6 +229,10 @@ class Sidebar extends StatelessWidget {
               leading: Icon(Iconsax.profile_2user),
               iconColor: Utility.greyDark,
               title: Text('Pelanggan'),
+              tileColor: controller.sidebarMenuSelected.value == 4
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("pelanggan"),
             ),
             // ListTile(
             //   leading: Icon(Iconsax.user_square),

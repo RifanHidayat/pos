@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/screen/auth/login.dart';
+import 'package:siscom_pos/screen/pelanggan/list_pelanggan_view.dart';
 import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/screen/stockopname/stockopname.dart';
@@ -92,11 +93,18 @@ class SidebarController extends BaseController {
         sidebarMenuSelected.value = 2;
         sidebarMenuSelected.refresh();
       }
-    }else if (value == "stock-opname") {
+    } else if (value == "stock-opname") {
       if (sidebarMenuSelected.value != 3) {
         Get.back();
         Get.offAll(StockOpname());
         sidebarMenuSelected.value = 3;
+        sidebarMenuSelected.refresh();
+      }
+    } else if (value == "pelanggan") {
+      if (sidebarMenuSelected.value != 4) {
+        Get.back();
+        Get.offAll(ListPelangganView());
+        sidebarMenuSelected.value = 4;
         sidebarMenuSelected.refresh();
       }
     }

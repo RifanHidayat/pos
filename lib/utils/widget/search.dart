@@ -5,14 +5,19 @@ import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:get/get.dart';
+
 class SearchApp extends StatelessWidget {
-  final controller,onTap,onChange,isSearchDate;
-  const SearchApp({super.key,this.controller,this.onChange,this.onTap,this.isSearchDate});
-  
+  final controller, onTap, onChange, isSearchDate;
+  const SearchApp(
+      {super.key,
+      this.controller,
+      this.onChange,
+      this.onTap,
+      this.isSearchDate});
 
   @override
   Widget build(BuildContext context) {
-    return  Row(
+    return Row(
       children: [
         Expanded(
           // flex:isSearchDate==true? 80:60,
@@ -24,7 +29,7 @@ class SearchApp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-               const  Expanded(
+                const Expanded(
                   flex: 15,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 7, left: 10),
@@ -55,8 +60,12 @@ class SearchApp extends StatelessWidget {
                                   border: InputBorder.none, hintText: "Cari"),
                               textInputAction: TextInputAction.done,
                               style: TextStyle(
-                                  fontSize: 14.0, height: 1.5, color: Colors.black),
-                              onSubmitted: (value) {},
+                                  fontSize: 14.0,
+                                  height: 1.5,
+                                  color: Colors.black),
+                              onSubmitted: (value) {
+                                if (onTap != null) onTap!(value);
+                              },
                             ),
                           ),
                           // !controller.statusCari.value
@@ -69,7 +78,7 @@ class SearchApp extends StatelessWidget {
                           //             color: Colors.red,
                           //           ),
                           //           onPressed: () {
-        
+
                           //           },
                           //         ),
                           //       )
@@ -82,23 +91,25 @@ class SearchApp extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 10,),
+        SizedBox(
+          width: 10,
+        ),
         Expanded(
-          flex: 10,
-          child: Container(
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Color.fromARGB(255, 211, 205, 205)),
-              borderRadius: BorderRadius.circular(5)
-            ),
-            child:const  Padding(
-              padding: EdgeInsets.only(top: 5,bottom: 5,left: 1,right: 2),
-              child: Icon(Iconsax.setting_4)),
-          ),
-        ))
+            flex: 10,
+            child: Container(
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                        width: 1, color: Color.fromARGB(255, 211, 205, 205)),
+                    borderRadius: BorderRadius.circular(5)),
+                child: const Padding(
+                    padding:
+                        EdgeInsets.only(top: 5, bottom: 5, left: 1, right: 2),
+                    child: Icon(Iconsax.setting_4)),
+              ),
+            ))
       ],
-    );;
+    );
+    ;
   }
-
-   
 }
