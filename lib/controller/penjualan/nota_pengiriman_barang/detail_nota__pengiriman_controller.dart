@@ -9,6 +9,7 @@ import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/hapus_dodt.dart';
 import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/memilih_sohd_controller.dart';
+import 'package:siscom_pos/controller/penjualan/nota_pengiriman_barang/simpan_nota_pengiriman.dart';
 import 'package:siscom_pos/controller/perhitungan_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/screen/penjualan/item_order_penjualan.dart';
@@ -625,25 +626,26 @@ class DetailNotaPenjualanController extends BaseController {
 
   void backValidasi() async {
     UtilsAlert.loadingSimpanData(Get.context!, "Loading...");
-    Future<bool> prosesClose = getDataCt.closePenjualan(
-        "DOHD", "", dashboardPenjualanCt.nomorDoSelected.value, "close_dohd");
-    bool hasilClose = await prosesClose;
-    if (hasilClose == true) {
-      dashboardPenjualanCt.changeMenu(2);
-      if (statusAksiItemOrderPenjualan.value) {
-        Get.back();
-        Get.back();
-        Get.back();
-        statusBack.value = true;
-        statusBack.refresh();
-      } else {
-        Get.back();
-        Get.back();
-        Get.back();
-        Get.back();
-        statusBack.value = true;
-        statusBack.refresh();
-      }
-    }
+    SimpanNotaPengirimanController().simpanDODT(barangTerpilih);
+    // Future<bool> prosesClose = getDataCt.closePenjualan(
+    //     "DOHD", "", dashboardPenjualanCt.nomorDoSelected.value, "close_dohd");
+    // bool hasilClose = await prosesClose;
+    // if (hasilClose == true) {
+    //   dashboardPenjualanCt.changeMenu(2);
+    //   if (statusAksiItemOrderPenjualan.value) {
+    //     Get.back();
+    //     Get.back();
+    //     Get.back();
+    //     statusBack.value = true;
+    //     statusBack.refresh();
+    //   } else {
+    //     Get.back();
+    //     Get.back();
+    //     Get.back();
+    //     Get.back();
+    //     statusBack.value = true;
+    //     statusBack.refresh();
+    //   }
+    // }
   }
 }
