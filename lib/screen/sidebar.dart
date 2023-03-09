@@ -16,6 +16,7 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Utility.baseColor2,
       child: Obx(
         () => ListView(
           // Remove padding
@@ -40,18 +41,15 @@ class Sidebar extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ClipOval(
-                              child: Image.network(
-                                'https://oflutter.com/wp-content/uploads/2021/02/girl-profile.png',
-                                fit: BoxFit.cover,
-                                width: 50,
-                                height: 50,
-                              ),
-                            ),
+                                child: Image.asset(
+                              "assets/Image.png",
+                              height: 50,
+                            )),
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsets.only(left: 8.0, top: 16.0),
                                 child: Text(
-                                  "Nama User",
+                                  "${controller.emailPengguna.value}",
                                   style: TextStyle(color: Utility.baseColor2),
                                 ),
                               ),
@@ -243,6 +241,10 @@ class Sidebar extends StatelessWidget {
               leading: Icon(Iconsax.document_text),
               iconColor: Utility.greyDark,
               title: Text('Laporan'),
+              tileColor: controller.sidebarMenuSelected.value == 5
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("laporan"),
             ),
             Divider(),
             Padding(
@@ -257,6 +259,10 @@ class Sidebar extends StatelessWidget {
               leading: Icon(Iconsax.setting_2),
               iconColor: Utility.greyDark,
               title: Text('Pengaturan'),
+              tileColor: controller.sidebarMenuSelected.value == 6
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("pengaturan"),
             ),
             ListTile(
               leading: Icon(Iconsax.message_question),

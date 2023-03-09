@@ -33,7 +33,7 @@ class Button1 extends StatelessWidget {
       },
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(3),
           child: Text(
             "$textBtn",
             style: TextStyle(

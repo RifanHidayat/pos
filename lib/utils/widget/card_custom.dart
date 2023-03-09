@@ -65,12 +65,14 @@ class CardCustomShadow extends StatelessWidget {
 class CardCustom extends StatelessWidget {
   final Widget? widgetCardCustom;
   final Color? colorBg;
+  final Color? colorBorder;
   final BorderRadius? radiusBorder;
 
   const CardCustom({
     Key? key,
     this.widgetCardCustom,
     this.colorBg,
+    this.colorBorder,
     this.radiusBorder,
   }) : super(key: key);
 
@@ -82,7 +84,10 @@ class CardCustom extends StatelessWidget {
             color: colorBg,
             borderRadius: radiusBorder,
             border: Border.all(
-                width: 0.5, color: Color.fromARGB(255, 211, 205, 205))),
+                width: 0.5,
+                color: colorBorder == null
+                    ? Color.fromARGB(255, 211, 205, 205)
+                    : colorBorder!)),
         child: widgetCardCustom);
   }
 }

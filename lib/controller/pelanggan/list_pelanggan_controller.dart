@@ -4,8 +4,12 @@ import 'package:siscom_pos/model/pelanggan/list_pelanggan_model.dart';
 
 class ListPelangganViewController extends GetxController {
   var listPelanggan = <ListPelangganModel>[].obs;
+  var listPelangganMaster = <ListPelangganModel>[].obs;
 
   var screenLoad = false.obs;
+
+  var statusMember = 0.obs;
+  var screenDetailAktif = 0.obs;
 
   List dummyData = [
     {
@@ -87,7 +91,16 @@ class ListPelangganViewController extends GetxController {
   Future<bool> getProsesListPelanggan() async {
     // load dummy
     for (var element in dummyData) {
-      listPelanggan.add(ListPelangganModel(
+      if (element["status"] == 1) {
+        listPelanggan.add(ListPelangganModel(
+          kodePelanggan: element["kode_pelanggan"],
+          namaPelanggan: element["nama_pelanggan"],
+          status: element["status"],
+          nomorTelpon: element["nomor_telpon"],
+          point: element["point"],
+        ));
+      }
+      listPelangganMaster.add(ListPelangganModel(
         kodePelanggan: element["kode_pelanggan"],
         namaPelanggan: element["nama_pelanggan"],
         status: element["status"],

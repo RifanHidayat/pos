@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/screen/auth/login.dart';
+import 'package:siscom_pos/screen/laporan/main_laporan.dart';
 import 'package:siscom_pos/screen/pelanggan/list_pelanggan_view.dart';
+import 'package:siscom_pos/screen/pengaturan/main_pengaturan.dart';
 import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
 import 'package:siscom_pos/screen/stockopname/stockopname.dart';
@@ -23,9 +25,18 @@ class SidebarController extends BaseController {
   var gudangSelectedSide = "".obs;
   var ppnDefaultCabang = "".obs;
   var ipdevice = "".obs;
+  var emailPengguna = "".obs;
   final NetworkInfo _networkInfo = NetworkInfo();
 
   var listCabang = [].obs;
+
+  @override
+  void onInit() async {
+    var dataUser = AppData.informasiLoginUser.split("-");
+    emailPengguna.value = dataUser[0];
+    emailPengguna.refresh();
+    super.onInit();
+  }
 
   void getCabang() async {
     Map<String, dynamic> body = {
@@ -79,6 +90,7 @@ class SidebarController extends BaseController {
     var ipLocal = await checkLocalIp;
     ipdevice.value = ipLocal;
     ipdevice.refresh();
+    print(AppData.informasiLoginUser);
     if (value == "pos") {
       if (sidebarMenuSelected.value != 1) {
         Get.back();
@@ -105,6 +117,20 @@ class SidebarController extends BaseController {
         Get.back();
         Get.offAll(ListPelangganView());
         sidebarMenuSelected.value = 4;
+        sidebarMenuSelected.refresh();
+      }
+    } else if (value == "laporan") {
+      if (sidebarMenuSelected.value != 5) {
+        Get.back();
+        Get.offAll(LaporanMainView());
+        sidebarMenuSelected.value = 5;
+        sidebarMenuSelected.refresh();
+      }
+    } else if (value == "pengaturan") {
+      if (sidebarMenuSelected.value != 6) {
+        Get.back();
+        Get.offAll(MainPengaturan());
+        sidebarMenuSelected.value = 6;
         sidebarMenuSelected.refresh();
       }
     }
