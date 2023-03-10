@@ -73,7 +73,8 @@ class Button2 extends StatelessWidget {
           backgroundColor: MaterialStateProperty.all<Color>(colorBtn!),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radius!),
+            borderRadius: BorderRadius.circular(8.0),
+            // borderRadius: BorderRadius.circular(radius!),
           ))),
       onPressed: () {
         if (onTap != null) onTap!();
@@ -157,33 +158,36 @@ class Button3 extends StatelessWidget {
           overlayColor: MaterialStateProperty.all<Color>(overlayColor!),
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(8.0),
               side: BorderSide(color: colorSideborder!),
             ),
           )),
       onPressed: () {
         if (onTap != null) onTap!();
       },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(right: 8),
-            child: icon1,
-          ),
-          Flexible(
-            child: icon1 != null
-                ? Text(
-                    "$textBtn",
-                    style: TextStyle(color: colorText),
-                  )
-                : Text(
-                    "$textBtn",
-                    style: TextStyle(color: colorText),
-                  ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: icon1,
+            ),
+            Flexible(
+              child: icon1 != null
+                  ? Text(
+                      "$textBtn",
+                      style: TextStyle(color: colorText),
+                    )
+                  : Text(
+                      "$textBtn",
+                      style: TextStyle(color: colorText),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

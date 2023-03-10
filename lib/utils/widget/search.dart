@@ -7,12 +7,14 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:get/get.dart';
 
 class SearchApp extends StatelessWidget {
-  final controller, onTap, onChange, isSearchDate;
+  final controller, onTap, onChange, isSearchDate, isFilter, onTapFilter;
   const SearchApp(
       {super.key,
       this.controller,
       this.onChange,
       this.onTap,
+      this.onTapFilter,
+      this.isFilter,
       this.isSearchDate});
 
   @override
@@ -21,7 +23,7 @@ class SearchApp extends StatelessWidget {
       children: [
         Expanded(
           // flex:isSearchDate==true? 80:60,
-          flex: 60,
+          flex: isFilter! == false ? 60 : 100,
           child: CardCustom(
             colorBg: Colors.white,
             radiusBorder: Utility.borderStyle1,
@@ -51,23 +53,43 @@ class SearchApp extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            flex: 80,
-                            child: TextField(
-                              controller: controller,
-                              cursorColor: Colors.black,
-                              decoration: InputDecoration(
-                                  border: InputBorder.none, hintText: "Cari"),
-                              textInputAction: TextInputAction.done,
-                              style: TextStyle(
-                                  fontSize: 14.0,
-                                  height: 1.5,
-                                  color: Colors.black),
-                              onSubmitted: (value) {
-                                if (onTap != null) onTap!(value);
-                              },
-                            ),
-                          ),
+                          onChange == null
+                              ? Expanded(
+                                  flex: 80,
+                                  child: TextField(
+                                    controller: controller,
+                                    cursorColor: Colors.black,
+                                    decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: "Cari"),
+                                    textInputAction: TextInputAction.done,
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        height: 1.5,
+                                        color: Colors.black),
+                                    onSubmitted: (value) {
+                                      if (onTap != null) onTap!(value);
+                                    },
+                                  ),
+                                )
+                              : Expanded(
+                                  flex: 80,
+                                  child: TextField(
+                                    controller: controller,
+                                    cursorColor: Colors.black,
+                                    decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: "Cari"),
+                                    textInputAction: TextInputAction.done,
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        height: 1.5,
+                                        color: Colors.black),
+                                    onChanged: (value) {
+                                      if (onTap != null) onTap!(value);
+                                    },
+                                  ),
+                                ),
                           // !controller.statusCari.value
                           //     ? SizedBox()
                           //     : Expanded(
@@ -91,23 +113,31 @@ class SearchApp extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(
-          width: 10,
-        ),
-        Expanded(
-            flex: 10,
-            child: Container(
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        width: 1, color: Color.fromARGB(255, 211, 205, 205)),
-                    borderRadius: BorderRadius.circular(5)),
-                child: const Padding(
-                    padding:
-                        EdgeInsets.only(top: 5, bottom: 5, left: 1, right: 2),
-                    child: Icon(Iconsax.setting_4)),
-              ),
-            ))
+        isFilter! == false
+            ? SizedBox(
+                width: 10,
+              )
+            : SizedBox(),
+        isFilter! == false
+            ? Expanded(
+                flex: 10,
+                child: InkWell(
+                  onTap: () {
+                    if (onTapFilter != null) onTapFilter!();
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            width: 1,
+                            color: Color.fromARGB(255, 211, 205, 205)),
+                        borderRadius: BorderRadius.circular(5)),
+                    child: const Padding(
+                        padding: EdgeInsets.only(
+                            top: 5, bottom: 5, left: 1, right: 2),
+                        child: Icon(Iconsax.setting_4)),
+                  ),
+                ))
+            : SizedBox()
       ],
     );
     ;

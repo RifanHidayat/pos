@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:siscom_pos/controller/pelanggan/list_pelanggan_controller.dart';
+import 'package:siscom_pos/controller/pengaturan/main_pengaturan_ct.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
-import 'package:siscom_pos/screen/laporan/lap_rekap_penjualan.dart';
-import 'package:siscom_pos/screen/laporan/lap_ringkasan_penjualan.dart';
-import 'package:siscom_pos/screen/pelanggan/detail_pelanggan_view.dart';
+import 'package:siscom_pos/screen/pengaturan/default_sales_pelanggan_view.dart';
 import 'package:siscom_pos/screen/pengaturan/setting_akun.dart';
+import 'package:siscom_pos/screen/pengaturan/ubah_password.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
-import 'package:siscom_pos/screen/stockopname/detail_stock_opname.dart';
-import 'package:siscom_pos/screen/stockopname/tambah_stok_opname.dart';
 import 'package:siscom_pos/utils/utility.dart';
-import 'package:siscom_pos/utils/widget/button.dart';
-import 'package:siscom_pos/utils/widget/search.dart';
-import 'package:siscom_pos/utils/widget/text_label.dart';
 import 'package:get/get.dart';
 
 class MainPengaturan extends StatefulWidget {
@@ -23,12 +17,12 @@ class MainPengaturan extends StatefulWidget {
 class _MainPengaturanState extends State<MainPengaturan> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  var controller = Get.put(ListPelangganViewController());
+  var controller = Get.put(mainPengaturanController());
   var sidebarCt = Get.put(SidebarController());
 
   @override
   void initState() {
-    // controller.startLoad();
+    controller.startLoad();
     super.initState();
   }
 
@@ -178,55 +172,69 @@ class _MainPengaturanState extends State<MainPengaturan> {
         SizedBox(
           height: Utility.medium,
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 15,
-              child: Icon(Iconsax.profile_2user),
-            ),
-            Expanded(
-              flex: 80,
-              child: Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Text(
-                  "Default Salesman & Pelanggan",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+        InkWell(
+          onTap: () {
+            Get.to(DefaultSalesPelanggan(),
+                duration: Duration(milliseconds: 300),
+                transition: Transition.rightToLeftWithFade);
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 15,
+                child: Icon(Iconsax.profile_2user),
+              ),
+              Expanded(
+                flex: 80,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 8, top: 3),
+                  child: Text(
+                    "Default Salesman & Pelanggan",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 10,
-              child: Icon(Iconsax.arrow_right_3),
-            ),
-          ],
+              Expanded(
+                flex: 10,
+                child: Icon(Iconsax.arrow_right_3),
+              ),
+            ],
+          ),
         ),
         Divider(),
         SizedBox(
           height: Utility.medium,
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 15,
-              child: Icon(Iconsax.unlock),
-            ),
-            Expanded(
-              flex: 80,
-              child: Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Text(
-                  "Ubah Kata Sandi",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+        InkWell(
+          onTap: () {
+            Get.to(UbahPassword(),
+                duration: Duration(milliseconds: 300),
+                transition: Transition.rightToLeftWithFade);
+          },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 15,
+                child: Icon(Iconsax.unlock),
+              ),
+              Expanded(
+                flex: 80,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 8, top: 3),
+                  child: Text(
+                    "Ubah Kata Sandi",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 10,
-              child: Icon(Iconsax.arrow_right_3),
-            ),
-          ],
+              Expanded(
+                flex: 10,
+                child: Icon(Iconsax.arrow_right_3),
+              ),
+            ],
+          ),
         )
       ],
     );

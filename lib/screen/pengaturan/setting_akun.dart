@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:siscom_pos/controller/onboard_controller.dart';
-import 'package:siscom_pos/screen/auth/login.dart';
+import 'package:siscom_pos/controller/pengaturan/main_pengaturan_ct.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 
 class SettingAkun extends StatelessWidget {
-  // final controller = Get.put(OnboardController());
+  var controller = Get.put(mainPengaturanController());
 
   @override
   Widget build(BuildContext context) {

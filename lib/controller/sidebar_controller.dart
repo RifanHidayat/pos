@@ -26,15 +26,19 @@ class SidebarController extends BaseController {
   var ppnDefaultCabang = "".obs;
   var ipdevice = "".obs;
   var emailPengguna = "".obs;
+  var passwordPengguna = "".obs;
   final NetworkInfo _networkInfo = NetworkInfo();
 
   var listCabang = [].obs;
+  var listCabangMaster = [].obs;
 
   @override
   void onInit() async {
     var dataUser = AppData.informasiLoginUser.split("-");
     emailPengguna.value = dataUser[0];
     emailPengguna.refresh();
+    passwordPengguna.value = dataUser[1];
+    passwordPengguna.refresh();
     super.onInit();
   }
 
@@ -48,6 +52,8 @@ class SidebarController extends BaseController {
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     List data = valueBody['data'];
+    listCabangMaster.value = data;
+    listCabangMaster.refresh();
     var sysUser = AppData.sysuserInformasi.split("-");
     var hakAksesCabang = sysUser[3].split(" ");
     List filter = [];
@@ -90,7 +96,7 @@ class SidebarController extends BaseController {
     var ipLocal = await checkLocalIp;
     ipdevice.value = ipLocal;
     ipdevice.refresh();
-    print(AppData.informasiLoginUser);
+    // print(AppData.informasiLoginUser);
     if (value == "pos") {
       if (sidebarMenuSelected.value != 1) {
         Get.back();
