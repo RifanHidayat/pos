@@ -2,14 +2,20 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:siscom_pos/controller/buttom_sheet_global.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/model/laporan/list_rekap_penjualan_model.dart';
 import 'package:siscom_pos/utils/utility.dart';
+import 'package:siscom_pos/utils/widget/text_form_field_group.dart';
+import 'package:siscom_pos/utils/widget/text_label.dart';
 
 class LaporanRekapPenjualanController extends GetxController {
   RefreshController refreshController = RefreshController(initialRefresh: true);
   RefreshController refreshDetailController =
       RefreshController(initialRefresh: true);
+
+  var sidebarCt = Get.put(SidebarController());
 
   var screenLoad = false.obs;
   var bestSellerView = true.obs;
@@ -17,11 +23,30 @@ class LaporanRekapPenjualanController extends GetxController {
   var listRekapPenjualan = <ListRekapPenjualanModel>[].obs;
   var detailRekap = [].obs;
   var dataBarang = [].obs;
+  var dataPelanggan = [].obs;
+  var dataSales = [].obs;
+  var dataBarangFilter = [].obs;
 
   var statusFilter = "".obs;
+  var tanggalDari = "".obs;
+  var tanggalSampai = "".obs;
+
+  // PELANGGAN
+  var kodePelangganSelected = "".obs;
+  var namaPelangganSelected = "".obs;
+
+  // SALES
+  var kodeSalesSelected = "".obs;
+  var namaSalesSelected = "".obs;
+
+  // BARANG FILTER
+  var kodeBarangfSelected = "".obs;
+  var groupBarangSelected = "".obs;
+  var namaBarangSelected = "".obs;
 
   var statusMember = 0.obs;
   var screenDetailAktif = 0.obs;
+  var filterAktif = 0.obs;
 
   var dummyData = [
     {"title": "SI2022010001", "jumlah": "25", "total": "50000000"},
@@ -29,6 +54,30 @@ class LaporanRekapPenjualanController extends GetxController {
     {"title": "SI2022010003", "jumlah": "25", "total": "50000000"},
     {"title": "SI2022010004", "jumlah": "25", "total": "50000000"},
     {"title": "SI2022010005", "jumlah": "25", "total": "50000000"},
+  ];
+
+  var dummyDataPelanggan = [
+    {"NAMA": "Pelanggan 1", "ALAMAT": "Alamat 1"},
+    {"NAMA": "Pelanggan 2", "ALAMAT": "Alamat 2"},
+    {"NAMA": "Pelanggan 3", "ALAMAT": "Alamat 3"},
+    {"NAMA": "Pelanggan 4", "ALAMAT": "Alamat 4"},
+    {"NAMA": "Pelanggan 5", "ALAMAT": "Alamat 5"},
+  ];
+
+  var dummyDataSales = [
+    {"NAMA": "Sales 1", "ALAMAT": "Alamat 1"},
+    {"NAMA": "Sales 2", "ALAMAT": "Alamat 2"},
+    {"NAMA": "Sales 3", "ALAMAT": "Alamat 3"},
+    {"NAMA": "Sales 4", "ALAMAT": "Alamat 4"},
+    {"NAMA": "Sales 5", "ALAMAT": "Alamat 5"},
+  ];
+
+  var dummyDataBarangFilter = [
+    {"NAMA": "Barang 1"},
+    {"NAMA": "Barang 2"},
+    {"NAMA": "Barang 3"},
+    {"NAMA": "Barang 4"},
+    {"NAMA": "Barang 5"},
   ];
 
   var dummyDataBarang = [
@@ -66,6 +115,14 @@ class LaporanRekapPenjualanController extends GetxController {
 
   void startLoad() {
     getProsesListRekap();
+    getProsesPelanggan();
+    getProsesSales();
+    getProsesBarang();
+    tanggalDari.value = Utility.convertDate1("${sidebarCt.dateTimeNow.value}");
+    tanggalSampai.value =
+        Utility.convertDate1("${sidebarCt.dateTimeNow.value}");
+    tanggalDari.refresh();
+    tanggalSampai.refresh();
   }
 
   Future<bool> getProsesListRekap() {
@@ -83,6 +140,30 @@ class LaporanRekapPenjualanController extends GetxController {
     }
     dataBarang.refresh();
 
+    return Future.value(true);
+  }
+
+  Future<bool> getProsesPelanggan() {
+    for (var element in dummyDataPelanggan) {
+      dataPelanggan.add(element);
+    }
+    dataPelanggan.refresh();
+    return Future.value(true);
+  }
+
+  Future<bool> getProsesSales() {
+    for (var element in dummyDataSales) {
+      dataSales.add(element);
+    }
+    dataSales.refresh();
+    return Future.value(true);
+  }
+
+  Future<bool> getProsesBarang() {
+    for (var element in dummyDataBarangFilter) {
+      dataBarangFilter.add(element);
+    }
+    dataBarangFilter.refresh();
     return Future.value(true);
   }
 
@@ -143,5 +224,77 @@ class LaporanRekapPenjualanController extends GetxController {
             ],
           );
         });
+  }
+
+  void filterTanggal() {
+    ButtonSheetController().validasiButtonSheet(
+        "Filter Tanggal", kontenFilterTanggal(), "", "Filter", () {});
+  }
+
+  Widget kontenFilterTanggal() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextLabel(
+                  text: "Tanggal Dari",
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                TextFieldDate(
+                  tanggal: "${tanggalDari.value}",
+                  onTap: (valueDate) {
+                    print(valueDate);
+                  },
+                )
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextLabel(
+                  text: "Tanggal Sampai",
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                TextFieldDate(
+                  tanggal: "${tanggalSampai.value}",
+                  onTap: (valueDate) {
+                    print(valueDate);
+                  },
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void filterPelanggan() {
+    GlobalBottomSheet().buttomSheetGlobal(dataPelanggan, "Filter Pelanggan",
+        "filter_pelanggan_rekap_penjualan", namaPelangganSelected.value);
+  }
+
+  void filterSales() {
+    GlobalBottomSheet().buttomSheetGlobal(dataSales, "Filter Sales",
+        "filter_sales_rekap_penjualan", namaSalesSelected.value);
+  }
+
+  void filterBarang() {
+    GlobalBottomSheet().buttomSheetGlobal(dataBarangFilter, "Filter Barang",
+        "filter_barang_rekap_penjualan", namaBarangSelected.value);
   }
 }

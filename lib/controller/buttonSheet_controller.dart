@@ -97,6 +97,7 @@ class ButtonSheetController extends GetxController {
                                 padding: const EdgeInsets.only(left: 3),
                                 child: Button1(
                                   textBtn: acc,
+                                  style: 2,
                                   colorBtn: Utility.primaryDefault,
                                   onTap: () {
                                     if (onTap != null) onTap();

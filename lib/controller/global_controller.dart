@@ -240,17 +240,18 @@ class GlobalController extends GetxController
                                               "pilih_so_nota_pengiriman") {
                                         aksiPenjualan(
                                             dataShow[index], stringController);
-                                      } else if (stringController ==
-                                          "pilih_barang_faktur_penjualan_si") {
-                                        aksiFakturPenjualanSI(dataShow[index]);
-                                      } else if (stringController ==
-                                          'pilih_gudang_stok_opaname') {
-                                        aksiGudangStokOpname(dataShow[index]);
-                                      } else if (stringController ==
-                                          'pilih_kelompok_barang_stok_opaname') {
-                                        aksiKelompokBarangStokOpname(
-                                            dataShow[index]);
                                       }
+                                      // else if (stringController ==
+                                      //     "pilih_barang_faktur_penjualan_si") {
+                                      //   aksiFakturPenjualanSI(dataShow[index]);
+                                      // } else if (stringController ==
+                                      //     'pilih_gudang_stok_opaname') {
+                                      //   aksiGudangStokOpname(dataShow[index]);
+                                      // } else if (stringController ==
+                                      //     'pilih_kelompok_barang_stok_opaname') {
+                                      //   aksiKelompokBarangStokOpname(
+                                      //       dataShow[index]);
+                                      // }
                                       {
                                         print(stringController);
 
@@ -411,23 +412,23 @@ class GlobalController extends GetxController
     }
   }
 
-  void aksiGudangStokOpname(dataTerpilih) {
-    print(dataTerpilih);
-    stokOpnameCtr.gudangCodeSelected.value = dataTerpilih['KODE'].toString();
-    stokOpnameCtr.gudangCtr.text = dataTerpilih['NAMA'].toString();
-    Get.back();
-  }
+  // void aksiGudangStokOpname(dataTerpilih) {
+  //   print(dataTerpilih);
+  //   stokOpnameCtr.gudangCodeSelected.value = dataTerpilih['KODE'].toString();
+  //   stokOpnameCtr.gudangCtr.text = dataTerpilih['NAMA'].toString();
+  //   Get.back();
+  // }
 
-  void aksiKelompokBarangStokOpname(dataTerpilih) {
-    stokOpnameCtr.groupCodeSelected.value = dataTerpilih['KODE'].toString();
-    stokOpnameCtr.groupBarangCtr.text = dataTerpilih['NAMA'].toString();
-    Get.back();
-  }
+  // void aksiKelompokBarangStokOpname(dataTerpilih) {
+  //   stokOpnameCtr.groupCodeSelected.value = dataTerpilih['KODE'].toString();
+  //   stokOpnameCtr.groupBarangCtr.text = dataTerpilih['NAMA'].toString();
+  //   Get.back();
+  // }
 
-  void aksiFakturPenjualanSI(dataTerpilih) {
-    FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);
-    Get.back();
-  }
+  // void aksiFakturPenjualanSI(dataTerpilih) {
+  //   FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);
+  //   Get.back();
+  // }
 
   Widget contentValidasiPilihSO(dataTerpilih) {
     return Text(

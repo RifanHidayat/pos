@@ -60,9 +60,10 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                   Padding(
                     padding: const EdgeInsets.only(left: 16, right: 16),
                     child: SearchApp(
-                      onTap: (value) {
-                        print(value);
-                      },
+                      controller: controller.pencarian.value,
+                      onChange: true,
+                      isFilter: true,
+                      onTap: (value) {},
                     ),
                   ),
                   SizedBox(

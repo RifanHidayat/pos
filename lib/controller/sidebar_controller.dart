@@ -8,11 +8,14 @@ import 'package:siscom_pos/screen/auth/login.dart';
 import 'package:siscom_pos/screen/laporan/main_laporan.dart';
 import 'package:siscom_pos/screen/pelanggan/list_pelanggan_view.dart';
 import 'package:siscom_pos/screen/pengaturan/main_pengaturan.dart';
+import 'package:siscom_pos/screen/pengaturan/setting_akun.dart';
 import 'package:siscom_pos/screen/penjualan/dashboard_penjualan.dart';
 import 'package:siscom_pos/screen/pos/dashboard_pos.dart';
+import 'package:siscom_pos/screen/pusat_bantuan/main_pusatbantuan.dart';
 import 'package:siscom_pos/screen/stockopname/stockopname.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
+import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/modal_popup.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -27,6 +30,7 @@ class SidebarController extends BaseController {
   var ipdevice = "".obs;
   var emailPengguna = "".obs;
   var passwordPengguna = "".obs;
+  var dateTimeNow = DateTime.now().obs;
   final NetworkInfo _networkInfo = NetworkInfo();
 
   var listCabang = [].obs;
@@ -39,7 +43,14 @@ class SidebarController extends BaseController {
     emailPengguna.refresh();
     passwordPengguna.value = dataUser[1];
     passwordPengguna.refresh();
+    getTimeNow();
     super.onInit();
+  }
+
+  void getTimeNow() {
+    var dateNow = DateTime.now();
+    dateTimeNow.value = dateNow;
+    dateTimeNow.refresh();
   }
 
   void getCabang() async {
@@ -139,6 +150,18 @@ class SidebarController extends BaseController {
         sidebarMenuSelected.value = 6;
         sidebarMenuSelected.refresh();
       }
+    } else if (value == "pusat_bantuan") {
+      if (sidebarMenuSelected.value != 7) {
+        Get.back();
+        Get.offAll(PusatBantuanMain());
+        sidebarMenuSelected.value = 7;
+        sidebarMenuSelected.refresh();
+      }
+    } else if (value == "personal_info") {
+      Get.back();
+      Get.to(SettingAkun(),
+          duration: Duration(milliseconds: 300),
+          transition: Transition.rightToLeftWithFade);
     }
   }
 

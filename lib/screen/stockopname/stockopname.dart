@@ -48,30 +48,33 @@ class _StockOpnameState extends State<StockOpname> {
             onWillPop: () async {
               return false;
             },
-            child: Obx(
-              () => Column(
-                children: [
-                  header(),
-                  SizedBox(
-                    height: Utility.medium,
+            child: Column(
+              children: [
+                header(),
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 16),
+                  child: SearchApp(
+                    controller: controller.pencarian.value,
+                    onChange: true,
+                    isFilter: true,
+                    onTap: (value) {},
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16),
-                    child: SearchApp(),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Flexible(
-                      child: RefreshIndicator(
-                          color: Utility.primaryDefault,
-                          onRefresh: refreshData,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16, right: 16),
-                            child: listStokOpnameView(),
-                          )))
-                ],
-              ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Flexible(
+                    child: RefreshIndicator(
+                        color: Utility.primaryDefault,
+                        onRefresh: refreshData,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
+                          child: listStokOpnameView(),
+                        )))
+              ],
             ),
           ),
         ),
@@ -93,7 +96,7 @@ class _StockOpnameState extends State<StockOpname> {
         ],
       ),
       width: MediaQuery.of(Get.context!).size.width,
-      height: 50,
+      height: 60,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -224,12 +227,14 @@ class _StockOpnameState extends State<StockOpname> {
                                         TextLabel(
                                           text: "$kodeCabang-$namaCabang",
                                           color: Utility.grey600,
+                                          size: 10.0,
                                         ),
                                         SizedBox(
                                           height: 5,
                                         ),
                                         TextLabel(
                                             text: "$kodeGudang-$namaGudang",
+                                            size: 10.0,
                                             color: Utility.grey600)
                                       ],
                                     ),

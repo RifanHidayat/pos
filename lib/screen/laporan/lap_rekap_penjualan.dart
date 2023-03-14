@@ -108,60 +108,104 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
               scrollDirection: Axis.horizontal,
               physics: BouncingScrollPhysics(),
               children: [
-                Container(
-                  margin: EdgeInsets.only(left: 8, right: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: Utility.borderStyle1,
-                    border: Border.all(
-                      color: Utility.nonAktif,
-                      width: 1.0,
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      controller.filterAktif.value = 1;
+                      controller.filterTanggal();
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 8, right: 3),
+                    decoration: BoxDecoration(
+                      color: controller.filterAktif.value == 1
+                          ? Utility.primaryLight100
+                          : Utility.baseColor2,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                        color: Utility.nonAktif,
+                        width: 1.0,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text("Tanggal"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Tanggal"),
+                    ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 3, right: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: Utility.borderStyle1,
-                    border: Border.all(
-                      color: Utility.nonAktif,
-                      width: 1.0,
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      controller.filterAktif.value = 2;
+                      controller.filterPelanggan();
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 3, right: 3),
+                    decoration: BoxDecoration(
+                      color: controller.filterAktif.value == 2
+                          ? Utility.primaryLight100
+                          : Utility.baseColor2,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                        color: Utility.nonAktif,
+                        width: 1.0,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text("Pelanggan"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Pelanggan"),
+                    ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 3, right: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: Utility.borderStyle1,
-                    border: Border.all(
-                      color: Utility.nonAktif,
-                      width: 1.0,
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      controller.filterAktif.value = 3;
+                      controller.filterSales();
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 3, right: 3),
+                    decoration: BoxDecoration(
+                      color: controller.filterAktif.value == 3
+                          ? Utility.primaryLight100
+                          : Utility.baseColor2,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                        color: Utility.nonAktif,
+                        width: 1.0,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text("Sales"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Sales"),
+                    ),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left: 3, right: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: Utility.borderStyle1,
-                    border: Border.all(
-                      color: Utility.nonAktif,
-                      width: 1.0,
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      controller.filterAktif.value = 4;
+                      controller.filterBarang();
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 3, right: 3),
+                    decoration: BoxDecoration(
+                      color: controller.filterAktif.value == 4
+                          ? Utility.primaryLight100
+                          : Utility.baseColor2,
+                      borderRadius: Utility.borderStyle1,
+                      border: Border.all(
+                        color: Utility.nonAktif,
+                        width: 1.0,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text("Barang"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Barang"),
+                    ),
                   ),
                 ),
               ],

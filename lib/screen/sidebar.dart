@@ -36,25 +36,41 @@ class Sidebar extends StatelessWidget {
                     height: 60,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipOval(
-                                child: Image.asset(
-                              "assets/Image.png",
-                              height: 50,
-                            )),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 8.0, top: 16.0),
-                                child: Text(
-                                  "${controller.emailPengguna.value}",
-                                  style: TextStyle(color: Utility.baseColor2),
+                      child: InkWell(
+                        onTap: () {
+                          controller.changeRoutePage("personal_info");
+                        },
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipOval(
+                                  child: Image.asset(
+                                "assets/Image.png",
+                                height: 50,
+                              )),
+                              Expanded(
+                                flex: 80,
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.only(left: 8.0, top: 16.0),
+                                  child: Text(
+                                    "Nama User",
+                                    style: TextStyle(color: Utility.baseColor2),
+                                  ),
                                 ),
                               ),
-                            )
-                          ],
+                              Expanded(
+                                flex: 20,
+                                child: Padding(
+                                    padding: EdgeInsets.only(top: 16.0),
+                                    child: Icon(
+                                      Iconsax.arrow_right_3,
+                                      color: Utility.baseColor2,
+                                    )),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -268,6 +284,10 @@ class Sidebar extends StatelessWidget {
               leading: Icon(Iconsax.message_question),
               iconColor: Utility.greyDark,
               title: Text('Pusat Bantuan'),
+              tileColor: controller.sidebarMenuSelected.value == 7
+                  ? Utility.infoLight50
+                  : Colors.white,
+              onTap: () => controller.changeRoutePage("pusat_bantuan"),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),

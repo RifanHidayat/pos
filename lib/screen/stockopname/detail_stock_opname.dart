@@ -106,14 +106,20 @@ class DetailStokOpname extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            TextLabel(text: "Detail barang",size: 16.0,weigh: FontWeight.bold,),
-            SizedBox(height: 10,),
+            TextLabel(
+              text: "Detail barang",
+              size: 16.0,
+              weigh: FontWeight.bold,
+            ),
+            SizedBox(
+              height: 10,
+            ),
             Expanded(
               child: Container(
                 height: double.maxFinite,
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.only(left: 10,right: 5),
+                    padding: EdgeInsets.only(left: 10, right: 5),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: List.generate(10, (index) => _item()),
@@ -130,7 +136,7 @@ class DetailStokOpname extends StatelessWidget {
 
   Widget _item() {
     return InkWell(
-      onTap: (){
+      onTap: () {
         detailItem();
       },
       child: Container(
@@ -170,13 +176,9 @@ class DetailStokOpname extends StatelessWidget {
     );
   }
 
-
-  void detailItem(){
- 
-   
+  void detailItem() {
     showModalBottomSheet<String>(
         context: Get.context!,
-   
         isScrollControlled: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
@@ -184,183 +186,237 @@ class DetailStokOpname extends StatelessWidget {
           ),
         ),
         builder: (context) {
-       
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             return MediaQuery(
                 data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
                 child: SafeArea(
-                
-                child: Padding(
-                  padding: EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: Container(
-                    child: Column(
-              
-                          mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                        
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 80,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextLabel(text: "Apple iphone 13 pro max 128GB",weigh: FontWeight.w700,),
-                                  SizedBox(height: 5,),
-                                    TextLabel(text: "002- Gudang bahan baku",color: Utility.grey900,)
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 20,
-                              child: InkWell(
-                                onTap: ()=>Get.back(),
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Icon(Icons.close,color: Utility.grey900)),
-                              ))
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-
-                        
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 50,
-                              child: Container(
-                                padding: EdgeInsets.only(top: 20,bottom: 20,left: 10,right: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(width: 1,color: Utility.grey100)
-                                ),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        bottom: MediaQuery.of(context).viewInsets.bottom),
+                    child: Container(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 80,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextLabel(text: "Gudang",),
-                                    SizedBox(height: 10,),
-                                       TextLabel(text: "Nama Gudang",weigh: FontWeight.bold ,size: 13.0,),
+                                    TextLabel(
+                                      text: "Apple iphone 13 pro max 128GB",
+                                      weigh: FontWeight.w700,
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    TextLabel(
+                                      text: "002- Gudang bahan baku",
+                                      color: Utility.grey900,
+                                    )
                                   ],
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 10,),
-                               Expanded(
-                              flex: 50,
-                              child: Container(
-                                padding: EdgeInsets.only(top: 20,bottom: 20,left: 10,right: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(width: 1,color: Utility.grey100)
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextLabel(text: "Stock",),
-                                    SizedBox(height: 10,),
-                                       TextLabel(text: "100000",weigh: FontWeight.bold ,size: 13.0,),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                         
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 50,
-                              child: Container(
-                                padding: EdgeInsets.only(top: 20,bottom: 20,left: 10,right: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(width: 1,color: Utility.grey100)
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextLabel(text: "Fisik",),
-                                    SizedBox(height: 10,),
-                                       TextLabel(text: "Nama Gudang",weigh: FontWeight.bold ,size: 13.0,),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10,),
-                               Expanded(
-                              flex: 50,
-                              child: Container(
-                                padding: EdgeInsets.only(top: 20,bottom: 20,left: 10,right: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(width: 1,color: Utility.grey100)
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextLabel(text: "Selisih",),
-                                    SizedBox(height: 10,),
-                                       TextLabel(text: "100000",weigh: FontWeight.bold ,size: 13.0,),
-                                  ],
+                              Expanded(
+                                  flex: 20,
+                                  child: InkWell(
+                                    onTap: () => Get.back(),
+                                    child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Icon(Icons.close,
+                                            color: Utility.grey900)),
+                                  ))
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                      top: 20, bottom: 20, left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 1, color: Utility.grey100)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextLabel(
+                                        text: "Gudang",
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextLabel(
+                                        text: "Nama Gudang",
+                                        weigh: FontWeight.bold,
+                                        size: 13.0,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 50,
-
-                              child: Container(
-
-                                decoration: BoxDecoration(
-                                  border: Border.all(width: 1,color: Utility.primaryDefault),
-                                  borderRadius: BorderRadius.circular(5)
-                                ),
-                              padding: EdgeInsets.only(top: 10,bottom: 10),
-                                
-                                
-                                child: Center(child: TextLabel(text: "Hapus",color: Utility.primaryDefault,)),
+                              SizedBox(
+                                width: 10,
                               ),
-                            ),
-                            SizedBox(width: 5,),
-                               Expanded(
-                              flex: 50,
-
-                              child: Container(
-
-                                decoration: BoxDecoration(
-                                  color: Utility.primaryDefault,
-                                  border: Border.all(width: 1,color: Utility.primaryDefault),
-                                  borderRadius: BorderRadius.circular(3)
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                      top: 20, bottom: 20, left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 1, color: Utility.grey100)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextLabel(
+                                        text: "Stock",
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextLabel(
+                                        text: "100000",
+                                        weigh: FontWeight.bold,
+                                        size: 13.0,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              padding: EdgeInsets.only(top: 10,bottom: 10),
-                                
-                                
-                                child: Center(child: TextLabel(text: "Simpan",color: Colors.white,)),
                               ),
-                            )
-                          ],
-                        ),
-                          SizedBox(height: 10,),
-                        
-                      ],
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                      top: 20, bottom: 20, left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 1, color: Utility.grey100)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextLabel(
+                                        text: "Fisik",
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextLabel(
+                                        text: "Nama Gudang",
+                                        weigh: FontWeight.bold,
+                                        size: 13.0,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                      top: 20, bottom: 20, left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 1, color: Utility.grey100)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextLabel(
+                                        text: "Selisih",
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextLabel(
+                                        text: "100000",
+                                        weigh: FontWeight.bold,
+                                        size: 13.0,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Utility.primaryDefault),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                                  child: Center(
+                                      child: TextLabel(
+                                    text: "Hapus",
+                                    color: Utility.primaryDefault,
+                                  )),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Utility.primaryDefault,
+                                      border: Border.all(
+                                          width: 1,
+                                          color: Utility.primaryDefault),
+                                      borderRadius: BorderRadius.circular(3)),
+                                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                                  child: Center(
+                                      child: TextLabel(
+                                    text: "Simpan",
+                                    color: Colors.white,
+                                  )),
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                        ));
+                ));
           });
         });
-  
-   }
-  
+  }
 }

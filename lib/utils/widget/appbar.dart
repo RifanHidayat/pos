@@ -67,7 +67,7 @@ class AppbarMenu1 extends StatelessWidget {
                   title!,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 16,
                       color: colorTitle),
                 ),
               ),
@@ -168,4 +168,3 @@ class AppbarMenu1 extends StatelessWidget {
     );
   }
 }
-

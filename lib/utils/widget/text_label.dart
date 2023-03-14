@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:siscom_pos/utils/utility.dart';
 
-
 class TextLabel extends StatelessWidget {
-  final text, size, color, weigh, family, align, decoration, letterSpacing,height;
+  final text,
+      size,
+      color,
+      weigh,
+      family,
+      align,
+      decoration,
+      letterSpacing,
+      height;
 
   const TextLabel(
       {super.key,
@@ -14,7 +21,8 @@ class TextLabel extends StatelessWidget {
       this.family,
       this.decoration,
       this.align,
-      this.letterSpacing,this.height});
+      this.letterSpacing,
+      this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +30,13 @@ class TextLabel extends StatelessWidget {
       text,
       textAlign: align ?? TextAlign.left,
       style: TextStyle(
-          decoration: decoration ?? TextDecoration.none,
-          color: color ?? Colors.black,
-          fontSize: size ?? 12,
-          fontWeight: weigh ?? FontWeight.w500,
-         
-          height:height?? 1.2,
-          letterSpacing: letterSpacing ?? 0.5,),
+        decoration: decoration ?? TextDecoration.none,
+        color: color ?? Colors.black,
+        fontSize: size ?? 14,
+        fontWeight: weigh ?? FontWeight.w500,
+        height: height ?? 1.2,
+        letterSpacing: letterSpacing ?? 0.5,
+      ),
     );
   }
 }

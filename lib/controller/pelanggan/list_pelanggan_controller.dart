@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siscom_pos/model/pelanggan/list_pelanggan_model.dart';
 
 class ListPelangganViewController extends GetxController {
   var listPelanggan = <ListPelangganModel>[].obs;
   var listPelangganMaster = <ListPelangganModel>[].obs;
+
+  var pencarian = TextEditingController().obs;
 
   var screenLoad = false.obs;
 

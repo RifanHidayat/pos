@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:siscom_pos/controller/stok_opname/api_stok_opname.dart';
 import 'package:siscom_pos/model/detail_barang.dart';
 import 'package:siscom_pos/model/stok_opname/list_stok_opname.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -62,10 +61,13 @@ class StockOpnameController extends GetxController {
   var groups = [].obs;
   var barangs = <DetailBarangModel>[].obs;
 
-  var dateCtr = TextEditingController();
-  var gudangCtr = TextEditingController();
-  var groupBarangCtr = TextEditingController();
-  var diopnameCtr = TextEditingController();
+  var pencarian = TextEditingController().obs;
+  var tanggal = TextEditingController().obs;
+  var tanggalBuatStok = TextEditingController().obs;
+  var diopnameOleh = TextEditingController().obs;
+  // var gudangCtr = TextEditingController().obs;
+  // var groupBarangCtr = TextEditingController().obs;
+  // var diopnameCtr = TextEditingController().obs;
 
   var tahun = "".obs;
   var bulan = "".obs;
@@ -175,10 +177,10 @@ class StockOpnameController extends GetxController {
   // }
 
   void resetData() {
-    dateCtr.clear();
-    gudangCtr.clear();
-    groupBarangCtr.clear();
-    diopnameCtr.clear();
+    // dateCtr.value.text = "";
+    // gudangCtr.value.text = "";
+    // groupBarangCtr.value.text = "";
+    // diopnameCtr.value.text = "";
     gudangCodeSelected.value = "";
   }
 }
