@@ -2,11 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/model/detail_barang.dart';
 import 'package:siscom_pos/model/stok_opname/list_stok_opname.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/request.dart';
 import 'package:siscom_pos/utils/toast.dart';
+import 'package:siscom_pos/utils/utility.dart';
+import 'package:siscom_pos/utils/widget/card_custom.dart';
+import 'package:siscom_pos/utils/widget/text_form_field_group.dart';
+import 'package:siscom_pos/utils/widget/text_label.dart';
 
 class StockOpnameController extends GetxController {
   var listStokOpname = <ListStokOpnameModel>[].obs;
@@ -56,18 +61,23 @@ class StockOpnameController extends GetxController {
     }
   ];
 
+  List dataDetailBarangStokOpname = [
+    {"nama": "APPLE IPHONE 13 PRO MAX PROMAX 128GB", "stok": 50},
+    {"nama": "APPLE IPHONE 13 PRO MAX PROMAX 128GB", "stok": 50},
+    {"nama": "APPLE IPHONE 13 PRO MAX PROMAX 128GB", "stok": 50},
+    {"nama": "APPLE IPHONE 13 PRO MAX PROMAX 128GB", "stok": 50},
+    {"nama": "APPLE IPHONE 13 PRO MAX PROMAX 128GB", "stok": 50},
+  ];
+
   var isLoading = true.obs;
-  var gudangs = [].obs;
-  var groups = [].obs;
+  var barangDetailStokOpname = [].obs;
   var barangs = <DetailBarangModel>[].obs;
 
   var pencarian = TextEditingController().obs;
   var tanggal = TextEditingController().obs;
   var tanggalBuatStok = TextEditingController().obs;
   var diopnameOleh = TextEditingController().obs;
-  // var gudangCtr = TextEditingController().obs;
-  // var groupBarangCtr = TextEditingController().obs;
-  // var diopnameCtr = TextEditingController().obs;
+  var fisikStokDetail = TextEditingController().obs;
 
   var tahun = "".obs;
   var bulan = "".obs;
@@ -101,86 +111,173 @@ class StockOpnameController extends GetxController {
 
     return Future.value(true);
   }
-  // Future<void> fetchGudang() async {
-  //   try {
-  //     var body = jsonEncode({"database": 'gik2', "kode_cabang": "02"});
-  //     var response =
-  //         await Request(url: "stok-opname-gudang", body: body).post();
-  //     var res = jsonDecode(response.body);
-  //     if (response.statusCode == 200) {
-  //       gudangs.value = res['data'];
-  //       fetchGroup();
-
-  //       isLoading.value = false;
-  //       return;
-  //     }
-  //     UtilsAlert.showToast(res['message']);
-
-  //     isLoading.value = false;
-  //   } catch (e) {
-  //     UtilsAlert.showToast(e.toString());
-  //     print("error ${e}");
-  //     isLoading.value = false;
-  //   }
-  // }
-
-  // Future<void> fetchGroup() async {
-  //   try {
-  //     print("Masuk sini");
-  //     var body = jsonEncode({"database": "gik2"});
-  //     var response = await Request(url: "stok-opname-group", body: body).post();
-  //     var res = jsonDecode(response.body);
-  //     if (response.statusCode == 200) {
-  //       print("data group ${res['data']}");
-  //       groups.value = res['data'];
-  //       isLoading.value = false;
-  //       return;
-  //     }
-  //     UtilsAlert.showToast(res['message']);
-
-  //     isLoading.value = false;
-  //   } catch (e) {
-  //     UtilsAlert.showToast(e.toString());
-  //     print("error ${e}");
-  //     isLoading.value = false;
-  //   }
-  // }
-
-  // Future<void> fetchDetailaBarang() async {
-  //   try {
-  //     // UtilsAlert.showLoadingIndicator(Get.context!);
-
-  //     var body = jsonEncode({
-  //       'database': AppData.databaseSelected,
-  //       "kode_gudang": gudangCodeSelected.value,
-  //       'periode': "2301"
-  //     });
-  //     var response =
-  //         await Request(url: "stok-opname-gudang-detail", body: body).post();
-  //     var res = jsonDecode(response.body);
-  //     if (response.statusCode == 200) {
-  //       print(res['data']);
-  //       barangs.value = DetailBarangModel.fromJsonToList(res['data']);
-  //       isLoading.value = false;
-  //       // Get.back();
-  //       return;
-  //     }
-
-  //     UtilsAlert.showToast(res['message'].toString());
-
-  //     isLoading.value = false;
-  //   } catch (e) {
-  //     print("error ${e}");
-  //     UtilsAlert.showToast(e.toString());
-  //     isLoading.value = false;
-  //   }
-  // }
 
   void resetData() {
-    // dateCtr.value.text = "";
-    // gudangCtr.value.text = "";
-    // groupBarangCtr.value.text = "";
-    // diopnameCtr.value.text = "";
     gudangCodeSelected.value = "";
+  }
+
+  void detailPenyesuaianBarangStokOpname() {
+    ButtonSheetController().validasiButtonSheet(
+        "", contentPenyesuaianStokOpname(), "", "Simpan", () {});
+  }
+
+  Widget contentPenyesuaianStokOpname() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextLabel(
+          text: "APPLE IPHONE 13 PRO MAX PROMAX 128GB",
+          weigh: FontWeight.bold,
+        ),
+        TextLabel(text: "002 - GUDANG BAHAN BAKU"),
+        SizedBox(
+          height: Utility.medium,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: 3.0),
+                child: CardCustom(
+                  colorBg: Utility.baseColor2,
+                  radiusBorder: Utility.borderStyle1,
+                  widgetCardCustom: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextLabel(
+                          text: "Gudang",
+                          size: Utility.small,
+                          color: Utility.nonAktif,
+                        ),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                        TextLabel(
+                          text: "Nama Gudang",
+                          weigh: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: 3.0),
+                child: CardCustom(
+                  colorBg: Utility.baseColor2,
+                  radiusBorder: Utility.borderStyle1,
+                  widgetCardCustom: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextLabel(
+                          text: "Stok",
+                          size: Utility.small,
+                          color: Utility.nonAktif,
+                        ),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                        TextLabel(
+                          text: "1200",
+                          weigh: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: Utility.medium,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: 3.0),
+                child: CardCustom(
+                  colorBg: Utility.baseColor2,
+                  radiusBorder: Utility.borderStyle1,
+                  widgetCardCustom: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextLabel(
+                          text: "Fisik",
+                          size: Utility.small,
+                          color: Utility.nonAktif,
+                        ),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                        SizedBox(
+                          height: 18,
+                          child: TextField(
+                            cursorColor: Utility.primaryDefault,
+                            controller: fisikStokDetail.value,
+                            textInputAction: TextInputAction.done,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            style: const TextStyle(
+                                fontSize: 14.0,
+                                height: 1.5,
+                                color: Colors.black),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: 3.0),
+                child: CardCustom(
+                  colorBg: Utility.baseColor2,
+                  radiusBorder: Utility.borderStyle1,
+                  widgetCardCustom: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextLabel(
+                          text: "Selisih",
+                          size: Utility.small,
+                          color: Utility.nonAktif,
+                        ),
+                        SizedBox(
+                          height: Utility.small,
+                        ),
+                        TextLabel(
+                          text: "10",
+                          weigh: FontWeight.bold,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: Utility.medium,
+        ),
+      ],
+    );
   }
 }

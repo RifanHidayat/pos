@@ -55,7 +55,7 @@ class BottomSheetPengaturanController extends GetxController {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SearchApp(
-                controller: pencarian,
+                controller: pencarian.value,
                 onChange: true,
                 isFilter: true,
                 onTap: (value) {

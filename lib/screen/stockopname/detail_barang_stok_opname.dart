@@ -4,6 +4,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
 import 'package:siscom_pos/screen/stockopname/berhasil_menambhakan_data.dart';
+import 'package:siscom_pos/screen/stockopname/scan_barang_stokopname.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbarmenu.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -37,8 +38,8 @@ class _DetailBarangStokOpnameState extends State<DetailBarangStokOpname> {
         type: "appbar_with_bottom",
         returnOnWillpop: true,
         appbarTitle: "Detail Barang Stok Opname",
-        ontapAppbar: () {},
-        backFunction: () {},
+        ontapAppbar: () => Get.back(),
+        backFunction: () => Get.back(),
         contentBottom: Button1(
           textBtn: "Simpan",
           colorBtn: Utility.primaryDefault,
@@ -102,31 +103,87 @@ class _DetailBarangStokOpnameState extends State<DetailBarangStokOpname> {
               SizedBox(
                 height: Utility.medium,
               ),
-              CardCustom(
-                colorBg: Utility.baseColor2,
-                radiusBorder: Utility.borderStyle1,
-                widgetCardCustom: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Iconsax.scan),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: TextLabel(
-                          text: 'Scan Barcode',
-                          size: 14.0,
-                          weigh: FontWeight.bold,
+              InkWell(
+                onTap: () {
+                  Get.to(ScanBarangStokOpname(),
+                      duration: Duration(milliseconds: 300),
+                      transition: Transition.rightToLeftWithFade);
+                },
+                child: CardCustom(
+                  colorBg: Utility.baseColor2,
+                  radiusBorder: Utility.borderStyle1,
+                  widgetCardCustom: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Iconsax.scan),
+                        SizedBox(
+                          width: 10,
                         ),
-                      )
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6.0),
+                          child: TextLabel(
+                            text: 'Scan Barcode',
+                            size: 14.0,
+                            weigh: FontWeight.bold,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              )
+              ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              SearchApp(
+                controller: controller.pencarian.value,
+                onChange: true,
+                isFilter: false,
+                onTap: (value) {
+                  print(value);
+                },
+              ),
+              SizedBox(
+                height: Utility.medium,
+              ),
+              Flexible(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: controller.dataDetailBarangStokOpname.length,
+                      itemBuilder: (context, index) {
+                        var nama = controller.dataDetailBarangStokOpname[index]
+                            ["nama"];
+                        var stok = controller.dataDetailBarangStokOpname[index]
+                            ["stok"];
+                        return InkWell(
+                          onTap: () =>
+                              controller.detailPenyesuaianBarangStokOpname(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: Utility.verySmall,
+                              ),
+                              TextLabel(
+                                text: "$nama",
+                                weigh: FontWeight.bold,
+                              ),
+                              SizedBox(
+                                height: Utility.verySmall,
+                              ),
+                              TextLabel(
+                                text: "Stok : $stok",
+                              ),
+                              Divider(),
+                            ],
+                          ),
+                        );
+                      }))
             ],
           ),
         ));

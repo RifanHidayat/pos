@@ -539,7 +539,12 @@ class _DetailNotaPengirimanBarangState
   Widget rincianWidget() {
     return InkWell(
       onTap: () {
-        HeaderRincianNotaPengirimanController().sheetButtomHeaderRincian();
+        if (controller.subtotal.value == 0.0) {
+          UtilsAlert.showToast(
+              "Harap update barang yang ingin di pilih terlebih dahulu");
+        } else {
+          HeaderRincianNotaPengirimanController().sheetButtomHeaderRincian();
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),

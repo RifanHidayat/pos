@@ -26,7 +26,6 @@ class _ScanBarangState extends State<ScanBarang> {
 
   var scanBarangCt = Get.put(ScanBarangController());
   var globalCt = Get.put(GlobalController());
-  
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -53,9 +52,9 @@ class _ScanBarangState extends State<ScanBarang> {
               child: Obx(
                 () => Stack(
                   children: [
-                    Expanded(
-                      child: Center(child: _buildQrView(context)),
-                    ),
+                    Align(
+                        alignment: Alignment.center,
+                        child: _buildQrView(context)),
                     scanBarangCt.scannerValue.value
                         ? screenDataScan(result)
                         : const SizedBox(),
@@ -236,9 +235,8 @@ class _ScanBarangState extends State<ScanBarang> {
           flex: 35,
           child: SizedBox(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Obx(
-                () => SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -294,18 +292,18 @@ class _ScanBarangState extends State<ScanBarang> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                "${scanBarangCt.barangSelect.value[0]['NAMA']}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Text(
-                                                "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect.value[0]['STDJUAL'], 0)}",
-                                                style: TextStyle(
-                                                  color: Utility.greyDark,
-                                                ),
-                                              ),
+                                              // Text(
+                                              //   "${scanBarangCt.barangSelect[0]['NAMA'] ?? ''}",
+                                              //   style: TextStyle(
+                                              //     fontWeight: FontWeight.bold,
+                                              //   ),
+                                              // ),
+                                              // Text(
+                                              //   "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect[0]['STDJUAL'] ?? 0, 0)}",
+                                              //   style: TextStyle(
+                                              //     color: Utility.greyDark,
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                         ),
@@ -364,9 +362,7 @@ class _ScanBarangState extends State<ScanBarang> {
                       )
                     ],
                   ),
-                ),
-              ),
-            ),
+                )),
           ),
         )
       ],
@@ -377,7 +373,7 @@ class _ScanBarangState extends State<ScanBarang> {
     // For this example we check how width or tall the device is and change the scanArea and overlay accordingly.
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
-        ? 200.0
+        ? 300.0
         : 350.0;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller

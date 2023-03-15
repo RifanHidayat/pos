@@ -92,6 +92,8 @@ class DetailNotaPenjualanController extends BaseController {
       dodtSelected.refresh();
     }
 
+    // PROSES AMBIL DATA SO PADA NOTA YANG SALES DAN PELANGGANNYA SAMA
+
     Future<List> getSOHDSelectedNotaPengiriman =
         getDataCt.sohdSelectedNotaPengiriman(
             dashboardPenjualanCt.selectedIdPelanggan.value,
@@ -101,6 +103,9 @@ class DetailNotaPenjualanController extends BaseController {
     List hasilData = await getSOHDSelectedNotaPengiriman;
     sohdTerpilih.value = hasilData;
     sohdTerpilih.refresh();
+
+    // END
+
     if (status == true) {
       checkDODT();
     } else {
@@ -109,7 +114,6 @@ class DetailNotaPenjualanController extends BaseController {
   }
 
   void checkDODT() async {
-    print('jalan ambil dodt');
     Future<List> prosesCheckDODT = GetDataController().getSpesifikData(
         "DODT",
         "NOMOR",
@@ -216,7 +220,6 @@ class DetailNotaPenjualanController extends BaseController {
     // print('barang terpilih $barang');
     if (barang.isNotEmpty) {
       if (barangTerpilih.isNotEmpty) {
-        print("tambah barang lagi nih");
         List dataSudahDiUpdate = [];
         for (var element in barangTerpilih) {
           if (Utility.validasiValueDouble('${element["qty_beli"]}') > 0.0) {
@@ -239,12 +242,6 @@ class DetailNotaPenjualanController extends BaseController {
 
       statusDODTKosong.value = false;
       statusDODTKosong.refresh();
-      // Future<bool> prosesAkumulasiMenyeluruh = perhitunganMenyeluruhDO();
-      // bool hasilProsesAkumulasi = await prosesAkumulasiMenyeluruh;
-      // if (hasilProsesAkumulasi) {
-      //   statusDODTKosong.value = false;
-      //   statusDODTKosong.refresh();
-      // }
     } else {
       statusDODTKosong.value = true;
       statusDODTKosong.refresh();
@@ -287,7 +284,7 @@ class DetailNotaPenjualanController extends BaseController {
         statusDODTKosong.refresh();
       }
     } else {
-      ButtonSheetController().validasiButtonSheet("Hapu Barang",
+      ButtonSheetController().validasiButtonSheet("Hapus Barang",
           Text("Yakin hapus barang ini ?"), "hapus_barang_dodt", 'Hapus', () {
         HapusDodtController().hapusBarangOnce(dataSelected, '');
       });
@@ -626,26 +623,30 @@ class DetailNotaPenjualanController extends BaseController {
 
   void backValidasi() async {
     UtilsAlert.loadingSimpanData(Get.context!, "Loading...");
-    SimpanNotaPengirimanController().simpanDODT(barangTerpilih);
-    // Future<bool> prosesClose = getDataCt.closePenjualan(
-    //     "DOHD", "", dashboardPenjualanCt.nomorDoSelected.value, "close_dohd");
-    // bool hasilClose = await prosesClose;
-    // if (hasilClose == true) {
-    //   dashboardPenjualanCt.changeMenu(2);
-    //   if (statusAksiItemOrderPenjualan.value) {
-    //     Get.back();
-    //     Get.back();
-    //     Get.back();
-    //     statusBack.value = true;
-    //     statusBack.refresh();
-    //   } else {
-    //     Get.back();
-    //     Get.back();
-    //     Get.back();
-    //     Get.back();
-    //     statusBack.value = true;
-    //     statusBack.refresh();
-    //   }
-    // }
+    Future<bool> prosesSimpanNota =
+        SimpanNotaPengirimanController().simpanDODT(barangTerpilih);
+    bool hasilSimpan = await prosesSimpanNota;
+    if (hasilSimpan) {
+      Future<bool> prosesClose = getDataCt.closePenjualan(
+          "DOHD", "", dashboardPenjualanCt.nomorDoSelected.value, "close_dohd");
+      bool hasilClose = await prosesClose;
+      if (hasilClose == true) {
+        dashboardPenjualanCt.changeMenu(2);
+        if (statusAksiItemOrderPenjualan.value) {
+          Get.back();
+          Get.back();
+          Get.back();
+          statusBack.value = true;
+          statusBack.refresh();
+        } else {
+          Get.back();
+          Get.back();
+          Get.back();
+          Get.back();
+          statusBack.value = true;
+          statusBack.refresh();
+        }
+      }
+    }
   }
 }

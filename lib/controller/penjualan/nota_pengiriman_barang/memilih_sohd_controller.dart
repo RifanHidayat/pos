@@ -63,35 +63,11 @@ class MemilihSOHDController extends BaseController {
         tampungGroupKode.add(data);
       }
     }
-    // if (detailDODT.isNotEmpty) {
-    //   for (var element in detailSODT) {
-    //     var data = {
-    //       "GROUP": element["GROUP"],
-    //       "KODE": element["BARANG"],
-    //     };
-    //     tampungGroupKode.add(data);
-    //   }
-    // } else {
-    //   for (var element in detailSODT) {
-    //     bool statusSelected = element["QTZ"] == 0 ? true : false;
-    //     if (statusSelected) {
-    //       var data = {
-    //         "GROUP": element["GROUP"],
-    //         "KODE": element["BARANG"],
-    //       };
-    //       tampungGroupKode.add(data);
-    //     }
-    //   }
-    // }
     if (tampungGroupKode.isNotEmpty) {
       // proses cari barang sesuai group dan kode
       Future<List> cariBarangNotaPengiriman =
           GetDataController().cariBarangNotaPengiriman(tampungGroupKode);
       List hasilProsesCariBarang = await cariBarangNotaPengiriman;
-
-      // // validasi data final
-
-      // print('hasil proses barang ${hasilProsesCariBarang.length}');
 
       Future<List> prosesBarang1 =
           checkingBarang(hasilProsesCariBarang, detailSODT);
