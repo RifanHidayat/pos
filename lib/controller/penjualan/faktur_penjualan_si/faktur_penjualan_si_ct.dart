@@ -4,6 +4,7 @@ import 'package:siscom_pos/controller/base_controller.dart';
 import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/faktur_penjualan_si/buttom_sheet/fpsi_pesan_barang_ct.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/utils/app_data.dart';
 import 'package:siscom_pos/utils/toast.dart';
@@ -83,12 +84,13 @@ class FakturPenjualanSIController extends BaseController {
     if (data.isNotEmpty) {
       listBarang.value = data;
       listBarang.refresh();
-      if (status == true) {
-        loadDataJLDT();
-      } else {
-        statusJLDTKosong.value = true;
-        statusJLDTKosong.refresh();
-      }
+      loadDataJLDT();
+      // if (status == true) {
+      //   loadDataJLDT();
+      // } else {
+      //   statusJLDTKosong.value = true;
+      //   statusJLDTKosong.refresh();
+      // }
     }
   }
 
@@ -292,44 +294,26 @@ class FakturPenjualanSIController extends BaseController {
 
       // ppn header
 
-      var taxpJLHD = infoJLHD[0]["TAXP"];
+      double taxpJLHD = infoJLHD[0]["TAXP"] == null || infoJLHD[0]["TAXP"] == 0
+          ? 0.0
+          : infoJLHD[0]["TAXP"].toDouble();
 
-      if (taxpJLHD != null || taxpJLHD != "") {
-        if (double.parse("$taxpJLHD") > 0.0) {
-          print('perhitungan ppn header jalan disini');
-          persenPPNHeaderRincian.value.text = "$taxpJLHD";
-          persenPPNHeaderRincianView.value.text = "$taxpJLHD";
-          persenPPNHeaderRincian.refresh();
-          persenPPNHeaderRincianView.refresh();
+      if (taxpJLHD > 0.0) {
+        print('perhitungan ppn header jalan disini');
+        persenPPNHeaderRincian.value.text = "$taxpJLHD";
+        persenPPNHeaderRincianView.value.text = "$taxpJLHD";
+        persenPPNHeaderRincian.refresh();
+        persenPPNHeaderRincianView.refresh();
 
-          var convert1PPN = Utility.nominalPPNHeaderView(
-              '${subtotal.value}',
-              persenDiskonHeaderRincian.value.text,
-              persenPPNHeaderRincian.value.text);
+        var convert1PPN = Utility.nominalPPNHeaderView(
+            '${subtotal.value}',
+            persenDiskonHeaderRincian.value.text,
+            persenPPNHeaderRincian.value.text);
 
-          nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-          nominalPPNHeaderRincianView.value.text =
-              convert1PPN.toStringAsFixed(0);
-          nominalPPNHeaderRincian.refresh();
-          nominalPPNHeaderRincianView.refresh();
-        } else {
-          persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
-          persenPPNHeaderRincianView.value.text =
-              sidebarCt.ppnDefaultCabang.value;
-          persenPPNHeaderRincian.refresh();
-          persenPPNHeaderRincianView.refresh();
-
-          var convert1PPN = Utility.nominalPPNHeaderView(
-              '${subtotal.value}',
-              persenDiskonHeaderRincian.value.text,
-              persenPPNHeaderRincian.value.text);
-
-          nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-          nominalPPNHeaderRincianView.value.text =
-              convert1PPN.toStringAsFixed(0);
-          nominalPPNHeaderRincian.refresh();
-          nominalPPNHeaderRincianView.refresh();
-        }
+        nominalPPNHeaderRincian.value.text = convert1PPN.toString();
+        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
+        nominalPPNHeaderRincian.refresh();
+        nominalPPNHeaderRincianView.refresh();
       } else {
         persenPPNHeaderRincian.value.text = sidebarCt.ppnDefaultCabang.value;
         persenPPNHeaderRincianView.value.text =
@@ -353,10 +337,10 @@ class FakturPenjualanSIController extends BaseController {
       var convert1 = Utility.persenDiskonHeader(
           "${subtotal.value}", "${infoJLHD[0]["BIAYA"]}");
 
-      var persenBiaya = "$convert1" == "NaN" ? "0.0" : "$convert1";
+      var persenBiaya = "$convert1" == "NaN" ? 0 : "$convert1";
 
       var convert1Charge = Utility.nominalPPNHeaderView('${subtotal.value}',
-          persenDiskonHeaderRincian.value.text, persenBiaya);
+          persenDiskonHeaderRincian.value.text, "$persenBiaya");
 
       nominalOngkosHeaderRincian.value.text = "$convert1Charge";
       nominalOngkosHeaderRincianView.value.text =
@@ -516,13 +500,15 @@ class FakturPenjualanSIController extends BaseController {
         .toList();
     if (editData.isNotEmpty) {
       statusEditBarang.value = true;
-      // OrderPenjualanPesanBarangController().validasiEditBarang(editData);
+      typeAksi.value = "edit_barang";
+      typeAksi.refresh();
+      FPSIButtomSheetPesanBarang().prosesPesanBarang1(editData);
     } else {
       UtilsAlert.showToast("Gagal edit data");
     }
   }
 
-  void hapusSODT(nourut) {
+  void hapusJLDT(nourut) {
     ButtonSheetController().validasiButtonSheet(
         "Hapus Barang", contentOpHapusBarang(), "op_hapus_barang", 'Hapus',
         () async {

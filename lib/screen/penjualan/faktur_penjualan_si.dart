@@ -576,7 +576,7 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                     SlidableAction(
                       flex: 1,
                       onPressed: (BuildContext context) {
-                        controller.hapusSODT(nourut);
+                        controller.hapusJLDT(nourut);
                       },
                       backgroundColor: Color(0xffFFF2EB),
                       foregroundColor: Colors.red,
@@ -669,7 +669,7 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat('${controller.subtotal.value.toInt()}', 'with_rp')}",
+                      "${Utility.rupiahFormat('${controller.subtotal.value}', 'with_rp')}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -761,7 +761,7 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat(controller.nominalPPNHeaderRincian.value.text, 'with_rp')}",
+                      "${Utility.rupiahFormat(controller.nominalPPNHeaderRincianView.value.text, 'with_rp')}",
                       // "Rp${controller.nominalPPNHeaderRincian.value.text}",
                       textAlign: TextAlign.right,
                     ),
@@ -791,8 +791,8 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat(controller.nominalOngkosHeaderRincianView.value.text, 'with_rp')}",
-                      // "Rp${controller.nominalOngkosHeaderRincian.value.text}",
+                      // "${Utility.rupiahFormat("${controller.nominalOngkosHeaderRincianView.value.text}", 'with_rp')}",
+                      "Rp${controller.nominalOngkosHeaderRincianView.value.text}",
                       textAlign: TextAlign.right,
                     ),
                   )

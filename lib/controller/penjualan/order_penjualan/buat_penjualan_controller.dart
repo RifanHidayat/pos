@@ -312,7 +312,7 @@ class BuatPenjualanController extends BaseController {
       Future<bool> prosesGetAllDOHD = dashboardPenjualanCt.getDataAllDOHD();
       bool hasilGetAll = await prosesGetAllDOHD;
       if (hasilGetAll) {
-        Get.to(DetailNotaPengirimanBarang(dataForm: true),
+        Get.to(DetailNotaPengirimanBarang(dataForm: false),
             duration: Duration(milliseconds: 500),
             transition: Transition.rightToLeftWithFade);
       }
@@ -490,7 +490,7 @@ class BuatPenjualanController extends BaseController {
       bool hasilGetAll = await prosesGetAllFakturPenjualan;
       if (hasilGetAll) {
         if (statusPilihData == "SI") {
-          Get.to(FakturPenjualanSI(dataForm: true),
+          Get.to(FakturPenjualanSI(dataForm: false),
               duration: Duration(milliseconds: 500),
               transition: Transition.rightToLeftWithFade);
         } else {

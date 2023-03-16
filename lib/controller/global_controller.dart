@@ -19,6 +19,7 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import 'penjualan/dashboard_penjualan_controller.dart';
 import 'penjualan/faktur_penjualan_si/buttom_sheet/fpsi_pesan_barang_ct.dart';
+import 'penjualan/faktur_penjualan_si/faktur_penjualan_si_ct.dart';
 import 'penjualan/nota_pengiriman_barang/memilih_sohd_controller.dart';
 import 'penjualan/order_penjualan/buttom_sheet/op_pesan_barang_ct.dart';
 import 'penjualan/order_penjualan/item_order_penjualan_controller.dart';
@@ -30,6 +31,7 @@ class GlobalController extends GetxController
   var sidebarCt = Get.put(SidebarController());
   var dashboardPenjualanCt = Get.put(DashbardPenjualanController());
   var itemOrderPenjualanCt = Get.put(ItemOrderPenjualanController());
+  var fakturPenjualanSICt = Get.put(FakturPenjualanSIController());
 
   var stokOpnameCtr = Get.put(StockOpnameController());
 
@@ -240,11 +242,11 @@ class GlobalController extends GetxController
                                               "pilih_so_nota_pengiriman") {
                                         aksiPenjualan(
                                             dataShow[index], stringController);
+                                      } else if (stringController ==
+                                          "pilih_barang_faktur_penjualan_si") {
+                                        aksiFakturPenjualanSI(dataShow[index]);
                                       }
-                                      // else if (stringController ==
-                                      //     "pilih_barang_faktur_penjualan_si") {
-                                      //   aksiFakturPenjualanSI(dataShow[index]);
-                                      // } else if (stringController ==
+                                      //else if (stringController ==
                                       //     'pilih_gudang_stok_opaname') {
                                       //   aksiGudangStokOpname(dataShow[index]);
                                       // } else if (stringController ==
@@ -425,10 +427,12 @@ class GlobalController extends GetxController
   //   Get.back();
   // }
 
-  // void aksiFakturPenjualanSI(dataTerpilih) {
-  //   FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);
-  //   Get.back();
-  // }
+  void aksiFakturPenjualanSI(dataTerpilih) {
+    fakturPenjualanSICt.typeAksi.value = "tambah_barang";
+    fakturPenjualanSICt.typeAksi.refresh();
+    FPSIButtomSheetPesanBarang().prosesPesanBarang1([dataTerpilih]);
+    Get.back();
+  }
 
   Widget contentValidasiPilihSO(dataTerpilih) {
     return Text(

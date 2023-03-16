@@ -110,6 +110,26 @@ class FPSIButtomSheetPesanBarang extends BaseController {
               double.parse("${getFirst['STDJUAL']}");
           fakturPenjualanSiCt.hargaJualPesanBarang.value.text =
               Utility.rupiahFormat("${getFirst['STDJUAL']}", '');
+        } else if (fakturPenjualanSiCt.typeAksi.value == "edit_barang") {
+          // print("masuk sini data keranjang di edit");
+          // print(dataSelected);
+          fakturPenjualanSiCt.jumlahPesan.value.text =
+              "${dataSelected[0]["qty_beli"]}";
+          qtySebelumEdit.value = "${dataSelected[0]["qty_beli"]}";
+          qtySebelumEdit.refresh();
+
+          listDataImeiSelected.clear();
+
+          fakturPenjualanSiCt.hargaJualPesanBarang.value.text =
+              Utility.rupiahFormat("${dataSelected[0]["STDJUAL"]}", '');
+          var hitungTotal =
+              Utility.validasiValueDouble("${dataSelected[0]["STDJUAL"]}") *
+                  Utility.validasiValueDouble("${dataSelected[0]["qty_beli"]}");
+
+          fakturPenjualanSiCt.totalPesanBarang.value = hitungTotal;
+          fakturPenjualanSiCt.totalPesanBarang.refresh();
+          fakturPenjualanSiCt.totalPesanBarangNoEdit.value = hitungTotal;
+          fakturPenjualanSiCt.totalPesanBarangNoEdit.refresh();
         }
         tipeImei.value = dataSelected[0]["TIPE"] == "1" ? true : false;
         tipeImei.refresh();
@@ -195,7 +215,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                         height: Utility.large,
                       ),
 
-                      // gambar barang
+                      // GAMBAR BARANG
 
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,6 +235,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                                       fit: BoxFit.fill)),
                             ),
                           ),
+                          // NAMA BARANG DAN STOK BARANG DI GUDANG
                           Expanded(
                             flex: 65,
                             child: Padding(
@@ -322,6 +343,10 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                         height: Utility.large + 6,
                       ),
 
+                      // VALIDASI TAMPILAN DETAIL BARANG UNTUK IMEI DAN BUKAN IMEI
+                      // screenDetailInputBarang = TAMPILAN BUKAN IMEI
+                      // screenImei = TAMPILAN BARANG IMEI
+
                       tipeImei.value == false
                           ? screenDetailInputBarang(
                               setState, fakturPenjualanSiCt.typeAksi.value)
@@ -372,7 +397,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          fakturPenjualanSiCt.typeAksi.value == "edit_keranjang"
+                          fakturPenjualanSiCt.typeAksi.value == "edit_barang"
                               ? Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.only(
@@ -406,60 +431,42 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                             child: Padding(
                                 padding: const EdgeInsets.only(
                                     left: 6.0, right: 6.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (fakturPenjualanSiCt.typeAksi.value ==
-                                          "edit_barang") {
-                                        // validasiSebelumAksi(
-                                        //     "Edit Barang",
-                                        //     "Yakin edit barang ini ?",
-                                        //     "",
-                                        //     type,
-                                        //     produkSelected);
+                                child: Button1(
+                                  textBtn: fakturPenjualanSiCt.typeAksi.value ==
+                                          "edit_barang"
+                                      ? "Edit"
+                                      : "Tambah",
+                                  colorBtn: Utility.primaryDefault,
+                                  colorText: Utility.baseColor2,
+                                  onTap: () {
+                                    if (fakturPenjualanSiCt.typeAksi.value ==
+                                        "edit_barang") {
+                                      // validasiSebelumAksi(
+                                      //     "Edit Barang",
+                                      //     "Yakin edit barang ini ?",
+                                      //     "",
+                                      //     type,
+                                      //     produkSelected);
+                                    } else {
+                                      if (stokBarang <= 0) {
+                                        UtilsAlert.showToast(
+                                            "Tidak dapat tambah barang");
                                       } else {
-                                        if (stokBarang <= 0) {
-                                          UtilsAlert.showToast(
-                                              "Tidak dapat tambah barang");
-                                        } else {
-                                          ButtonSheetController().validasiButtonSheet(
-                                              "Simpan Barang",
-                                              Text(
-                                                  "Yakin simpan barang ${produkSelected[0]['NAMA']}"),
-                                              "tambah_barang_faktur_penjualan_si",
-                                              'Tambah Barang', () async {
-                                            simpanBarangFakturPenjualanSIController()
-                                                .simpanBarangProses1(
-                                                    produkSelected,
-                                                    listDataImei,
-                                                    qtySebelumEdit.value);
-                                          });
-                                        }
+                                        ButtonSheetController().validasiButtonSheet(
+                                            "Simpan Barang",
+                                            Text(
+                                                "Yakin simpan barang ${produkSelected[0]['NAMA']}"),
+                                            "tambah_barang_faktur_penjualan_si",
+                                            'Tambah Barang', () async {
+                                          simpanBarangFakturPenjualanSIController()
+                                              .simpanBarangProses1(
+                                                  produkSelected,
+                                                  listDataImei,
+                                                  qtySebelumEdit.value);
+                                        });
                                       }
-                                    },
-                                    child: CardCustom(
-                                      colorBg: Utility.primaryDefault,
-                                      radiusBorder: Utility.borderStyle5,
-                                      widgetCardCustom: Padding(
-                                          padding: EdgeInsets.all(8),
-                                          child: Center(
-                                            child: fakturPenjualanSiCt
-                                                        .typeAksi.value ==
-                                                    "edit_keranjang"
-                                                ? Text(
-                                                    "Edit",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  )
-                                                : Text(
-                                                    "Tambah",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                          )),
-                                    ),
-                                  ),
+                                    }
+                                  },
                                 )),
                           )
                         ],
@@ -1269,7 +1276,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
           double.parse(fakturPenjualanSiCt.jumlahPesan.value.text);
 
       fakturPenjualanSiCt.persenDiskonPesanBarang.value.text =
-          hitung.toString();
+          hitung.toStringAsFixed(2);
       fakturPenjualanSiCt.totalPesanBarang.value =
           fakturPenjualanSiCt.totalPesanBarangNoEdit.value - hitungFinal;
       fakturPenjualanSiCt.totalPesanBarang.refresh();
