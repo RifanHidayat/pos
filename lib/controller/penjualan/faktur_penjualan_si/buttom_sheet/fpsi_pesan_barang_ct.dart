@@ -35,6 +35,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
   var listDataImeiSelected = [].obs;
 
   void prosesPesanBarang1(dataSelected) async {
+    UtilsAlert.loadingSimpanData(Get.context!, "Sedan memuat...");
     fakturPenjualanSiCt.totalPesanBarang.value = 0.0;
     fakturPenjualanSiCt.persenDiskonPesanBarang.value.text = "";
     fakturPenjualanSiCt.nominalDiskonPesanBarang.value.text = "";
@@ -142,6 +143,7 @@ class FPSIButtomSheetPesanBarang extends BaseController {
 
         typeFocus.value = "";
         typeFocus.refresh();
+        Get.back();
 
         // GET STOK BARANG
         Future<List> getStokBarang = GetDataController().checkStokOutstanding(
@@ -441,12 +443,14 @@ class FPSIButtomSheetPesanBarang extends BaseController {
                                   onTap: () {
                                     if (fakturPenjualanSiCt.typeAksi.value ==
                                         "edit_barang") {
-                                      // validasiSebelumAksi(
-                                      //     "Edit Barang",
-                                      //     "Yakin edit barang ini ?",
-                                      //     "",
-                                      //     type,
-                                      //     produkSelected);
+                                      ButtonSheetController().validasiButtonSheet(
+                                          "Edit Barang",
+                                          Text(
+                                              "Yakin edit barang ${produkSelected[0]['NAMA']}"),
+                                          "edit_barang_penjualan_si",
+                                          'Edit Barang', () async {
+                                        print(produkSelected);
+                                      });
                                     } else {
                                       if (stokBarang <= 0) {
                                         UtilsAlert.showToast(

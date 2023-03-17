@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/penjualan/dashboard_penjualan_controller.dart';
+import 'package:siscom_pos/controller/penjualan/faktur_penjualan_si/buttom_sheet/fpsi_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/faktur_penjualan_si/faktur_penjualan_si_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/buttom_sheet/op_header_rincian_ct.dart';
 import 'package:siscom_pos/controller/penjualan/order_penjualan/item_order_penjualan_controller.dart';
@@ -479,7 +480,7 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
   Widget rincianWidget() {
     return InkWell(
       onTap: () {
-        HeaderRincianOrderPenjualanController().sheetButtomHeaderRincian();
+        RincianHeaderFakturPenjualanSI().sheetButtomHeaderRincian();
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -761,8 +762,8 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                   Expanded(
                     flex: 30,
                     child: Text(
-                      "${Utility.rupiahFormat(controller.nominalPPNHeaderRincianView.value.text, 'with_rp')}",
-                      // "Rp${controller.nominalPPNHeaderRincian.value.text}",
+                      // "${Utility.rupiahFormat(controller.nominalPPNHeaderRincianView.value.text, 'with_rp')}",
+                      "Rp${controller.nominalPPNHeaderRincianView.value.text}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -805,7 +806,7 @@ class _FakturPenjualanSIState extends State<FakturPenjualanSI> {
                 colorBg: Colors.white,
                 radiusBorder: Utility.borderStyle1,
                 widgetCardCustom: InkWell(
-                  onTap: () => controller.showKeteranganSOHD(),
+                  onTap: () => controller.showKeteranganJLHD(),
                   child: Padding(
                     padding: EdgeInsets.all(8),
                     child: Center(

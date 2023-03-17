@@ -212,6 +212,8 @@ class FakturPenjualanSIController extends BaseController {
           "get_spesifik_data_transaksi");
       List infoJLHD = await updateInformasiJLHD;
 
+      print("jlhd selected $infoJLHD");
+
       // perhitungan HRGTOT
       double subtotalKeranjang = 0.0;
       double discdHeader = 0.0;
@@ -311,7 +313,8 @@ class FakturPenjualanSIController extends BaseController {
             persenPPNHeaderRincian.value.text);
 
         nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
+        nominalPPNHeaderRincianView.value.text =
+            Utility.rupiahFormat("$convert1PPN", "");
         nominalPPNHeaderRincian.refresh();
         nominalPPNHeaderRincianView.refresh();
       } else {
@@ -327,36 +330,33 @@ class FakturPenjualanSIController extends BaseController {
             persenPPNHeaderRincian.value.text);
 
         nominalPPNHeaderRincian.value.text = convert1PPN.toString();
-        nominalPPNHeaderRincianView.value.text = convert1PPN.toStringAsFixed(0);
+        nominalPPNHeaderRincianView.value.text =
+            Utility.rupiahFormat("$convert1PPN", "");
         nominalPPNHeaderRincian.refresh();
         nominalPPNHeaderRincianView.refresh();
       }
 
       // biaya header
 
-      var convert1 = Utility.persenDiskonHeader(
-          "${subtotal.value}", "${infoJLHD[0]["BIAYA"]}");
+      // var convert1 = Utility.persenDiskonHeader(
+      //     "${subtotal.value}", "${infoJLHD[0]["BIAYA"]}");
 
-      var persenBiaya = "$convert1" == "NaN" ? 0 : "$convert1";
+      // var persenBiaya = "$convert1" == "NaN" ? 0 : "$convert1";
 
-      var convert1Charge = Utility.nominalPPNHeaderView('${subtotal.value}',
-          persenDiskonHeaderRincian.value.text, "$persenBiaya");
+      // var convert1Charge = Utility.nominalPPNHeaderView('${subtotal.value}',
+      //     persenDiskonHeaderRincian.value.text, "$persenBiaya");
 
-      nominalOngkosHeaderRincian.value.text = "$convert1Charge";
+      nominalOngkosHeaderRincian.value.text = "${infoJLHD[0]["BIAYA"]}";
       nominalOngkosHeaderRincianView.value.text =
-          convert1Charge.toStringAsFixed(0);
-
-      double discnHeader = discdHeader + dischHeader;
-
-      GetDataController().updateJlhd(
-          "${infoJLHD[0]['PK']}",
-          "${allQtyBeli.value}",
-          "$discdHeader",
-          "$dischHeader",
-          "$discnHeader");
+          Utility.rupiahFormat("${infoJLHD[0]["BIAYA"]}", "");
 
       totalNetto.value = double.parse("${infoJLHD[0]["HRGNET"]}");
       totalNetto.refresh();
+
+      double discnHeader = discdHeader + dischHeader;
+
+      GetDataController().updateJlhd("${infoJLHD[0]['PK']}", "${allQty}",
+          "$discdHeader", "$dischHeader", "$discnHeader");
 
       // CHECKING PUTANG
 
@@ -525,11 +525,19 @@ class FakturPenjualanSIController extends BaseController {
     });
   }
 
-  void showKeteranganSOHD() {
-    keterangan1.value.text = dashboardPenjualanCt.dataSohd[0]['KET1'];
-    keterangan2.value.text = dashboardPenjualanCt.dataSohd[0]['KET2'];
-    keterangan3.value.text = dashboardPenjualanCt.dataSohd[0]['KET3'];
-    keterangan4.value.text = dashboardPenjualanCt.dataSohd[0]['KET4'];
+  void showKeteranganJLHD() async {
+    // print(dashboardPenjualanCt.fakturPenjualanSelected);
+    Future<List> updateInformasiJLHD = GetDataController().getSpesifikData(
+        "JLHD",
+        "NOMOR",
+        dashboardPenjualanCt.fakturPenjualanSelected[0]["NOMOR"],
+        "get_spesifik_data_transaksi");
+    List infoJLHD = await updateInformasiJLHD;
+
+    keterangan1.value.text = infoJLHD[0]['KET1'] ?? "";
+    keterangan2.value.text = infoJLHD[0]['KET2'] ?? "";
+    keterangan3.value.text = infoJLHD[0]['KET3'] ?? "";
+    keterangan4.value.text = infoJLHD[0]['KET4'] ?? "";
     ButtonSheetController().validasiButtonSheet(
         "Keterangan", contentShowKeterangan(), "show_keterangan", "", () => {});
   }
