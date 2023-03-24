@@ -1,10 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
+import 'package:siscom_pos/model/stok_opname/list_stok_opname.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
-import 'package:siscom_pos/screen/stockopname/detail_stock_opname.dart';
 import 'package:siscom_pos/screen/stockopname/tambah_stok_opname.dart';
+import 'package:siscom_pos/utils/api.dart';
+import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
+import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/search.dart';
 import 'package:siscom_pos/utils/widget/text_label.dart';
 import 'package:get/get.dart';
@@ -30,11 +38,6 @@ class _StockOpnameState extends State<StockOpname> {
     super.dispose();
   }
 
-  Future<void> refreshData() async {
-    await Future.delayed(Duration(seconds: 2));
-    controller.startLoad();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -48,33 +51,43 @@ class _StockOpnameState extends State<StockOpname> {
             onWillPop: () async {
               return false;
             },
-            child: Column(
-              children: [
-                header(),
-                SizedBox(
-                  height: Utility.medium,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: SearchApp(
-                    controller: controller.pencarian.value,
-                    onChange: true,
-                    isFilter: true,
-                    onTap: (value) {},
+            child: Obx(
+              () => Column(
+                children: [
+                  header(),
+                  SizedBox(
+                    height: Utility.medium,
                   ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Flexible(
-                    child: RefreshIndicator(
-                        color: Utility.primaryDefault,
-                        onRefresh: refreshData,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: listStokOpnameView(),
-                        )))
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: SearchApp(
+                      controller: controller.pencarian.value,
+                      onChange: true,
+                      isFilter: false,
+                      onTap: (value) {
+                        var textCari = value.toLowerCase();
+                        List<ListStokOpnameModel> filter =
+                            controller.listStokOpnameMaster.where((element) {
+                          var nomorFaktur = element.nomorFaktur!.toLowerCase();
+
+                          return nomorFaktur.contains(textCari);
+                        }).toList();
+                        setState(() {
+                          controller.listStokOpname.value = filter;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Flexible(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: listStokOpnameView(),
+                  ))
+                ],
+              ),
             ),
           ),
         ),
@@ -124,9 +137,7 @@ class _StockOpnameState extends State<StockOpname> {
           Expanded(
             flex: 20,
             child: InkWell(
-              onTap: () {
-                Get.to(TambahStokOpname());
-              },
+              onTap: () => controller.getLastKodeStokOpname(),
               child: Container(
                 alignment: Alignment.center,
                 child: Icon(
@@ -185,337 +196,180 @@ class _StockOpnameState extends State<StockOpname> {
                   ],
                 ),
               )
-            : ListView.builder(
-                physics: controller.listStokOpname.length <= 10
-                    ? AlwaysScrollableScrollPhysics()
-                    : BouncingScrollPhysics(),
-                itemCount: controller.listStokOpname.length,
-                itemBuilder: (context, index) {
-                  var nomorFaktur = controller.listStokOpname[0].nomorFaktur;
-                  var kodeCabang = controller.listStokOpname[0].kodeCabang;
-                  var namaCabang = controller.listStokOpname[0].namaCabang;
-                  var kodeGudang = controller.listStokOpname[0].kodeGudang;
-                  var namaGudang = controller.listStokOpname[0].namaGudang;
-                  var tanggal = controller.listStokOpname[0].tanggal;
+            : SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: true,
+                header: MaterialClassicHeader(
+                  color: Utility.primaryDefault,
+                ),
+                footer: ClassicFooter(
+                  loadingText: "Load More...",
+                  noDataText: "Finished loading data",
+                  loadStyle: LoadStyle.ShowWhenLoading,
+                  loadingIcon: Icon(Iconsax.more),
+                ),
+                onRefresh: () async {
+                  await Future.delayed(Duration(seconds: 1));
+                  controller.page.value = 10;
+                  controller.page.refresh();
+                  controller.startLoad();
+                  controller.refreshController.refreshCompleted();
+                },
+                onLoading: () async {
+                  await Future.delayed(Duration(seconds: 1));
+                  setState(() {
+                    controller.page.value = controller.page.value + 10;
+                    controller.refreshController.loadComplete();
+                  });
+                },
+                controller: controller.refreshController,
+                child: ListView.builder(
+                    physics: controller.listStokOpname.length <= 10
+                        ? AlwaysScrollableScrollPhysics()
+                        : BouncingScrollPhysics(),
+                    itemCount:
+                        controller.listStokOpname.length > controller.page.value
+                            ? controller.page.value
+                            : controller.listStokOpname.length,
+                    itemBuilder: (context, index) {
+                      var nomorFaktur =
+                          controller.listStokOpname[index].nomorFaktur;
+                      var kodeCabang =
+                          controller.listStokOpname[index].kodeCabang;
+                      var namaCabang =
+                          controller.listStokOpname[index].namaCabang;
+                      var kodeGudang =
+                          controller.listStokOpname[index].kodeGudang;
+                      var namaGudang =
+                          controller.listStokOpname[index].namaGudang;
+                      var tanggal = controller.listStokOpname[index].tanggal;
 
-                  return InkWell(
-                    onTap: () {
-                      Get.to(DetailStokOpname());
-                    },
-                    child: Container(
-                      padding: EdgeInsets.only(top: 10),
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 50,
-                                  child: Container(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        TextLabel(
-                                          text: "$nomorFaktur",
-                                          weigh: FontWeight.w700,
-                                          size: 14.0,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        TextLabel(
-                                          text: "$kodeCabang-$namaCabang",
-                                          color: Utility.grey600,
-                                          size: 10.0,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        TextLabel(
-                                            text: "$kodeGudang-$namaGudang",
-                                            size: 10.0,
-                                            color: Utility.grey600)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                    flex: 50,
-                                    child: Container(
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          TextLabel(
-                                              text:
-                                                  "${Utility.convertDate5('$tanggal')}",
-                                              color: Utility.grey600),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Icon(Icons.arrow_forward_ios,
-                                              size: 20, color: Utility.grey600)
-                                        ],
-                                      ),
-                                    ))
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Divider()
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                });
-  }
-
-  void detailItem() {
-    showModalBottomSheet<String>(
-        context: Get.context!,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(6.0),
-          ),
-        ),
-        builder: (context) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-            return MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        bottom: MediaQuery.of(context).viewInsets.bottom),
-                    child: Container(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 80,
-                                child: Column(
+                      return InkWell(
+                        onTap: () {
+                          ButtonSheetController().validasiButtonSheet(
+                              "Pilih aksi",
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextLabel(
-                                      text: "Apple iphone 13 pro max 128GB",
-                                      weigh: FontWeight.w700,
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    TextLabel(
-                                      text: "002- Gudang bahan baku",
-                                      color: Utility.grey900,
-                                    )
+                                    Expanded(
+                                        child: Padding(
+                                      padding: EdgeInsets.only(right: 3.0),
+                                      child: Button1(
+                                        textBtn: "Hapus",
+                                        colorBtn: Colors.red,
+                                        colorText: Utility.baseColor2,
+                                        onTap: () async {
+                                          controller
+                                              .hapusListStopOpname(nomorFaktur);
+                                        },
+                                      ),
+                                    )),
+                                    Expanded(
+                                        child: Padding(
+                                      padding: EdgeInsets.only(left: 3.0),
+                                      child: Button1(
+                                        textBtn: "Detail",
+                                        colorBtn: Utility.primaryDefault,
+                                        colorText: Utility.baseColor2,
+                                        onTap: () async {
+                                          controller.kodeGudangSelected.value =
+                                              kodeGudang!;
+                                          controller.namaGudangSelected.value =
+                                              namaGudang!;
+                                          controller.kodeGudangSelected
+                                              .refresh();
+                                          controller.namaGudangSelected
+                                              .refresh();
+                                          UtilsAlert.loadingSimpanData(
+                                              Get.context!, "Sedang Memuat...");
+                                          controller
+                                              .beforeEnterDetailStokOpname(
+                                                  nomorFaktur, "detail");
+                                        },
+                                      ),
+                                    ))
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                  flex: 20,
-                                  child: InkWell(
-                                    onTap: () => Get.back(),
-                                    child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Icon(Icons.close,
-                                            color: Utility.grey900)),
-                                  ))
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                      top: 20, bottom: 20, left: 10, right: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          width: 1, color: Utility.grey100)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextLabel(
-                                        text: "Gudang",
+                              "show_keterangan",
+                              "",
+                              () async {});
+                        },
+                        child: Container(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Container(
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 50,
+                                      child: Container(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            TextLabel(
+                                              text: "$nomorFaktur",
+                                              weigh: FontWeight.w700,
+                                              size: 14.0,
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            TextLabel(
+                                              text: "$kodeCabang - $namaCabang",
+                                              color: Utility.grey600,
+                                              size: 10.0,
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            TextLabel(
+                                                text:
+                                                    "$kodeGudang - $namaGudang",
+                                                size: 10.0,
+                                                color: Utility.grey600)
+                                          ],
+                                        ),
                                       ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextLabel(
-                                        text: "Nama Gudang",
-                                        weigh: FontWeight.bold,
-                                        size: 13.0,
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                    Expanded(
+                                        flex: 50,
+                                        child: Container(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              TextLabel(
+                                                  text:
+                                                      "${DateFormat('dd MMMM yyyy').format(DateTime.parse('$tanggal'))}",
+                                                  color: Utility.grey600),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Icon(Icons.arrow_forward_ios,
+                                                  size: 20,
+                                                  color: Utility.grey600)
+                                            ],
+                                          ),
+                                        ))
+                                  ],
                                 ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                      top: 20, bottom: 20, left: 10, right: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          width: 1, color: Utility.grey100)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextLabel(
-                                        text: "Stock",
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextLabel(
-                                        text: "100000",
-                                        weigh: FontWeight.bold,
-                                        size: 13.0,
-                                      ),
-                                    ],
-                                  ),
+                                SizedBox(
+                                  height: 10,
                                 ),
-                              ),
-                            ],
+                                Divider()
+                              ],
+                            ),
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                      top: 20, bottom: 20, left: 10, right: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          width: 1, color: Utility.grey100)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextLabel(
-                                        text: "Fisik",
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextLabel(
-                                        text: "Nama Gudang",
-                                        weigh: FontWeight.bold,
-                                        size: 13.0,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  padding: EdgeInsets.only(
-                                      top: 20, bottom: 20, left: 10, right: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          width: 1, color: Utility.grey100)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextLabel(
-                                        text: "Selisih",
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextLabel(
-                                        text: "100000",
-                                        weigh: FontWeight.bold,
-                                        size: 13.0,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          width: 1,
-                                          color: Utility.primaryDefault),
-                                      borderRadius: BorderRadius.circular(5)),
-                                  padding: EdgeInsets.only(top: 10, bottom: 10),
-                                  child: Center(
-                                      child: TextLabel(
-                                    text: "Hapus",
-                                    color: Utility.primaryDefault,
-                                  )),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Expanded(
-                                flex: 50,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Utility.primaryDefault,
-                                      border: Border.all(
-                                          width: 1,
-                                          color: Utility.primaryDefault),
-                                      borderRadius: BorderRadius.circular(3)),
-                                  padding: EdgeInsets.only(top: 10, bottom: 10),
-                                  child: Center(
-                                      child: TextLabel(
-                                    text: "Simpan",
-                                    color: Colors.white,
-                                  )),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ));
-          });
-        });
+                        ),
+                      );
+                    }),
+              );
   }
 }

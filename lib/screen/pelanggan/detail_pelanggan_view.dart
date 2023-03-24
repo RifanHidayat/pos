@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 import 'package:siscom_pos/controller/pelanggan/list_pelanggan_controller.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
@@ -108,7 +109,7 @@ class DetailPelangganView extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            "001",
+                            "${controller.detailPelanggan[0].kodePelanggan}",
                             style: TextStyle(color: Utility.nonAktif),
                           ),
                         ))
@@ -154,24 +155,11 @@ class DetailPelangganView extends StatelessWidget {
                     ),
                     Expanded(
                         flex: 80,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: CardCustom(
-                            colorBg: Utility.baseColor2,
-                            radiusBorder: Utility.borderStyle1,
-                            widgetCardCustom: Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Nama Salesman"),
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 3),
-                                      child: Icon(Iconsax.arrow_down_1),
-                                    )
-                                  ],
-                                )),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            "${controller.detailPelanggan[0].namaSales}",
+                            style: TextStyle(color: Utility.nonAktif),
                           ),
                         ))
                   ],
@@ -196,7 +184,7 @@ class DetailPelangganView extends StatelessWidget {
           height: 6,
         ),
         Text(
-          "BUDI",
+          "${controller.detailPelanggan[0].namaPelanggan}",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         SizedBox(
@@ -355,7 +343,7 @@ class DetailPelangganView extends StatelessWidget {
             height: 6,
           ),
           Text(
-            "Cengkareng, Jakarta barat",
+            "${controller.detailPelanggan[0].alamat1} - ${controller.detailPelanggan[0].alamat2}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),
@@ -367,7 +355,7 @@ class DetailPelangganView extends StatelessWidget {
             height: 6,
           ),
           Text(
-            "08765456745",
+            "${controller.detailPelanggan[0].nomorTelpon}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),
@@ -379,7 +367,7 @@ class DetailPelangganView extends StatelessWidget {
             height: 6,
           ),
           Text(
-            "admin@gmail.com",
+            "${controller.detailPelanggan[0].email}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),
@@ -391,7 +379,7 @@ class DetailPelangganView extends StatelessWidget {
             height: 6,
           ),
           Text(
-            "30-04-1995",
+            "${DateFormat('dd MMMM yyyy').format(DateTime.parse('${controller.detailPelanggan[0].tanggalLahir}'))}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),
@@ -424,7 +412,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "12.345.123",
+                      "${Utility.rupiahFormat('${controller.detailPelanggan[0].limit}', 'with_rp')}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -436,14 +424,14 @@ class DetailPelangganView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Total Limit",
+                      "Total Kredit",
                       style: TextStyle(color: Utility.nonAktif),
                     ),
                     SizedBox(
                       height: 6,
                     ),
                     Text(
-                      "12.345.123",
+                      "${Utility.rupiahFormat('${controller.detailPelanggan[0].kredit}', 'with_rp')}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -470,7 +458,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "12.345.123",
+                      "${Utility.rupiahFormat('${controller.detailPelanggan[0].uangMuka}', 'with_rp')}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -489,7 +477,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "12.345.123",
+                      "",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -525,14 +513,14 @@ class DetailPelangganView extends StatelessWidget {
           ),
           Divider(),
           Text(
-            "NIK",
+            "NPWP",
             style: TextStyle(color: Utility.nonAktif),
           ),
           SizedBox(
             height: 6,
           ),
           Text(
-            "8512345678910",
+            "${controller.detailPelanggan[0].npwp}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),
@@ -551,7 +539,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "8512345678910",
+                      "${controller.detailPelanggan[0].tanggalJoin}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -570,7 +558,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "8512345678910",
+                      "${controller.detailPelanggan[0].tanggalExp}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -597,7 +585,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "8512345678910",
+                      "${controller.detailPelanggan[0].pointDidapat}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -616,7 +604,7 @@ class DetailPelangganView extends StatelessWidget {
                       height: 6,
                     ),
                     Text(
-                      "8512345678910",
+                      "${controller.detailPelanggan[0].pointDitukar}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
@@ -636,7 +624,7 @@ class DetailPelangganView extends StatelessWidget {
             height: 6,
           ),
           Text(
-            "8512345678910",
+            "${controller.detailPelanggan[0].totalPoint}",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           Divider(),

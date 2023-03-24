@@ -6,6 +6,8 @@ class ListStokOpnameModel {
   String? namaCabang;
   String? kodeGudang;
   String? namaGudang;
+  String? kelompokBarang;
+  String? diopnameOleh;
   String? tanggal;
 
   ListStokOpnameModel(
@@ -14,6 +16,8 @@ class ListStokOpnameModel {
       this.namaCabang,
       this.kodeGudang,
       this.namaGudang,
+      this.kelompokBarang,
+      this.diopnameOleh,
       this.tanggal});
 
   Map<String, dynamic> toMap() {
@@ -23,6 +27,8 @@ class ListStokOpnameModel {
       "namaCabang": namaCabang,
       "kodeGudang": kodeGudang,
       "namaGudang": namaGudang,
+      "kelompokBarang": kelompokBarang,
+      "diopnameOleh": diopnameOleh,
       "tanggal": tanggal
     };
   }
@@ -34,6 +40,8 @@ class ListStokOpnameModel {
       namaCabang: map['namaCabang'],
       kodeGudang: map['kodeGudang'],
       namaGudang: map['namaGudang'],
+      kelompokBarang: map['kelompokBarang'],
+      diopnameOleh: map['diopnameOleh'],
       tanggal: map['tanggal'],
     );
   }

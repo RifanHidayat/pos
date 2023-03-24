@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pengaturan/main_pengaturan_ct.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/scan_barang_controller.dart';
 import 'package:siscom_pos/controller/stok_opname/scan_barang_ct.dart';
+import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
@@ -170,18 +172,15 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           TextLabel(
-                                            text:
-                                                "Juice Jeruk Kemasan botol 250ML",
+                                            text: scanBarangCt
+                                                .dataBarangSelected[0]
+                                                .namaBarang!,
                                             weigh: FontWeight.bold,
                                             size: Utility.medium,
                                           ),
                                           SizedBox(
                                             height: Utility.small,
                                           ),
-                                          TextLabel(
-                                            text: "002 - GUDANG BAHAN BAKU",
-                                            color: Utility.nonAktif,
-                                          )
                                         ],
                                       ),
                                     ),
@@ -223,7 +222,8 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
                                                 height: 3.0,
                                               ),
                                               TextLabel(
-                                                text: "200",
+                                                text:
+                                                    "${scanBarangCt.dataBarangSelected[0].qty!}",
                                                 weigh: FontWeight.bold,
                                               )
                                             ],
@@ -253,26 +253,10 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
                                               SizedBox(
                                                 height: 3.0,
                                               ),
-                                              SizedBox(
-                                                height: 18,
-                                                child: TextField(
-                                                  cursorColor:
-                                                      Utility.primaryDefault,
-                                                  controller: scanBarangCt
-                                                      .fisikBarang.value,
-                                                  textInputAction:
-                                                      TextInputAction.done,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                    border: InputBorder.none,
-                                                  ),
-                                                  style: const TextStyle(
-                                                      fontSize: 14.0,
-                                                      height: 1.5,
-                                                      color: Colors.black),
-                                                ),
+                                              TextLabel(
+                                                text:
+                                                    "${scanBarangCt.dataBarangSelected[0].fisik!}",
+                                                weigh: FontWeight.bold,
                                               )
                                             ],
                                           ),
@@ -302,7 +286,8 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
                                                 height: 3.0,
                                               ),
                                               TextLabel(
-                                                text: "0",
+                                                text:
+                                                    "${scanBarangCt.dataBarangSelected[0].qty! - scanBarangCt.dataBarangSelected[0].fisik!}",
                                                 weigh: FontWeight.bold,
                                               )
                                             ],
@@ -334,6 +319,16 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
                     textBtn: "Simpan",
                     colorBtn: Utility.primaryDefault,
                     colorText: Utility.baseColor2,
+                    onTap: () {
+                      ButtonSheetController().validasiButtonSheet(
+                          "Simpan Perubahan",
+                          TextLabel(
+                              text:
+                                  "Yakin simpan perubahan data ${scanBarangCt.dataBarangSelected[0].namaBarang!} ?"),
+                          "",
+                          "Simpan",
+                          () => scanBarangCt.simpanPerubahanScan());
+                    },
                   ),
                 ),
               ),
@@ -381,13 +376,17 @@ class _ScanBarangStokOpnameState extends State<ScanBarangStokOpname> {
     controller?.pauseCamera();
     var compileData = await scanData;
     if (compileData.format != "" || compileData.code != "") {
-      setState(() {
-        scanBarangCt.getBarcode(compileData.format, compileData.code);
+      setState(() async {
+        Future<bool> prosesCheckData =
+            scanBarangCt.getBarcode(compileData.format, compileData.code);
+        bool hasilProses = await prosesCheckData;
+        if (hasilProses == false) {
+          controller?.resumeCamera();
+        }
       });
     } else {
       controller?.resumeCamera();
     }
-    print('hasil data ${compileData.code}');
 
     // var value =
     //     await Navigator.push(context, MaterialPageRoute(builder: (context) {

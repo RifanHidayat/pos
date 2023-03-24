@@ -31,7 +31,9 @@ class AppbarMenu1 extends StatelessWidget {
                 ? style2()
                 : icon == 3
                     ? style3()
-                    : SizedBox());
+                    : icon == 4
+                        ? style4()
+                        : SizedBox());
   }
 
   Widget style1() {
@@ -164,6 +166,24 @@ class AppbarMenu1 extends StatelessWidget {
                     icon: rightIcon!),
               ),
             )),
+      ],
+    );
+  }
+
+  Widget style4() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+            child: Container(
+          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(bottom: 15, left: 15),
+          child: Text(
+            title!,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: colorTitle),
+          ),
+        )),
       ],
     );
   }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:siscom_pos/controller/pelanggan/list_pelanggan_controller.dart';
+import 'package:siscom_pos/model/pelanggan/list_pelanggan_model.dart';
 import 'package:siscom_pos/screen/pelanggan/detail_pelanggan_view.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
-import 'package:siscom_pos/screen/stockopname/detail_stock_opname.dart';
 import 'package:siscom_pos/screen/stockopname/tambah_stok_opname.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -32,11 +33,6 @@ class _ListPelangganViewState extends State<ListPelangganView> {
     super.dispose();
   }
 
-  Future<void> refreshData() async {
-    await Future.delayed(Duration(seconds: 2));
-    controller.startLoad();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -62,8 +58,20 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                     child: SearchApp(
                       controller: controller.pencarian.value,
                       onChange: true,
-                      isFilter: true,
-                      onTap: (value) {},
+                      isFilter: false,
+                      onTap: (value) {
+                        var textCari = value.toLowerCase();
+                        List<ListPelangganModel> filter =
+                            controller.listPelangganMaster.where((element) {
+                          var namaPelanggan =
+                              element.namaPelanggan!.toLowerCase();
+
+                          return namaPelanggan.contains(textCari);
+                        }).toList();
+                        setState(() {
+                          controller.listPelanggan.value = filter;
+                        });
+                      },
                     ),
                   ),
                   SizedBox(
@@ -76,13 +84,10 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                     height: Utility.medium,
                   ),
                   Flexible(
-                      child: RefreshIndicator(
-                          color: Utility.primaryDefault,
-                          onRefresh: refreshData,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16, right: 16),
-                            child: listPelanggan(),
-                          )))
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: listPelanggan(),
+                  ))
                 ],
               ),
             ),
@@ -156,7 +161,7 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                 controller.statusMember.value = 0;
                 controller.statusMember.refresh();
                 controller.listPelanggan.value = controller.listPelangganMaster
-                    .where((element) => element.status == 1)
+                    .where((element) => element.status == "Y")
                     .toList();
                 controller.listPelanggan.refresh();
               }
@@ -181,7 +186,7 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                   controller.statusMember.refresh();
                   controller.listPelanggan.value = controller
                       .listPelangganMaster
-                      .where((element) => element.status == 2)
+                      .where((element) => element.status == "")
                       .toList();
                   controller.listPelanggan.refresh();
                 }
@@ -237,150 +242,194 @@ class _ListPelangganViewState extends State<ListPelangganView> {
                   ],
                 ),
               )
-            : ListView.builder(
-                physics: controller.listPelanggan.length <= 10
-                    ? AlwaysScrollableScrollPhysics()
-                    : BouncingScrollPhysics(),
-                itemCount: controller.listPelanggan.length,
-                itemBuilder: (context, index) {
-                  var kodePelanggan = controller.listPelanggan[0].kodePelanggan;
-                  var namaPelanggan = controller.listPelanggan[0].namaPelanggan;
-                  var status = controller.listPelanggan[0].status;
-                  var nomorTelpon = controller.listPelanggan[0].nomorTelpon;
-                  var point = controller.listPelanggan[0].point;
+            : SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: true,
+                header: MaterialClassicHeader(
+                  color: Utility.primaryDefault,
+                ),
+                footer: ClassicFooter(
+                  loadingText: "Load More...",
+                  noDataText: "Finished loading data",
+                  loadStyle: LoadStyle.ShowWhenLoading,
+                  loadingIcon: Icon(Iconsax.more),
+                ),
+                onRefresh: () async {
+                  await Future.delayed(Duration(seconds: 1));
+                  if (controller.statusMember.value == 2) {
+                    controller.getProsesListPelanggan();
+                    controller.statusMember.value = 0;
+                    controller.statusMember.refresh();
+                  } else {
+                    controller.page.value = 10;
+                    controller.page.refresh();
+                  }
+                  controller.refreshController.refreshCompleted();
+                },
+                onLoading: () async {
+                  await Future.delayed(Duration(seconds: 1));
+                  setState(() {
+                    controller.page.value = controller.page.value + 10;
+                    controller.refreshController.loadComplete();
+                  });
+                },
+                controller: controller.refreshController,
+                child: ListView.builder(
+                    physics: controller.listPelanggan.length <= 10
+                        ? AlwaysScrollableScrollPhysics()
+                        : BouncingScrollPhysics(),
+                    itemCount:
+                        controller.listPelanggan.length > controller.page.value
+                            ? controller.page.value
+                            : controller.listPelanggan.length,
+                    itemBuilder: (context, index) {
+                      var kodePelanggan =
+                          controller.listPelanggan[index].kodePelanggan;
+                      var namaPelanggan =
+                          controller.listPelanggan[index].namaPelanggan;
+                      var status = controller.listPelanggan[index].status;
+                      var nomorTelpon =
+                          controller.listPelanggan[index].nomorTelpon;
+                      var point = controller.listPelanggan[index].totalPoint;
 
-                  return InkWell(
-                    onTap: () {
-                      Get.to(DetailPelangganView(),
-                          duration: Duration(milliseconds: 350),
-                          transition: Transition.rightToLeftWithFade);
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 20,
-                                child: Image.asset(
-                                  "assets/Avatar.png",
-                                  height: 50,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 70,
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 6),
-                                        child: Text("$namaPelanggan"),
-                                      ),
-                                      Row(
+                      return InkWell(
+                        onTap: () =>
+                            controller.detailPelangganView(kodePelanggan),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 20,
+                                    child: Image.asset(
+                                      "assets/Avatar.png",
+                                      height: 50,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 70,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 8),
+                                      child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Expanded(
-                                            flex: 10,
-                                            child: Image.asset(
-                                              "assets/award.png",
-                                              height: 15,
-                                            ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 6),
+                                            child: Text("$namaPelanggan"),
                                           ),
-                                          Expanded(
-                                            flex: 10,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(left: 3),
-                                              child: Text(
-                                                "$point",
-                                                style: TextStyle(
-                                                    fontSize: Utility.normal),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                flex: 10,
+                                                child: Image.asset(
+                                                  "assets/award.png",
+                                                  height: 15,
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 5,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(top: 3),
-                                              child: Icon(
-                                                Icons.fiber_manual_record,
-                                                size: 12,
-                                                color: Utility.nonAktif,
+                                              Expanded(
+                                                flex: 10,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 3),
+                                                  child: Text(
+                                                    "$point",
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            Utility.normal),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 30,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(left: 3),
-                                              child: status == 1
-                                                  ? Text(
-                                                      "Member",
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              Utility.normal),
-                                                    )
-                                                  : Text(
-                                                      "Non Member",
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              Utility.normal),
-                                                    ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 5,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(top: 3),
-                                              child: Icon(
-                                                Icons.fiber_manual_record,
-                                                size: 12,
-                                                color: Utility.nonAktif,
+                                              Expanded(
+                                                flex: 5,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 3),
+                                                  child: Icon(
+                                                    Icons.fiber_manual_record,
+                                                    size: 12,
+                                                    color: Utility.nonAktif,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 40,
-                                            child: Padding(
-                                              padding: EdgeInsets.only(left: 3),
-                                              child: Text(
-                                                "$nomorTelpon",
-                                                style: TextStyle(
-                                                    fontSize: Utility.normal),
+                                              Expanded(
+                                                flex: 30,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 3),
+                                                  child: status == 1
+                                                      ? Text(
+                                                          "Member",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              fontSize: Utility
+                                                                  .normal),
+                                                        )
+                                                      : Text(
+                                                          "Non Member",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              fontSize: Utility
+                                                                  .normal),
+                                                        ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
+                                              Expanded(
+                                                flex: 5,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 3),
+                                                  child: Icon(
+                                                    Icons.fiber_manual_record,
+                                                    size: 12,
+                                                    color: Utility.nonAktif,
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 40,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 3),
+                                                  child: Text(
+                                                    "$nomorTelpon",
+                                                    style: TextStyle(
+                                                        fontSize:
+                                                            Utility.normal),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
                                         ],
-                                      )
-                                    ],
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  Expanded(
+                                    flex: 10,
+                                    child: Align(
+                                        alignment: Alignment.center,
+                                        child: Icon(Iconsax.arrow_right_3)),
+                                  )
+                                ],
                               ),
-                              Expanded(
-                                flex: 10,
-                                child: Align(
-                                    alignment: Alignment.center,
-                                    child: Icon(Iconsax.arrow_right_3)),
-                              )
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              height: Utility.medium,
+                            ),
+                            Divider()
+                          ],
                         ),
-                        SizedBox(
-                          height: Utility.medium,
-                        ),
-                        Divider()
-                      ],
-                    ),
-                  );
-                });
+                      );
+                    }),
+              );
   }
 }

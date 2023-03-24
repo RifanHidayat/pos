@@ -5,7 +5,7 @@ import 'package:siscom_pos/controller/laporan/lap_ringkasan_penjualan_ct.dart';
 import 'package:siscom_pos/controller/pelanggan/list_pelanggan_controller.dart';
 import 'package:siscom_pos/screen/pelanggan/detail_pelanggan_view.dart';
 import 'package:siscom_pos/screen/sidebar.dart';
-import 'package:siscom_pos/screen/stockopname/detail_stock_opname.dart';
+
 import 'package:siscom_pos/screen/stockopname/tambah_stok_opname.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';

@@ -9,6 +9,8 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
+import 'stok_opname/stok_opname_controller.dart';
+
 class GlobalBottomSheet extends GetxController
     with GetSingleTickerProviderStateMixin {
   AnimationController? animasiController;
@@ -229,7 +231,8 @@ class GlobalBottomSheet extends GetxController
                 var nama = dataShow[index]['NAMA'];
 
                 return InkWell(
-                  onTap: () {},
+                  onTap: () =>
+                      prosesData(stringController, dataShow[index], setState),
                   child: Padding(
                     padding: const EdgeInsets.only(top: 5, bottom: 5),
                     child: Container(
@@ -257,6 +260,25 @@ class GlobalBottomSheet extends GetxController
                 );
               })),
     );
+  }
+
+  var stokOpnameCt = Get.put(StockOpnameController());
+
+  void prosesData(stringController, dataSelected, setState) {
+    if (stringController == "pilih_gudang_header_stokopname") {
+      stokOpnameCt.kodeGudangSelected.value = dataSelected["KODE"];
+      stokOpnameCt.kodeGudangSelected.refresh();
+      stokOpnameCt.namaGudangSelected.value = dataSelected["NAMA"];
+      stokOpnameCt.namaGudangSelected.refresh();
+    } else if (stringController == "pilih_kelompokbarang_header_stokopname") {
+      stokOpnameCt.kodeKelompokBarang.value = dataSelected["KODE"];
+      stokOpnameCt.kodeKelompokBarang.refresh();
+      stokOpnameCt.inisialKelompokBarang.value = dataSelected["INISIAL"];
+      stokOpnameCt.inisialKelompokBarang.refresh();
+      stokOpnameCt.namaKelompokBarang.value = dataSelected["NAMA"];
+      stokOpnameCt.namaKelompokBarang.refresh();
+    }
+    Get.back();
   }
 
   void validasiButtonSheet(String pesan1, Widget content, String type,

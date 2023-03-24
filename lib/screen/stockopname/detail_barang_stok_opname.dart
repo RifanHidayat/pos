@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:siscom_pos/controller/buttonSheet_controller.dart';
 import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
-import 'package:siscom_pos/screen/stockopname/berhasil_menambhakan_data.dart';
+import 'package:siscom_pos/model/stok_opname/tambah_opnamedt.dart';
+
 import 'package:siscom_pos/screen/stockopname/scan_barang_stokopname.dart';
+import 'package:siscom_pos/screen/stockopname/stockopname.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbarmenu.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
@@ -36,49 +39,37 @@ class _DetailBarangStokOpnameState extends State<DetailBarangStokOpname> {
   Widget build(BuildContext context) {
     return MainScaffold(
         type: "appbar_with_bottom",
-        returnOnWillpop: true,
+        returnOnWillpop: false,
         appbarTitle: "Detail Barang Stok Opname",
-        ontapAppbar: () => Get.back(),
-        backFunction: () => Get.back(),
+        ontapAppbar: () {},
+        backFunction: () {},
         contentBottom: Button1(
           textBtn: "Simpan",
           colorBtn: Utility.primaryDefault,
           colorText: Utility.baseColor2,
-          onTap: () {},
+          onTap: () {
+            ButtonSheetController().validasiButtonSheet(
+                "Detail Barang Stok Opname",
+                TextLabel(text: "Yakin Simpan data detail ?"),
+                "",
+                "Simpan", () async {
+              Get.offAll(StockOpname());
+            });
+          },
         ),
-        content: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: Utility.medium,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: CardCustom(
-                      colorBg: Utility.baseColor2,
-                      radiusBorder: Utility.borderStyle1,
-                      widgetCardCustom: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Align(
-                            alignment: Alignment.center,
-                            child: TextGroupColumn(
-                              title: "Total Stok",
-                              colorTitle: Utility.nonAktif,
-                              sizeTitle: Utility.normal,
-                              subtitleBold: true,
-                              subtitle: "40000",
-                              sizeSubtitle: Utility.medium,
-                            )),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+        content: Obx(
+          () => Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
                       child: CardCustom(
                         colorBg: Utility.baseColor2,
                         radiusBorder: Utility.borderStyle1,
@@ -87,104 +78,169 @@ class _DetailBarangStokOpnameState extends State<DetailBarangStokOpname> {
                           child: Align(
                               alignment: Alignment.center,
                               child: TextGroupColumn(
-                                title: "Total Fisik",
+                                title: "Total Stok",
                                 colorTitle: Utility.nonAktif,
                                 sizeTitle: Utility.normal,
                                 subtitleBold: true,
-                                subtitle: "40000",
+                                subtitle: "${controller.totalStok.value}",
                                 sizeSubtitle: Utility.medium,
                               )),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: Utility.medium,
-              ),
-              InkWell(
-                onTap: () {
-                  Get.to(ScanBarangStokOpname(),
-                      duration: Duration(milliseconds: 300),
-                      transition: Transition.rightToLeftWithFade);
-                },
-                child: CardCustom(
-                  colorBg: Utility.baseColor2,
-                  radiusBorder: Utility.borderStyle1,
-                  widgetCardCustom: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Iconsax.scan),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6.0),
-                          child: TextLabel(
-                            text: 'Scan Barcode',
-                            size: 14.0,
-                            weigh: FontWeight.bold,
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: CardCustom(
+                          colorBg: Utility.baseColor2,
+                          radiusBorder: Utility.borderStyle1,
+                          widgetCardCustom: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Align(
+                                alignment: Alignment.center,
+                                child: TextGroupColumn(
+                                  title: "Total Fisik",
+                                  colorTitle: Utility.nonAktif,
+                                  sizeTitle: Utility.normal,
+                                  subtitleBold: true,
+                                  subtitle: "${controller.totalFisik.value}",
+                                  sizeSubtitle: Utility.medium,
+                                )),
                           ),
-                        )
-                      ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.to(ScanBarangStokOpname(),
+                        duration: Duration(milliseconds: 300),
+                        transition: Transition.rightToLeftWithFade);
+                  },
+                  child: CardCustom(
+                    colorBg: Utility.baseColor2,
+                    radiusBorder: Utility.borderStyle1,
+                    widgetCardCustom: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Iconsax.scan),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6.0),
+                            child: TextLabel(
+                              text: 'Scan Barcode',
+                              size: 14.0,
+                              weigh: FontWeight.bold,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: Utility.medium,
-              ),
-              SearchApp(
-                controller: controller.pencarian.value,
-                onChange: true,
-                isFilter: false,
-                onTap: (value) {
-                  print(value);
-                },
-              ),
-              SizedBox(
-                height: Utility.medium,
-              ),
-              Flexible(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      itemCount: controller.dataDetailBarangStokOpname.length,
-                      itemBuilder: (context, index) {
-                        var nama = controller.dataDetailBarangStokOpname[index]
-                            ["nama"];
-                        var stok = controller.dataDetailBarangStokOpname[index]
-                            ["stok"];
-                        return InkWell(
-                          onTap: () =>
-                              controller.detailPenyesuaianBarangStokOpname(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: Utility.verySmall,
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                SearchApp(
+                  controller: controller.pencarian.value,
+                  onChange: true,
+                  isFilter: false,
+                  onTap: (value) {
+                    var textCari = value.toLowerCase();
+                    List<TambahOpnameDt> filter = controller
+                        .detailBarangTambahStokOpnameDtMaster
+                        .where((element) {
+                      var namaBarang = element.namaBarang!.toLowerCase();
+
+                      return namaBarang.contains(textCari);
+                    }).toList();
+                    setState(() {
+                      controller.detailBarangTambahStokOpnameDt.value = filter;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                Flexible(
+                    child: controller.detailBarangTambahStokOpnameDt.isEmpty
+                        ? Center(
+                            child: SingleChildScrollView(
+                              physics: BouncingScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    "assets/empty.png",
+                                    height: 200,
+                                  ),
+                                  SizedBox(
+                                    height: Utility.medium,
+                                  ),
+                                  Text(
+                                    "Data Detail kosong",
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                              TextLabel(
-                                text: "$nama",
-                                weigh: FontWeight.bold,
-                              ),
-                              SizedBox(
-                                height: Utility.verySmall,
-                              ),
-                              TextLabel(
-                                text: "Stok : $stok",
-                              ),
-                              Divider(),
-                            ],
-                          ),
-                        );
-                      }))
-            ],
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            itemCount: controller
+                                .detailBarangTambahStokOpnameDt.length,
+                            itemBuilder: (context, index) {
+                              var namaBarang = controller
+                                  .detailBarangTambahStokOpnameDt[index]
+                                  .namaBarang;
+                              var group = controller
+                                  .detailBarangTambahStokOpnameDt[index].group;
+                              var barang = controller
+                                  .detailBarangTambahStokOpnameDt[index]
+                                  .kodeBarang;
+                              var stok = controller
+                                  .detailBarangTambahStokOpnameDt[index].qty;
+                              return InkWell(
+                                onTap: () => controller
+                                    .detailPenyesuaianBarangStokOpname(
+                                        "$group$barang"),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: Utility.verySmall,
+                                    ),
+                                    TextLabel(
+                                      text: "$namaBarang",
+                                      weigh: FontWeight.bold,
+                                    ),
+                                    SizedBox(
+                                      height: Utility.verySmall,
+                                    ),
+                                    TextLabel(
+                                      text: "Stok : $stok",
+                                    ),
+                                    Divider(),
+                                  ],
+                                ),
+                              );
+                            }))
+              ],
+            ),
           ),
         ));
   }

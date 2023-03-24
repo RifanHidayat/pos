@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:siscom_pos/controller/buttom_sheet_global.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
+import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/controller/stok_opname/stok_opname_controller.dart';
 import 'package:siscom_pos/screen/stockopname/detail_barang_stok_opname.dart';
 import 'package:siscom_pos/utils/app_data.dart';
@@ -30,6 +32,7 @@ class TambahStokOpname extends StatefulWidget {
 class _TambahStokOpnameState extends State<TambahStokOpname> {
   final controller = Get.put(StockOpnameController());
   final globalController = Get.put(GlobalController());
+  final sidebarCt = Get.put(SidebarController());
 
   @override
   void initState() {
@@ -57,26 +60,26 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
           colorBtn: Utility.primaryDefault,
           colorText: Colors.white,
           onTap: () {
-            Get.to(DetailBarangStokOpname(),
-                duration: Duration(milliseconds: 300),
-                transition: Transition.rightToLeftWithFade);
+            controller.validasiSimpanHeaderStokOpname();
           }),
       content: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: Utility.medium,
-              ),
-              info1(),
-              SizedBox(
-                height: Utility.large,
-              ),
-              formInput(),
-            ],
+        child: Obx(
+          () => Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: Utility.medium,
+                ),
+                info1(),
+                SizedBox(
+                  height: Utility.large,
+                ),
+                formInput(),
+              ],
+            ),
           ),
         ),
       ),
@@ -103,7 +106,7 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
                         height: 3.0,
                       ),
                       TextLabel(
-                        text: "0001",
+                        text: "${controller.kodeTambahHd.value}",
                         color: Utility.nonAktif,
                       ),
                     ],
@@ -111,7 +114,7 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
               Expanded(
                 flex: 2,
                 child: Container(
-                  margin: const EdgeInsets.only(left: 2.0, right: 2.0),
+                  margin: const EdgeInsets.only(left: 2.5, right: 2.5),
                   color: Utility.greyLight300,
                 ),
               ),
@@ -127,7 +130,7 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
                           height: 3.0,
                         ),
                         TextLabel(
-                          text: "WESTERN MANIA 1",
+                          text: "${sidebarCt.cabangNameSelectedSide.value}",
                           color: Utility.nonAktif,
                         ),
                       ],
@@ -151,11 +154,28 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
         SizedBox(
           height: 3.0,
         ),
-        TextFieldMain(
-          controller: controller.tanggalBuatStok.value,
-          statusIconLeft: false,
-          onTap: () {},
-        ),
+        InkWell(
+            onTap: () {
+              DatePicker.showDatePicker(Get.context!,
+                  showTitleActions: true,
+                  minTime: DateTime(2000, 1, 1),
+                  maxTime: DateTime(2100, 1, 1), onConfirm: (date) {
+                controller.tanggalBuatStok.value.text =
+                    "${DateFormat('yyyy-MM-dd').format(date)}";
+                controller.tanggalBuatStok.refresh();
+              }, currentTime: DateTime.now(), locale: LocaleType.en);
+            },
+            child: CardCustom(
+              colorBg: Utility.baseColor2,
+              radiusBorder: Utility.borderStyle1,
+              widgetCardCustom: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: TextLabel(
+                  text:
+                      "${Utility.convertDate1(controller.tanggalBuatStok.value.text)}",
+                ),
+              ),
+            )),
         SizedBox(
           height: Utility.medium,
         ),
@@ -166,26 +186,52 @@ class _TambahStokOpnameState extends State<TambahStokOpname> {
         SizedBox(
           height: 3.0,
         ),
-        TextFieldMain(
-          controller: controller.tanggalBuatStok.value,
-          statusIconLeft: false,
-          onTap: () {},
-        ),
+        InkWell(
+            onTap: () {
+              GlobalBottomSheet().buttomSheetGlobal(
+                  controller.listAllGudang,
+                  "Pilih Gudang",
+                  "pilih_gudang_header_stokopname",
+                  controller.namaGudangSelected.value);
+            },
+            child: CardCustom(
+              colorBg: Utility.baseColor2,
+              radiusBorder: Utility.borderStyle1,
+              widgetCardCustom: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: TextLabel(
+                  text: "${controller.namaGudangSelected.value}",
+                ),
+              ),
+            )),
         SizedBox(
           height: Utility.medium,
         ),
         TextLabel(
-          text: "Kelompok Barang *",
+          text: "Kelompok Barang",
           weigh: FontWeight.bold,
         ),
         SizedBox(
           height: 3.0,
         ),
-        TextFieldMain(
-          controller: controller.tanggalBuatStok.value,
-          statusIconLeft: false,
-          onTap: () {},
-        ),
+        InkWell(
+            onTap: () {
+              GlobalBottomSheet().buttomSheetGlobal(
+                  controller.listAllKelompokBarang,
+                  "Pilih Kelompok Barang",
+                  "pilih_kelompokbarang_header_stokopname",
+                  controller.namaKelompokBarang.value);
+            },
+            child: CardCustom(
+              colorBg: Utility.baseColor2,
+              radiusBorder: Utility.borderStyle1,
+              widgetCardCustom: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: TextLabel(
+                  text: "${controller.namaKelompokBarang.value}",
+                ),
+              ),
+            )),
         SizedBox(
           height: Utility.medium,
         ),
