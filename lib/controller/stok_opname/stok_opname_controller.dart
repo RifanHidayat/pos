@@ -118,12 +118,15 @@ class StockOpnameController extends GetxController {
   }
 
   void getLastKodeStokOpname() async {
+     // Get.to(TambahStokOpname());
+    print("get las kode stok opname");
     Future<List> checkLastStokOpname =
         GetDataController().checkLastRecord("OPNAMEHD", "NOMOR");
     List hasilLastRecord = await checkLastStokOpname;
     if (hasilLastRecord[0] == true && hasilLastRecord[2].length != 0) {
       // VALIDASI LAST NOMOR
 
+      
       var lastNomor = hasilLastRecord[2][0]["NOMOR"];
       var hitung1 = int.parse(lastNomor) + 1;
       var hitung2 = "$hitung1".length == 1
@@ -134,14 +137,22 @@ class StockOpnameController extends GetxController {
                   ? "0$hitung1"
                   : "$hitung1";
       kodeTambahHd.value = hitung2;
-      kodeTambahHd.refresh();
+      kodeTambahHd.refresh();}else{
+         kodeTambahHd.value="00001";
+         kodeTambahHd.refresh();
 
+      }
+
+
+    print("all gudang");
       // GET ALL GUDANG
       var connect = Api.connectionApi2("get", "", "stok-opname-gudang",
           "&cabang=${sidebarCt.cabangKodeSelectedSide.value}");
       var getValue = await connect;
       var valueBody = jsonDecode(getValue.body);
+      print(valueBody);
       List dataGudang = valueBody['data'];
+
 
       if (dataGudang.isNotEmpty) {
         var getFirst = dataGudang.first;
@@ -168,7 +179,7 @@ class StockOpnameController extends GetxController {
       }
 
       Get.to(TambahStokOpname());
-    }
+    
   }
 
   void validasiSimpanHeaderStokOpname() async {
@@ -186,9 +197,12 @@ class StockOpnameController extends GetxController {
         'diopname': diopnameOleh.value.text,
         'cabang': sidebarCt.cabangKodeSelectedSide.value
       };
+      print(body);
       var connect = Api.connectionApi2("post", body, "stok-opname-hd", "");
       var getValue = await connect;
       var valueBody = jsonDecode(getValue.body);
+
+      print(valueBody);
 
       if (valueBody["status"] == true) {
         // VALIDASI MASUK KE DETAIL STOK OPNAME

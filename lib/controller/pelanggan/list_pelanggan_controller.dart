@@ -41,6 +41,8 @@ class ListPelangganViewController extends GetxController {
     if (data.isNotEmpty) {
       List<ListPelangganModel> tampungPelanggan = [];
       for (var element in data) {
+        
+
         tampungPelanggan.add(ListPelangganModel(
           kodePelanggan: element['KODE'],
           namaPelanggan: element['NAMA'],
@@ -71,6 +73,8 @@ class ListPelangganViewController extends GetxController {
           pointDitukar: Utility.validasiValueDouble("${element['POINT']}"),
           totalPoint: Utility.validasiValueDouble("${element['POINK']}"),
         ));
+
+
       }
       List<ListPelangganModel> dataMember =
           tampungPelanggan.where((element) => element.status == "Y").toList();

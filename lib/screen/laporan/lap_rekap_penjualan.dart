@@ -43,7 +43,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
               automaticallyImplyLeading: false,
               elevation: 2,
               flexibleSpace: AppbarMenu1(
-                title: "Rekap Penjualan",
+                title: "Laporan Penjualan",
                 icon: 1,
                 colorTitle: Colors.black,
                 onTap: () {

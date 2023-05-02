@@ -138,7 +138,7 @@ class AuthController extends GetxController {
         var valueBody = jsonDecode(res.body);
         if (valueBody['status'] == true) {
           var data = valueBody['data'];
-          print("informasi user sysuser $data");
+          
           AppData.sysuserInformasi =
               "${data[0]['USID']}-${data[0]['USLEVEL']}-${data[0]['LOGINFLAG']}-${data[0]['AKSESCABANG']}-${data[0]['AKSESGUDANG']}";
           var aksesCabangUser = "${data[0]['AKSESCABANG']}".split(" ");

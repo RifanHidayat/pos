@@ -122,6 +122,7 @@ class GetDataController extends GetxController {
     var connect = Api.connectionApi("post", body, "check_last_record");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
+    print("value body ${valueBody}");
     List dataFinal = [];
     if (valueBody['status']) {
       dataFinal = [true, valueBody['status'], valueBody['data']];

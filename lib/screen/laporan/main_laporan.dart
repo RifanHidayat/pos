@@ -89,9 +89,7 @@ class _LaporanMainViewState extends State<LaporanMainView> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: Utility.medium,
-                  ),
+                  
                   Divider(),
                   SizedBox(
                     height: Utility.medium,
@@ -116,7 +114,85 @@ class _LaporanMainViewState extends State<LaporanMainView> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Text(
-                                "Rekap Penjualan",
+                                "Laporan Order",
+                                style: TextStyle(
+                                    fontSize: Utility.medium,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 10,
+                            child: Icon(Iconsax.arrow_right_3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                   Divider(),
+                  SizedBox(
+                    height: Utility.medium,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Get.to(LaporanRekapPenjualan(),
+                          duration: Duration(milliseconds: 300),
+                          transition: Transition.rightToLeftWithFade);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 10,
+                            child: Icon(Iconsax.document_filter),
+                          ),
+                          Expanded(
+                            flex: 80,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                "Laporan pengiriman",
+                                style: TextStyle(
+                                    fontSize: Utility.medium,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 10,
+                            child: Icon(Iconsax.arrow_right_3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                   Divider(),
+                  SizedBox(
+                    height: Utility.medium,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Get.to(LaporanRekapPenjualan(),
+                          duration: Duration(milliseconds: 300),
+                          transition: Transition.rightToLeftWithFade);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 10,
+                            child: Icon(Iconsax.document_filter),
+                          ),
+                          Expanded(
+                            flex: 80,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Text(
+                                "Laporan Penjualan",
                                 style: TextStyle(
                                     fontSize: Utility.medium,
                                     fontWeight: FontWeight.bold),

@@ -11,7 +11,7 @@ class Api {
       base64Encode(utf8
           .encode('aplikasioperasionalsiscom:siscom@ptshaninformasi#2022@'));
 
-  static var basicUrl = "http://kantor.membersis.com:5000/";
+  static var basicUrl = "http://kantor.membersis.com:2627/";
 
   static Future connectionApi(
       String typeConnect, valFormData, String url) async {
