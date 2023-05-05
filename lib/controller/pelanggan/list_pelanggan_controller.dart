@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 import 'package:siscom_pos/controller/sidebar_controller.dart';
 import 'package:siscom_pos/model/pelanggan.dart';
 import 'package:siscom_pos/model/pelanggan/list_pelanggan_model.dart';
@@ -15,6 +16,7 @@ class ListPelangganViewController extends GetxController {
   RefreshController refreshController = RefreshController(initialRefresh: true);
 
   var sidebarCt = Get.put(SidebarController());
+  var dashbardController = Get.put(DashbardController());
 
   var listPelanggan = <ListPelangganModel>[].obs;
   var listPelangganMaster = <ListPelangganModel>[].obs;
@@ -34,15 +36,13 @@ class ListPelangganViewController extends GetxController {
 
   Future<bool> getProsesListPelanggan() async {
     var connect = Api.connectionApi2("get", "", "pelanggan",
-        "&cabang=${sidebarCt.cabangKodeSelectedSide.value}");
+        "&cabang=${sidebarCt.cabangKodeSelectedSide.value}&salesm=${dashbardController.pelayanSelected.value}");
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     List data = valueBody['data'];
     if (data.isNotEmpty) {
       List<ListPelangganModel> tampungPelanggan = [];
       for (var element in data) {
-        
-
         tampungPelanggan.add(ListPelangganModel(
           kodePelanggan: element['KODE'],
           namaPelanggan: element['NAMA'],
@@ -73,8 +73,6 @@ class ListPelangganViewController extends GetxController {
           pointDitukar: Utility.validasiValueDouble("${element['POINT']}"),
           totalPoint: Utility.validasiValueDouble("${element['POINK']}"),
         ));
-
-
       }
       List<ListPelangganModel> dataMember =
           tampungPelanggan.where((element) => element.status == "Y").toList();

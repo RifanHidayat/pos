@@ -115,7 +115,7 @@ class Register extends StatelessWidget {
                                   Padding(
                                     padding: EdgeInsets.only(left: 5),
                                     child: Text(
-                                      "Database",
+                                      "Nama Perusahaan",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -135,8 +135,19 @@ class Register extends StatelessWidget {
                                         child: Padding(
                                           padding: const EdgeInsets.only(
                                               top: 6.0, left: 8.0),
-                                          child: Obx(() => Text(
-                                              "${controller.databaseSelectedRegis.value}")),
+                                          child: Obx(() => Row(
+                                                children: [
+                                                  Icon(
+                                                    Iconsax.buildings,
+                                                    color: Utility.grey500,
+                                                  ),
+                                                  SizedBox(
+                                                    width: Utility.medium,
+                                                  ),
+                                                  Text(
+                                                      "${controller.companynameSelectedRegis.value}"),
+                                                ],
+                                              )),
                                         ),
                                       ),
                                     ),
@@ -156,54 +167,21 @@ class Register extends StatelessWidget {
                                     height: 5,
                                   ),
                                   CardCustomForm(
-                                    colorBg: Utility.baseColor2,
+                                    colorBg: Utility.fielddisable,
                                     tinggiCard: 50.0,
                                     radiusBorder: Utility.borderStyle1,
                                     widgetCardForm: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: TextField(
+                                        enabled: false,
                                         cursorColor: Utility.primaryDefault,
                                         controller:
                                             controller.namaRegister.value,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
-                                          prefixIcon: const Icon(Iconsax.user),
-                                        ),
-                                        style: TextStyle(
-                                            fontSize: 14.0,
-                                            height: 2.0,
-                                            color: Colors.black),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: Utility.medium,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 5),
-                                    child: Text(
-                                      "Nama Perusahaan",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  CardCustomForm(
-                                    colorBg: Utility.baseColor2,
-                                    tinggiCard: 50.0,
-                                    radiusBorder: Utility.borderStyle1,
-                                    widgetCardForm: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: TextField(
-                                        cursorColor: Utility.primaryDefault,
-                                        controller:
-                                            controller.namaPerusahaan.value,
-                                        decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          prefixIcon:
-                                              const Icon(Iconsax.buildings),
+                                          prefixIcon: const Icon(
+                                            Iconsax.user,
+                                          ),
                                         ),
                                         style: TextStyle(
                                             fontSize: 14.0,
@@ -235,10 +213,8 @@ class Register extends StatelessWidget {
                                       child: Obx(
                                         () => TextField(
                                           cursorColor: Utility.primaryDefault,
-                                          obscureText: !this
-                                              .controller
-                                              .showpassword
-                                              .value,
+                                          obscureText:
+                                              !controller.showpassword.value,
                                           controller:
                                               controller.passwordRegister.value,
                                           decoration: InputDecoration(
@@ -250,21 +226,74 @@ class Register extends StatelessWidget {
                                                   controller.showpassword.value
                                                       ? Iconsax.eye
                                                       : Iconsax.eye_slash,
-                                                  color: this
-                                                          .controller
-                                                          .showpassword
+                                                  color: controller
+                                                          .showpassword.value
+                                                      ? Utility.primaryDefault
+                                                      : Utility.nonAktif,
+                                                ),
+                                                onPressed: () {
+                                                  controller
+                                                          .showpassword.value =
+                                                      !controller
+                                                          .showpassword.value;
+                                                },
+                                              )),
+                                          style: TextStyle(
+                                              fontSize: 14.0,
+                                              height: 2.0,
+                                              color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: Utility.medium,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 5),
+                                    child: Text(
+                                      "Konfirmasi Password",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  CardCustomForm(
+                                    colorBg: Utility.baseColor2,
+                                    tinggiCard: 50.0,
+                                    radiusBorder: Utility.borderStyle1,
+                                    widgetCardForm: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Obx(
+                                        () => TextField(
+                                          cursorColor: Utility.primaryDefault,
+                                          obscureText: !controller
+                                              .showconfirmpassword.value,
+                                          controller: controller
+                                              .confirmpasswordRegister.value,
+                                          decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                              prefixIcon:
+                                                  const Icon(Iconsax.lock),
+                                              suffixIcon: IconButton(
+                                                icon: Icon(
+                                                  controller.showconfirmpassword
+                                                          .value
+                                                      ? Iconsax.eye
+                                                      : Iconsax.eye_slash,
+                                                  color: controller
+                                                          .showconfirmpassword
                                                           .value
                                                       ? Utility.primaryDefault
                                                       : Utility.nonAktif,
                                                 ),
                                                 onPressed: () {
-                                                  this
-                                                          .controller
-                                                          .showpassword
+                                                  controller.showconfirmpassword
                                                           .value =
-                                                      !this
-                                                          .controller
-                                                          .showpassword
+                                                      !controller
+                                                          .showconfirmpassword
                                                           .value;
                                                 },
                                               )),

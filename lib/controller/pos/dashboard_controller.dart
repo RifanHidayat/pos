@@ -512,18 +512,21 @@ class DashbardController extends BaseController {
     connect.then((dynamic res) {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
-        var data = valueBody['data'];
+        List data = valueBody['data'];
         listKelompokBarang.value = data;
         listKelompokBarang.value.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
         if (type == "arsip") {
           aksiPilihKategoriBarang();
         } else {
-          var getFirst = data.first;
-          var kodeInisial = getFirst['INISIAL'];
-          kategoriBarang.value = getFirst['NAMA'];
+          if (data.isNotEmpty) {
+            var getFirst = data.first;
+            var kodeInisial = getFirst['INISIAL'];
+            kategoriBarang.value = getFirst['NAMA'];
+            getMenu(kodeInisial, type);
+          } else {
+            kategoriBarang.value = '';
+          }
           kategoriBarang.refresh();
-          print('load menu first');
-          getMenu(kodeInisial, type);
         }
         kategoriBarang.refresh();
         listKelompokBarang.refresh();
@@ -576,7 +579,7 @@ class DashbardController extends BaseController {
     connect.then((dynamic res) {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
-        List data = valueBody['data'];
+        List data = valueBody['data'] ?? [];
         loadingString.value =
             data.isEmpty ? "Tidak ada barang" : "Sedang memuat...";
         if (data.isNotEmpty) {

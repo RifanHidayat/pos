@@ -68,7 +68,8 @@ class PilihDatabase extends StatelessWidget {
         itemBuilder: (context, index) {
           var dbname = controller.database.value[index]['dbname'];
           var password = controller.database.value[index]['password'];
-
+          var companyName = controller.database.value[index]['company_name'];
+          var name = controller.database.value[index]['name'];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,8 +77,12 @@ class PilihDatabase extends StatelessWidget {
                 height: Utility.medium,
               ),
               InkWell(
-                onTap: () =>
-                    controller.selectDatabaseDanPassword(url, dbname, password),
+                onTap: () => controller.selectDatabaseDanPassword(
+                    url: url,
+                    dbname: dbname,
+                    companyname: companyName,
+                    password: password,
+                    name: name),
                 child: CardCustom(
                     colorBg: Utility.baseColor2,
                     radiusBorder: Utility.borderStyle1,
@@ -93,7 +98,7 @@ class PilihDatabase extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "$dbname",
+                                    "$companyName",
                                     style: Utility.judulList,
                                   ),
                                   SizedBox(
