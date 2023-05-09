@@ -37,6 +37,7 @@ class Utility {
   static Color greyLight50 = Color(0xffF8FAFF);
   static Color grey100 = Color(0xffE9EDF5);
   static Color grey600 = Color(0xff687182);
+  static Color grey300 = Colors.grey.shade300;
   static Color grey500 = Colors.grey.shade500;
   static Color grey900 = Color(0xff333B4A);
   static Color greyDark = Color(0xff333B4A);

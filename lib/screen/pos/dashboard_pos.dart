@@ -16,6 +16,10 @@ import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
+import 'package:siscom_pos/components/showbuttomsheet/main_showbuttomsheet_widget.dart';
+
+import '../../controller/pelanggan/list_pelanggan_controller.dart';
+import '../../utils/controllers/controller_implementation.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -26,9 +30,12 @@ class _DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   final controller = Get.put(DashbardController());
+  final listPelangganViewController = Get.put(ListPelangganViewController());
   var globalController = Get.put(GlobalController());
   var buttomSheetProduk = Get.put(BottomSheetPos());
   var arsipCt = Get.put(ArsipFakturController());
+  var buttonsheetimpl = Get.put(ButtomSheetImplementation());
+  var paramimpl = ControllerImpl.paramscontrollerimpl;
 
   late FocusNode myFocusNode;
 
@@ -39,9 +46,17 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    controller.startLoad('');
+    debugPrint(
+        'datanya ada dynamic ${listPelangganViewController.listdynamicPelanggan.value}');
+    _init();
     myFocusNode = FocusNode();
     super.initState();
+  }
+
+  _init() async {
+    controller.startLoad('');
+    await listPelangganViewController.startLoad();
+    paramimpl.convert(listPelangganViewController.memberlist.value);
   }
 
   @override
@@ -565,13 +580,26 @@ class _DashboardState extends State<Dashboard> {
                                             "-") {
                                           UtilsAlert.showToast(
                                               "Harap pilih sales terlebih dahulu...");
-                                        } else if (controller
-                                            .listPelanggan.value.isNotEmpty) {
-                                          globalController.buttomSheet1(
-                                              controller.listPelanggan.value,
-                                              "Pilih Pelanggan",
-                                              "dashboard",
-                                              controller.namaPelanggan.value);
+                                        } else if (listPelangganViewController
+                                            .listdynamicPelanggan
+                                            .value
+                                            .isNotEmpty) {
+                                          // globalController.buttomSheet1(
+                                          //     controller.listPelanggan.value,
+                                          //     "Pilih Pelanggan",
+                                          //     "dashboard",
+                                          //     controller.namaPelanggan.value);
+
+                                          buttonsheetimpl.build(
+                                              list: ControllerImpl
+                                                  .paramscontrollerimpl
+                                                  .data
+                                                  .value,
+                                              judul: "Pilih Pelanggan",
+                                              namaSelected: controller
+                                                  .namaPelanggan.value,
+                                              key:
+                                                  'show_data_pelanggan_member_status');
                                         } else {
                                           UtilsAlert.showToast(
                                               "Harap hubungi admin untuk setting pelayan dan pelanggan");
@@ -593,13 +621,13 @@ class _DashboardState extends State<Dashboard> {
                                                 fontSize: Utility.small),
                                           ),
                                           Text(
-                                            "${controller.namaPelanggan.value}"
+                                            "${listPelangganViewController.pelangganselectedDashboard.value}"
                                                         .length >
                                                     5
-                                                ? "${controller.namaPelanggan.value}"
+                                                ? "${listPelangganViewController.pelangganselectedDashboard.value}"
                                                         .substring(0, 5) +
                                                     '..'
-                                                : "${controller.namaPelanggan.value}",
+                                                : "${listPelangganViewController.pelangganselectedDashboard.value}",
                                             style: TextStyle(
                                                 color: Utility.greyDark,
                                                 fontSize: Utility.normal),
