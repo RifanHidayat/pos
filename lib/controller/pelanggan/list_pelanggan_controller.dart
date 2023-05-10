@@ -112,7 +112,6 @@ class ListPelangganViewController extends GetxController {
   }
 
   Future<bool> getProsesListPelanggan() async {
-    listdynamicPelanggan.clear();
     var connect = Api.connectionApi2("get", "", "pelanggan",
         "&cabang=${sidebarCt.cabangKodeSelectedSide.value}&salesm=${dashbardController.pelayanSelected.value}");
     var getValue = await connect;
@@ -120,6 +119,7 @@ class ListPelangganViewController extends GetxController {
     List data = valueBody['data'];
     debugPrint('data pelanggan -data ${data.length}');
     if (data.isNotEmpty) {
+      listdynamicPelanggan.clear();
       List<ListPelangganModel> tampungPelanggan = [];
       for (int i = 0; i < data.length; i++) {
         var element = data[i];
@@ -168,7 +168,6 @@ class ListPelangganViewController extends GetxController {
       final nonmember = listdynamicPelanggan.value
           .where((m) => m['FLAGMEMBER'] != 1)
           .toList();
-      debugPrint('data pelanggan -list dynamic ${listdynamicPelanggan.length}');
 
       memberlist.value = member;
       nonmemberlist.value = nonmember;

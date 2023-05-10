@@ -9,9 +9,16 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 
+import '../components/showbuttomsheet/main_showbuttomsheet_widget.dart';
+import '../controller/auth/auth_controller.dart';
+import '../utils/controllers/controller_implementation.dart';
+
 class Sidebar extends StatelessWidget {
   var controller = Get.put(SidebarController());
   var globalCt = Get.put(GlobalController());
+  var buttonsheetimpl = Get.put(ButtomSheetImplementation());
+  var paramimpl = ControllerImpl.paramscontrollerimpl;
+  final controllerAuth = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -92,32 +99,39 @@ class Sidebar extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: InkWell(
-                              onTap: () {
-                                globalCt.buttomSheet1(
-                                    controller.listCabang.value,
-                                    "Pilih Cabang",
-                                    "sidebar",
-                                    controller.cabangNameSelectedSide.value);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 8.0, right: 8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 15,
-                                      child: Icon(
-                                        Iconsax.buildings_2,
-                                        color: Utility.primaryDefault,
-                                      ),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 8.0, right: 8.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 15,
+                                    child: Icon(
+                                      Iconsax.buildings_2,
+                                      color: Utility.primaryDefault,
                                     ),
-                                    Expanded(
-                                      flex: 40,
-                                      child: Padding(
-                                        padding: EdgeInsets.only(left: 3.0),
+                                  ),
+                                  Expanded(
+                                    flex: 40,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 3.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          paramimpl.convert(
+                                              controller.listCabang.value);
+                                          buttonsheetimpl.build(
+                                              list: ControllerImpl
+                                                  .paramscontrollerimpl
+                                                  .data
+                                                  .value,
+                                              judul: "Pilih Cabang",
+                                              namaSelected: controller
+                                                  .cabangNameSelectedSide.value,
+                                              key:
+                                                  'show_entry_data_cabang_sidebar');
+                                        },
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -133,13 +147,8 @@ class Sidebar extends StatelessWidget {
                                               ),
                                             ),
                                             Text(
-                                              "${controller.cabangNameSelectedSide.value}"
-                                                          .length >
-                                                      18
-                                                  ? "${controller.cabangNameSelectedSide.value}"
-                                                          .substring(0, 18) +
-                                                      '...'
-                                                  : "${controller.cabangNameSelectedSide.value}",
+                                              "${controller.cabangNameSelectedSide.value}",
+                                              overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                   color: Utility.greyDark,
                                                   fontSize: Utility.normal),
@@ -148,16 +157,76 @@ class Sidebar extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 10,
-                                      child: Icon(
-                                        Iconsax.arrow_down_1,
-                                        size: 18,
-                                        color: Utility.nonAktif,
+                                  ),
+                                  Expanded(
+                                    flex: 12,
+                                    child: Icon(
+                                      Iconsax.arrow_down_1,
+                                      size: 18,
+                                      color: Utility.nonAktif,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 5,
+                                    child: Container(
+                                      height: 30,
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        width: 1.5,
+                                        color: Color.fromARGB(24, 0, 22, 103),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Expanded(
+                                    flex: 15,
+                                    child: Icon(
+                                      Iconsax.calendar,
+                                      color: Utility.primaryDefault,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 40,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 3.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          controllerAuth.filterBulan();
+                                        },
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Text(
+                                                "Periode",
+                                                style: TextStyle(
+                                                    color: Utility.nonAktif,
+                                                    fontSize: Utility.small),
+                                              ),
+                                            ),
+                                            Text(
+                                              "${controllerAuth.bulanTahunShow.value}",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  color: Utility.greyDark,
+                                                  fontSize: Utility.normal),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 10,
+                                    child: Icon(
+                                      Iconsax.arrow_down_1,
+                                      size: 18,
+                                      color: Utility.nonAktif,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),

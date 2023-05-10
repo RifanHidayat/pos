@@ -53,12 +53,17 @@ class ButtomSheetImplementation extends GetxController
       case 'show_data_pelanggan_member_status':
         widget.addAll([
           Header.header(judul),
-          Search.search(),
+          Search.search(key),
           MemberStatus.memberstatus(),
           ListData.list(datalist, key)
         ]);
         break;
       default:
+        widget.addAll([
+          Header.header(judul),
+          Search.search(key),
+          ListData.list(datalist, key)
+        ]);
     }
     return widget;
   }

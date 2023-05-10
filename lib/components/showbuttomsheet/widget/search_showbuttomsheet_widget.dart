@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:siscom_pos/controller/pos/dashboard_controller.dart';
 
 import '../../../controller/pelanggan/list_pelanggan_controller.dart';
 import '../../../utils/controllers/controller_implementation.dart';
@@ -11,8 +12,9 @@ class Search {
   static var controller = TextEditingController();
   static var getcontroller = Get.find<ListPelangganViewController>();
   static var paramimpl = ControllerImpl.paramscontrollerimpl;
+  static var dashboardcontroller = Get.put(DashbardController());
 
-  static search() {
+  static search(key) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: CardCustom(
@@ -54,22 +56,7 @@ class Search {
                                 textInputAction: TextInputAction.done,
                                 onChanged: (value) {
                                   getcontroller.search('active');
-                                  if (controller.text.isEmpty) {
-                                    getcontroller.search('close');
-
-                                    if (getcontroller.showmemberstatus.value ==
-                                        'member') {
-                                      paramimpl.convert(
-                                          getcontroller.memberlist.value);
-                                    } else {
-                                      paramimpl
-                                          .convert(getcontroller.nonmemberlist);
-                                    }
-                                  } else {
-                                    getcontroller.searchdata(controller.text);
-                                    paramimpl.convert(
-                                        getcontroller.searchmemberlist.value);
-                                  }
+                                  _validatedsearch(key);
                                 },
                                 onSubmitted: (value) {
                                   if (controller.text.isNotEmpty) {
@@ -108,5 +95,36 @@ class Search {
         ),
       ),
     );
+  }
+
+  static _validatedsearch(key) {
+    switch (key) {
+      case 'show_data_pelanggan_member_status':
+        if (controller.text.isEmpty) {
+          getcontroller.search('close');
+
+          if (getcontroller.showmemberstatus.value == 'member') {
+            paramimpl.convert(getcontroller.memberlist.value);
+          } else {
+            paramimpl.convert(getcontroller.nonmemberlist);
+          }
+        } else {
+          getcontroller.searchdata(controller.text);
+          paramimpl.convert(getcontroller.searchmemberlist.value);
+        }
+        break;
+      case 'show_entry_data_sales':
+        if (controller.text.isEmpty) {
+          getcontroller.search('close');
+
+          paramimpl.convert(dashboardcontroller.listSalesman.value);
+        } else {
+          dashboardcontroller.salessearch(controller.text);
+          paramimpl.convert(dashboardcontroller.searchdataentry.value);
+          debugPrint('masuk kesini ');
+        }
+        break;
+      default:
+    }
   }
 }

@@ -18,6 +18,7 @@ import 'package:siscom_pos/utils/widget/button.dart';
 import 'package:siscom_pos/utils/widget/card_custom.dart';
 import 'package:siscom_pos/components/showbuttomsheet/main_showbuttomsheet_widget.dart';
 
+import '../../components/button/button_costum.dart';
 import '../../controller/pelanggan/list_pelanggan_controller.dart';
 import '../../utils/controllers/controller_implementation.dart';
 
@@ -56,7 +57,6 @@ class _DashboardState extends State<Dashboard> {
   _init() async {
     controller.startLoad('');
     await listPelangganViewController.startLoad();
-    paramimpl.convert(listPelangganViewController.memberlist.value);
   }
 
   @override
@@ -71,13 +71,13 @@ class _DashboardState extends State<Dashboard> {
       color: Colors.white,
       child: SafeArea(
         child: GestureDetector(
-          onTap: () {
-            FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus) {
-              currentFocus.unfocus();
-            }
-          },
-          child: Scaffold(
+            onTap: () {
+              FocusScopeNode currentFocus = FocusScope.of(context);
+              if (!currentFocus.hasPrimaryFocus) {
+                currentFocus.unfocus();
+              }
+            },
+            child: Scaffold(
               key: _scaffoldKey,
               drawer: Sidebar(),
               backgroundColor: Utility.baseColor2,
@@ -189,6 +189,94 @@ class _DashboardState extends State<Dashboard> {
                                         textAlign: TextAlign.center,
                                         style:
                                             TextStyle(color: Utility.greyDark),
+                                      ),
+                                      Obx(
+                                        () => controller.nomorFaktur.value ==
+                                                "-"
+                                            ? controller.viewButtonKeranjang
+                                                        .value ==
+                                                    false
+                                                ? SizedBox()
+                                                : ButtonCostum
+                                                    .buttontransparanst(
+                                                        icon: Icons.open_in_new,
+                                                        onPressed: () {
+                                                          if (controller.kodePelayanSelected.value == "" ||
+                                                              controller
+                                                                      .customSelected
+                                                                      .value ==
+                                                                  "" ||
+                                                              controller
+                                                                      .cabangKodeSelected
+                                                                      .value ==
+                                                                  "") {
+                                                            UtilsAlert.showToast(
+                                                                "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
+                                                          } else {
+                                                            controller
+                                                                .keteranganInsertFaktur
+                                                                .value
+                                                                .text = "";
+                                                            globalController
+                                                                .buttomSheetInsertFaktur();
+                                                          }
+                                                        },
+                                                        title: 'Buat Faktur')
+                                            : Obx(
+                                                () => Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 16,
+                                                      right: 16,
+                                                      top: 8,
+                                                      bottom: 12),
+                                                  child: controller
+                                                                  .viewButtonKeranjang
+                                                                  .value ==
+                                                              false ||
+                                                          controller
+                                                                  .jumlahItemDikeranjang
+                                                                  .value ==
+                                                              0
+                                                      ? SizedBox()
+                                                      : SizedBox(
+                                                          height: 50,
+                                                          child: Button4(
+                                                              totalItem:
+                                                                  "${controller.jumlahItemDikeranjang.value}",
+                                                              totalAll: Text(
+                                                                "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
+                                                                style: TextStyle(
+                                                                    color: Utility
+                                                                        .baseColor2),
+                                                              ),
+                                                              onTap: () {
+                                                                controller
+                                                                    .hitungAllArsipMenu();
+                                                                Get.to(
+                                                                    RincianPemesanan(),
+                                                                    duration: Duration(
+                                                                        milliseconds:
+                                                                            200),
+                                                                    transition:
+                                                                        Transition
+                                                                            .zoom);
+                                                              },
+                                                              colorButton: Utility
+                                                                  .primaryDefault,
+                                                              colortext: Utility
+                                                                  .baseColor2,
+                                                              border:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8.0),
+                                                              icon: Icon(
+                                                                Iconsax.add,
+                                                                color: Utility
+                                                                    .baseColor2,
+                                                              )),
+                                                        ),
+                                                ),
+                                              ),
                                       )
                                     ],
                                   ),
@@ -198,84 +286,11 @@ class _DashboardState extends State<Dashboard> {
                                       left: 16, right: 16),
                                   child: listMenuScreen(),
                                 ),
-                        )
+                        ),
                       ],
                     ),
                   )),
-              bottomNavigationBar: Obx(
-                () => controller.nomorFaktur.value == "-"
-                    ? controller.viewButtonKeranjang.value == false
-                        ? SizedBox()
-                        : Padding(
-                            padding: EdgeInsets.only(
-                                left: 16, right: 16, top: 8, bottom: 12),
-                            child: Container(
-                                height: 50,
-                                child: Button2(
-                                    textBtn: "Buat Faktur",
-                                    colorBtn: Utility.primaryDefault,
-                                    colorText: Colors.white,
-                                    icon1: Icon(
-                                      Iconsax.add,
-                                      color: Utility.baseColor2,
-                                    ),
-                                    radius: 8.0,
-                                    style: 2,
-                                    onTap: () {
-                                      if (controller
-                                                  .kodePelayanSelected.value ==
-                                              "" ||
-                                          controller.customSelected.value ==
-                                              "" ||
-                                          controller.cabangKodeSelected.value ==
-                                              "") {
-                                        UtilsAlert.showToast(
-                                            "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
-                                      } else {
-                                        controller.keteranganInsertFaktur.value
-                                            .text = "";
-                                        globalController
-                                            .buttomSheetInsertFaktur();
-                                      }
-                                    })),
-                          )
-                    : Obx(
-                        () => Padding(
-                          padding: EdgeInsets.only(
-                              left: 16, right: 16, top: 8, bottom: 12),
-                          child: controller.viewButtonKeranjang.value ==
-                                      false ||
-                                  controller.jumlahItemDikeranjang.value == 0
-                              ? SizedBox()
-                              : SizedBox(
-                                  height: 50,
-                                  child: Button4(
-                                      totalItem:
-                                          "${controller.jumlahItemDikeranjang.value}",
-                                      totalAll: Text(
-                                        "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
-                                        style: TextStyle(
-                                            color: Utility.baseColor2),
-                                      ),
-                                      onTap: () {
-                                        controller.hitungAllArsipMenu();
-                                        Get.to(RincianPemesanan(),
-                                            duration:
-                                                Duration(milliseconds: 200),
-                                            transition: Transition.zoom);
-                                      },
-                                      colorButton: Utility.primaryDefault,
-                                      colortext: Utility.baseColor2,
-                                      border: BorderRadius.circular(8.0),
-                                      icon: Icon(
-                                        Iconsax.add,
-                                        color: Utility.baseColor2,
-                                      )),
-                                ),
-                        ),
-                      ),
-              )),
-        ),
+            )),
       ),
     );
   }
@@ -377,93 +392,6 @@ class _DashboardState extends State<Dashboard> {
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 3.5),
                                     child: Icon(
-                                      Iconsax.buildings_2,
-                                      color: Utility.primaryDefault,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 40,
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (controller.listKeranjangArsip.value
-                                              .isEmpty &&
-                                          controller.nomorFaktur.value == "-") {
-                                        print(
-                                            'all cabang ${controller.listCabang.value}');
-                                        globalController.buttomSheet1(
-                                            controller.listCabang.value,
-                                            "Pilih Cabang",
-                                            "dashboard",
-                                            controller
-                                                .cabangNameSelected.value);
-                                      } else {
-                                        print("sudah pilih jldt");
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.only(left: 3.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Cabang",
-                                            style: TextStyle(
-                                                color: Utility.nonAktif,
-                                                fontSize: Utility.small),
-                                          ),
-                                          Text(
-                                            "${controller.cabangNameSelected.value}"
-                                                        .length >
-                                                    5
-                                                ? "${controller.cabangNameSelected.value}"
-                                                        .substring(0, 5) +
-                                                    '..'
-                                                : "${controller.cabangNameSelected.value}",
-                                            style: TextStyle(
-                                                color: Utility.greyDark,
-                                                fontSize: Utility.normal),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 10,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 5),
-                                    child: Icon(
-                                      Iconsax.arrow_down_1,
-                                      size: 18,
-                                      color: Utility.nonAktif,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )),
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            height: 30,
-                            alignment: Alignment.center,
-                            child: Container(
-                              width: 1.5,
-                              color: Color.fromARGB(24, 0, 22, 103),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                            flex: 32,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 15,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 3.5),
-                                    child: Icon(
                                       Iconsax.user,
                                       color: Utility.primaryDefault,
                                     ),
@@ -481,17 +409,21 @@ class _DashboardState extends State<Dashboard> {
                                           controller.nomorFaktur.value == "-") {
                                         if (controller
                                             .listSalesman.value.isNotEmpty) {
-                                          globalController.buttomSheet1(
-                                              controller.listSalesman.value,
-                                              stringJudul,
-                                              "dashboard",
-                                              controller.pelayanSelected.value);
+                                          paramimpl.convert(
+                                              controller.listSalesman.value);
+                                          buttonsheetimpl.build(
+                                              list: ControllerImpl
+                                                  .paramscontrollerimpl
+                                                  .data
+                                                  .value,
+                                              judul: stringJudul,
+                                              namaSelected: controller
+                                                  .pelayanSelected.value,
+                                              key: 'show_entry_data_sales');
                                         } else {
                                           UtilsAlert.showToast(
                                               "Harap hubungi admin untuk setting pelayan");
                                         }
-                                      } else {
-                                        print("sudah pilih jldt");
                                       }
                                     },
                                     child: Padding(
@@ -514,13 +446,8 @@ class _DashboardState extends State<Dashboard> {
                                                       fontSize: Utility.small),
                                                 ),
                                           Text(
-                                            "${controller.pelayanSelected.value}"
-                                                        .length >
-                                                    5
-                                                ? "${controller.pelayanSelected.value}"
-                                                        .substring(0, 5) +
-                                                    '..'
-                                                : "${controller.pelayanSelected.value}",
+                                            "${controller.pelayanSelected.value}",
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 color: Utility.greyDark,
                                                 fontSize: Utility.normal),
@@ -584,12 +511,9 @@ class _DashboardState extends State<Dashboard> {
                                             .listdynamicPelanggan
                                             .value
                                             .isNotEmpty) {
-                                          // globalController.buttomSheet1(
-                                          //     controller.listPelanggan.value,
-                                          //     "Pilih Pelanggan",
-                                          //     "dashboard",
-                                          //     controller.namaPelanggan.value);
-
+                                          paramimpl.convert(
+                                              listPelangganViewController
+                                                  .memberlist.value);
                                           buttonsheetimpl.build(
                                               list: ControllerImpl
                                                   .paramscontrollerimpl

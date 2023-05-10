@@ -109,6 +109,20 @@ class DashbardController extends BaseController {
   var listPelanggan = [].obs;
   var listfakturArsip = [].obs;
   var informasiJlhd = [].obs;
+//NEW VARIABEL
+  var searchdataentry = [].obs;
+//SEARCH SALES ENTRY DATA
+  salessearch(search) {
+    searchdataentry.clear();
+    final dataentry = listSalesman.value
+        .where((element) => element['NAMA']
+            .toString()
+            .toUpperCase()
+            .contains(search.toString().toUpperCase()))
+        .toList();
+    searchdataentry.value.addAll(dataentry);
+    debugPrint('berapa datanya ${searchdataentry}');
+  }
 
   void startLoad(type) {
     if (AppData.noFaktur != "") {
@@ -375,6 +389,7 @@ class DashbardController extends BaseController {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
         data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
+        debugPrint('Sales $data');
         listSalesman.value = data;
         if (data.isEmpty) {
           pelayanSelected.value = "-";
@@ -476,11 +491,11 @@ class DashbardController extends BaseController {
             List hasilDataSales = await checkSales;
 
             if (hasilDataSales.isNotEmpty) {
-              kodePelayanSelected.value = hasilDataSales[0]['KODE'];
-              kodePelayanSelected.refresh();
+              // kodePelayanSelected.value = hasilDataSales[0]['KODE'];
+              // kodePelayanSelected.refresh();
 
-              pelayanSelected.value = hasilDataSales[0]['NAMA'];
-              pelayanSelected.refresh();
+              // pelayanSelected.value = hasilDataSales[0]['NAMA'];
+              // pelayanSelected.refresh();
 
               Future<List> listSalesSelected = GetDataController()
                   .getSpesifikData("CUSTOM", "SALESM",
