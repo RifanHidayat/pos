@@ -69,8 +69,7 @@ class CardType {
                       ),
                     ),
                   ),
-                if (noHp.isNotEmpty &&
-                    key == 'show_data_pelanggan_member_status')
+                if (noHp != null && key == 'show_data_pelanggan_member_status')
                   Padding(
                     padding: EdgeInsets.only(top: 3),
                     child: Icon(
@@ -79,7 +78,7 @@ class CardType {
                       color: Utility.nonAktif,
                     ),
                   ),
-                if (noHp.isNotEmpty)
+                if (noHp != null && key != 'show_data_kelompok_barang')
                   Padding(
                     padding: EdgeInsets.only(left: 3),
                     child: Text(
@@ -91,27 +90,35 @@ class CardType {
                   ),
               ],
             ),
-            trailing: Container(
-              height: 20,
-              width: 20,
-              decoration: BoxDecoration(
-                border: Border.all(
+            trailing: key == 'show_data_kelompok_barang'
+                ? Icon(
+                    Icons.check_circle,
                     color: ButtonController.pelangganAktifCard.value == name
                         ? Utility.infoDefault
-                        : Utility.grey300,
-                    width: 1),
-                shape: BoxShape.circle,
-              ),
-              child: Container(
-                margin: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: ButtonController.pelangganAktifCard.value == name
-                      ? Utility.infoDefault
-                      : Utility.baseColor2,
-                ),
-              ),
-            ),
+                        : Utility.baseColor2,
+                  )
+                : Container(
+                    height: 20,
+                    width: 20,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color:
+                              ButtonController.pelangganAktifCard.value == name
+                                  ? Utility.infoDefault
+                                  : Utility.grey300,
+                          width: 1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Container(
+                      margin: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ButtonController.pelangganAktifCard.value == name
+                            ? Utility.infoDefault
+                            : Utility.baseColor2,
+                      ),
+                    ),
+                  ),
           ),
         ));
   }

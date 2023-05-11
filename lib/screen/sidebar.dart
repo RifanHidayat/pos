@@ -11,6 +11,7 @@ import 'package:siscom_pos/utils/widget/card_custom.dart';
 
 import '../components/showbuttomsheet/main_showbuttomsheet_widget.dart';
 import '../controller/auth/auth_controller.dart';
+import '../controller/getdata_controller.dart';
 import '../utils/controllers/controller_implementation.dart';
 
 class Sidebar extends StatelessWidget {
@@ -19,6 +20,8 @@ class Sidebar extends StatelessWidget {
   var buttonsheetimpl = Get.put(ButtomSheetImplementation());
   var paramimpl = ControllerImpl.paramscontrollerimpl;
   final controllerAuth = Get.put(AuthController());
+  var getdatacontroller = Get.put(GetDataController());
+  final dashbordcontroller = Get.put(DashbardController());
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +193,8 @@ class Sidebar extends StatelessWidget {
                                       padding: EdgeInsets.only(left: 3.0),
                                       child: InkWell(
                                         onTap: () {
-                                          controllerAuth.filterBulan();
+                                          controllerAuth.filterBulan(
+                                              key: 'sidebar_sync_with_login');
                                         },
                                         child: Column(
                                           crossAxisAlignment:

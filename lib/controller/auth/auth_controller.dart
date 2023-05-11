@@ -204,7 +204,9 @@ class AuthController extends GetxController {
     bulanTahunShow.refresh();
   }
 
-  void filterBulan() {
+//NEW VARIABLE FOR VALIDATE DATETIME WHEN SELECTED
+
+  void filterBulan({key}) {
     DatePicker.showPicker(
       Get.context!,
       pickerModel: CustomMonthPicker(
@@ -213,13 +215,17 @@ class AuthController extends GetxController {
         currentTime: DateTime.now(),
       ),
       onConfirm: (time) {
-        if (time != null) {
-          tanggalSelected.value = "${DateFormat('yyyy-MM-dd').format(time)}";
-          bulanTahunSelected.value = "${DateFormat('MM-yyyy').format(time)}";
-          bulanTahunShow.value =
-              "${Utility.convertDate3('${tanggalSelected.value}')}";
-          this.tanggalSelected.refresh();
-          this.bulanTahunSelected.refresh();
+        tanggalSelected.value =
+            DateFormat('yyyy-MM-dd').format(time).toString();
+        bulanTahunSelected.value =
+            DateFormat('MM-yyyy').format(time).toString();
+        bulanTahunShow.value = Utility.convertDate3(tanggalSelected.value);
+        tanggalSelected.refresh();
+        bulanTahunSelected.refresh();
+        debugPrint('masuk kesini ?');
+        if (key != null) {
+          Get.back();
+          nextStep1();
         }
       },
     );

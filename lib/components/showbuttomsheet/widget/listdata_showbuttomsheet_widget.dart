@@ -64,6 +64,9 @@ class ListData {
       dashboardController.pilihGudang(nama);
       dashboardController.aksiGetSalesman(kode, '', '');
       dashboardController.aksiPilihKategoriBarang();
+    } else if (key == 'show_data_kelompok_barang') {
+      dashboardController.kategoriBarang.value = nama;
+      dashboardController.aksiPilihKategoriBarang();
     }
   }
 

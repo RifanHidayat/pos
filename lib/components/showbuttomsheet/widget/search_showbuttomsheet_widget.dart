@@ -121,6 +121,16 @@ class Search {
         } else {
           dashboardcontroller.salessearch(controller.text);
           paramimpl.convert(dashboardcontroller.searchdataentry.value);
+        }
+        break;
+      case 'show_data_kelompok_barang':
+        if (controller.text.isEmpty) {
+          getcontroller.search('close');
+
+          paramimpl.convert(dashboardcontroller.listKelompokBarang.value);
+        } else {
+          dashboardcontroller.kelompokbarangsearch(controller.text);
+          paramimpl.convert(dashboardcontroller.searchdataentry.value);
           debugPrint('masuk kesini ');
         }
         break;

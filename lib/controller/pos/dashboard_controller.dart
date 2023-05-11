@@ -124,6 +124,18 @@ class DashbardController extends BaseController {
     debugPrint('berapa datanya ${searchdataentry}');
   }
 
+  kelompokbarangsearch(search) {
+    searchdataentry.clear();
+    final dataentry = listKelompokBarang.value
+        .where((element) => element['NAMA']
+            .toString()
+            .toUpperCase()
+            .contains(search.toString().toUpperCase()))
+        .toList();
+    searchdataentry.value.addAll(dataentry);
+    debugPrint('berapa datanya ${searchdataentry}');
+  }
+
   void startLoad(type) {
     if (AppData.noFaktur != "") {
       // arsipController.startLoad();
