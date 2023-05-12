@@ -22,6 +22,7 @@ import 'package:siscom_pos/components/showbuttomsheet/main_showbuttomsheet_widge
 import '../../components/button/button_costum.dart';
 import '../../controller/pelanggan/list_pelanggan_controller.dart';
 import '../../utils/controllers/controller_implementation.dart';
+import '../../utils/widget/form_scan/main_form_scan.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -54,15 +55,13 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     _hideButtonController = ScrollController();
     _hideButtonController!.addListener(_scrolllistener);
-    debugPrint(
-        'datanya ada dynamic ${listPelangganViewController.listdynamicPelanggan.value}');
     _init();
     myFocusNode = FocusNode();
     super.initState();
   }
 
   _init() async {
-    controller.startLoad('');
+    await Future.wait([controller.startLoad('')]);
     await listPelangganViewController.startLoad();
   }
 
@@ -260,7 +259,7 @@ class _DashboardState extends State<Dashboard> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 14.0),
                 child: InkWell(
-                    onTap: () => Get.to(ScanBarang()),
+                    onTap: () => CForm().scanProduct(),
                     child: Icon(Iconsax.scan_barcode)),
               )),
           Expanded(
@@ -463,6 +462,8 @@ class _DashboardState extends State<Dashboard> {
                                           paramimpl.convert(
                                               listPelangganViewController
                                                   .memberlist.value);
+                                          listPelangganViewController
+                                              .validatememberstatus(1);
                                           buttonsheetimpl.build(
                                               list: ControllerImpl
                                                   .paramscontrollerimpl
@@ -969,41 +970,72 @@ class _DashboardState extends State<Dashboard> {
                       ),
               );
             }),
-        Positioned(
-          bottom: 20,
-          right: 0,
-          left: 0,
-          child: _isVisible == false
-              ? SizedBox()
-              : AnimatedOpacity(
-                  duration: Duration(seconds: 3),
-                  opacity: 1,
-                  alwaysIncludeSemantics: true,
-                  child: SizedBox(
-                      height: 50,
-                      child: Button2(
-                          textBtn: "Buat Faktur",
-                          colorBtn: Utility.primaryDefault,
-                          colorText: Colors.white,
-                          icon1: Icon(
-                            Iconsax.add,
-                            color: Utility.baseColor2,
-                          ),
-                          radius: 8.0,
-                          style: 2,
-                          onTap: () {
-                            if (controller.kodePelayanSelected.value == "" ||
-                                controller.customSelected.value == "" ||
-                                controller.cabangKodeSelected.value == "") {
-                              UtilsAlert.showToast(
-                                  "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
-                            } else {
-                              controller.keteranganInsertFaktur.value.text = "";
-                              globalController.buttomSheetInsertFaktur();
-                            }
-                          })),
-                ),
-        )
+        _isVisible == false
+            ? SizedBox()
+            : Positioned(
+                bottom: 20,
+                right: 0,
+                left: 0,
+                child: controller.nomorFaktur.value != "-"
+                    ? Obx(
+                        () => SizedBox(
+                          height: 50,
+                          child: Button4(
+                              totalItem:
+                                  "${controller.jumlahItemDikeranjang.value}",
+                              totalAll: Text(
+                                "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
+                                style: TextStyle(color: Utility.baseColor2),
+                              ),
+                              onTap: () {
+                                controller.hitungAllArsipMenu();
+                                Get.to(RincianPemesanan(),
+                                    duration: Duration(milliseconds: 200),
+                                    transition: Transition.zoom);
+                              },
+                              colorButton: Utility.primaryDefault,
+                              colortext: Utility.baseColor2,
+                              border: BorderRadius.circular(8.0),
+                              icon: RotatedBox(
+                                quarterTurns: 2,
+                                child: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Utility.baseColor2,
+                                ),
+                              )),
+                        ),
+                      )
+                    : AnimatedOpacity(
+                        duration: Duration(seconds: 3),
+                        opacity: 1,
+                        alwaysIncludeSemantics: true,
+                        child: SizedBox(
+                            height: 50,
+                            child: Button2(
+                                textBtn: "Buat Faktur",
+                                colorBtn: Utility.primaryDefault,
+                                colorText: Colors.white,
+                                icon1: Icon(
+                                  Iconsax.add,
+                                  color: Utility.baseColor2,
+                                ),
+                                radius: 8.0,
+                                style: 2,
+                                onTap: () {
+                                  if (controller.kodePelayanSelected.value ==
+                                          "" ||
+                                      controller.customSelected.value == "" ||
+                                      controller.cabangKodeSelected.value ==
+                                          "") {
+                                    UtilsAlert.showToast(
+                                        "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
+                                  } else {
+                                    controller
+                                        .keteranganInsertFaktur.value.text = "";
+                                    globalController.buttomSheetInsertFaktur();
+                                  }
+                                })),
+                      ))
       ],
     );
   }
@@ -1308,45 +1340,76 @@ class _DashboardState extends State<Dashboard> {
                                       fontWeight: FontWeight.bold),
                                 ))),
                           ),
-                        )
+                        ),
                       ],
                     );
             }),
-        Positioned(
-          bottom: 20,
-          right: 0,
-          left: 0,
-          child: _isVisible == false
-              ? SizedBox()
-              : AnimatedOpacity(
-                  duration: Duration(seconds: 3),
-                  opacity: 1,
-                  alwaysIncludeSemantics: true,
-                  child: SizedBox(
-                      height: 50,
-                      child: Button2(
-                          textBtn: "Buat Faktur",
-                          colorBtn: Utility.primaryDefault,
-                          colorText: Colors.white,
-                          icon1: Icon(
-                            Iconsax.add,
-                            color: Utility.baseColor2,
-                          ),
-                          radius: 8.0,
-                          style: 2,
-                          onTap: () {
-                            if (controller.kodePelayanSelected.value == "" ||
-                                controller.customSelected.value == "" ||
-                                controller.cabangKodeSelected.value == "") {
-                              UtilsAlert.showToast(
-                                  "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
-                            } else {
-                              controller.keteranganInsertFaktur.value.text = "";
-                              globalController.buttomSheetInsertFaktur();
-                            }
-                          })),
-                ),
-        )
+        _isVisible == false
+            ? SizedBox()
+            : Positioned(
+                bottom: 20,
+                right: 0,
+                left: 0,
+                child: controller.nomorFaktur.value != "-"
+                    ? Obx(
+                        () => SizedBox(
+                          height: 50,
+                          child: Button4(
+                              totalItem:
+                                  "${controller.jumlahItemDikeranjang.value}",
+                              totalAll: Text(
+                                "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
+                                style: TextStyle(color: Utility.baseColor2),
+                              ),
+                              onTap: () {
+                                controller.hitungAllArsipMenu();
+                                Get.to(RincianPemesanan(),
+                                    duration: Duration(milliseconds: 200),
+                                    transition: Transition.zoom);
+                              },
+                              colorButton: Utility.primaryDefault,
+                              colortext: Utility.baseColor2,
+                              border: BorderRadius.circular(8.0),
+                              icon: RotatedBox(
+                                quarterTurns: 2,
+                                child: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Utility.baseColor2,
+                                ),
+                              )),
+                        ),
+                      )
+                    : AnimatedOpacity(
+                        duration: Duration(seconds: 3),
+                        opacity: 1,
+                        alwaysIncludeSemantics: true,
+                        child: SizedBox(
+                            height: 50,
+                            child: Button2(
+                                textBtn: "Buat Faktur",
+                                colorBtn: Utility.primaryDefault,
+                                colorText: Colors.white,
+                                icon1: Icon(
+                                  Iconsax.add,
+                                  color: Utility.baseColor2,
+                                ),
+                                radius: 8.0,
+                                style: 2,
+                                onTap: () {
+                                  if (controller.kodePelayanSelected.value ==
+                                          "" ||
+                                      controller.customSelected.value == "" ||
+                                      controller.cabangKodeSelected.value ==
+                                          "") {
+                                    UtilsAlert.showToast(
+                                        "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
+                                  } else {
+                                    controller
+                                        .keteranganInsertFaktur.value.text = "";
+                                    globalController.buttomSheetInsertFaktur();
+                                  }
+                                })),
+                      )),
       ],
     );
   }
@@ -1363,7 +1426,6 @@ class _DashboardState extends State<Dashboard> {
     if (!_hideButtonController!.position.outOfRange) {
       _isVisible = true;
     }
-    setState(() {});
   }
 }
 

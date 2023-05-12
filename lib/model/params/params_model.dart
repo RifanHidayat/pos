@@ -26,7 +26,7 @@ class ParamsModel {
 
   factory ParamsModel.fromMap(Map<String, dynamic> map) {
     return ParamsModel(
-        charge: map['SCHARGE'],
+        charge: map['CHARGE'],
         inisial: map['INISIAL'],
         kode: map['KODE'],
         nama: map['NAMA'],

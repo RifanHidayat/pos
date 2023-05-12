@@ -46,7 +46,7 @@ class ListData {
         ));
   }
 
-  static _checkingdata({key, nama, kode, wilayah}) {
+  static _checkingdata({key, nama, kode, wilayah, ppn, charger}) {
     if (key == 'show_data_pelanggan_member_status') {
       getcontroller.pelangganselectedDashboard.value = nama;
     } else if (key == 'show_data_pct_pelanggan_member_status') {
@@ -59,6 +59,15 @@ class ListData {
       dashboardController.kodePelayanSelected.value = kode;
       dashboardController.aksiGetCustomer(kode, '');
     } else if (key == 'show_entry_data_cabang_sidebar') {
+      dashboardController.cabangKodeSelected.value = kode;
+      dashboardController.cabangNameSelected.value = nama;
+      if (ppn != null) {
+        dashboardController.ppnCabang.value = double.parse("$ppn");
+      }
+      if (charger != null) {
+        dashboardController.serviceChargerCabang.value =
+            double.parse("$charger");
+      }
       sidebarCt.cabangKodeSelectedSide.value = kode;
       sidebarCt.cabangNameSelectedSide.value = nama;
       dashboardController.pilihGudang(nama);
@@ -77,10 +86,11 @@ class ListData {
     }
     ButtonController.setStateBACpelanggan(datashow!.nama);
     _checkingdata(
-      key: key,
-      kode: datashow.kode,
-      nama: datashow.nama,
-      wilayah: datashow.wilayah,
-    );
+        key: key,
+        kode: datashow.kode,
+        nama: datashow.nama,
+        wilayah: datashow.wilayah,
+        ppn: datashow.ppn,
+        charger: datashow.charge);
   }
 }

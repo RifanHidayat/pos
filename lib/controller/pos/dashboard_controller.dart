@@ -7,6 +7,7 @@ import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
+import 'package:siscom_pos/utils/controllers/controller_implementation.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 
@@ -136,7 +137,7 @@ class DashbardController extends BaseController {
     debugPrint('berapa datanya ${searchdataentry}');
   }
 
-  void startLoad(type) {
+  Future<void> startLoad(type) async {
     if (AppData.noFaktur != "") {
       // arsipController.startLoad();
       var getValue1 = AppData.noFaktur.split("|");

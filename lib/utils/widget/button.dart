@@ -200,7 +200,7 @@ class Button4 extends StatelessWidget {
   final Color? colorButton;
   final Color? colortext;
   final BorderRadius? border;
-  final Icon? icon;
+  final Widget? icon;
   const Button4({
     Key? key,
     this.totalItem,

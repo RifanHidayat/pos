@@ -65,10 +65,10 @@ class Utility {
       bottomRight: Radius.circular(6));
 
   static BorderRadius borderStyle2 = BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomLeft: Radius.circular(16),
-      bottomRight: Radius.circular(16));
+      topLeft: Radius.circular(6),
+      topRight: Radius.circular(6),
+      bottomLeft: Radius.circular(6),
+      bottomRight: Radius.circular(6));
 
   static BorderRadius borderStyle3 = BorderRadius.only(
       topLeft: Radius.circular(24),

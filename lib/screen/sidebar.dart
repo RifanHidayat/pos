@@ -374,7 +374,10 @@ class Sidebar extends StatelessWidget {
                   size: 20,
                 ),
                 colorText: Colors.red,
-                onTap: () => controller.logout(),
+                onTap: () {
+                  Get.back();
+                  controller.logout();
+                },
               ),
             ),
             Padding(

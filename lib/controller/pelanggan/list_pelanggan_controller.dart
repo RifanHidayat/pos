@@ -117,7 +117,8 @@ class ListPelangganViewController extends GetxController {
     var getValue = await connect;
     var valueBody = jsonDecode(getValue.body);
     List data = valueBody['data'];
-    debugPrint('data pelanggan -data ${data.length}');
+    debugPrint(
+        'data pelanggan -data ${data.length} - sales ${dashbardController.pelayanSelected.value} - cabang ${sidebarCt.cabangKodeSelectedSide.value}');
     if (data.isNotEmpty) {
       listdynamicPelanggan.clear();
       List<ListPelangganModel> tampungPelanggan = [];
