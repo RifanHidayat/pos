@@ -646,7 +646,7 @@ class BottomSheetPos extends BaseController
                                       colorBg: Utility.primaryDefault,
                                       radiusBorder: Utility.borderStyle5,
                                       widgetCardCustom: Padding(
-                                          padding: EdgeInsets.all(8),
+                                          padding: EdgeInsets.all(15),
                                           child: Center(
                                             child: type == "edit_keranjang"
                                                 ? Text(
@@ -810,8 +810,8 @@ class BottomSheetPos extends BaseController
                     decoration: BoxDecoration(
                         color: Utility.grey100,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          bottomLeft: Radius.circular(16),
+                          topLeft: Radius.circular(6),
+                          bottomLeft: Radius.circular(6),
                         )),
                     child: Center(
                       child: Text("Rp"),
@@ -840,8 +840,7 @@ class BottomSheetPos extends BaseController
                           keyboardType:
                               TextInputType.numberWithOptions(signed: true),
                           textInputAction: TextInputAction.done,
-                          decoration:
-                              new InputDecoration(border: InputBorder.none),
+                          decoration: InputDecoration(border: InputBorder.none),
                           style: TextStyle(
                               fontSize: 14.0, height: 1.0, color: Colors.black),
                           onSubmitted: (value) {
@@ -959,8 +958,8 @@ class BottomSheetPos extends BaseController
                             decoration: BoxDecoration(
                                 color: Utility.grey100,
                                 borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(16),
-                                  bottomRight: Radius.circular(16),
+                                  topRight: Radius.circular(6),
+                                  bottomRight: Radius.circular(6),
                                 )),
                             child: Center(
                               child: Text("%"),
@@ -991,8 +990,8 @@ class BottomSheetPos extends BaseController
                             decoration: BoxDecoration(
                                 color: Utility.grey100,
                                 borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16),
-                                  bottomLeft: Radius.circular(16),
+                                  topLeft: Radius.circular(6),
+                                  bottomLeft: Radius.circular(6),
                                 )),
                             child: Center(
                               child: Text("Rp"),

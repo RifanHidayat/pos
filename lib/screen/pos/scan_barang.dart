@@ -55,172 +55,200 @@ class _ScanBarangState extends State<ScanBarang> {
                     Align(
                         alignment: Alignment.center,
                         child: _buildQrView(context)),
-                    scanBarangCt.scannerValue.value
-                        ? screenDataScan(result)
-                        : const SizedBox(),
+                    Positioned(top: 20, left: 10, right: 10, child: header()),
+                    if (scanBarangCt.scannerValue.value)
+                      Positioned(
+                          bottom: 150,
+                          left: 20,
+                          right: 20,
+                          child: screenDataScan(result)),
+                    if (scanBarangCt.scannerValue.value)
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: buttoncheckinproduct(),
+                      )
                   ],
                 ),
-              )
-              // Column(
-              //   crossAxisAlignment: CrossAxisAlignment.start,
-              //   children: <Widget>[
-              //     Expanded(flex: 80, child: Center(child: _buildQrView(context))),
-              //     Expanded(
-              //       flex: 20,
-              //       child: FittedBox(
-              //         fit: BoxFit.contain,
-              //         child: Column(
-              //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //           children: <Widget>[
-              //             if (result != null)
-              //               barcodeData(result)
-              //             else
-              //               const Text('Scan a code'),
-              //             Row(
-              //               mainAxisAlignment: MainAxisAlignment.center,
-              //               crossAxisAlignment: CrossAxisAlignment.center,
-              //               children: <Widget>[
-              //                 Container(
-              //                   margin: const EdgeInsets.all(8),
-              //                   child: ElevatedButton(
-              //                       onPressed: () async {
-              //                         await controller?.toggleFlash();
-              //                         setState(() {});
-              //                       },
-              //                       child: FutureBuilder(
-              //                         future: controller?.getFlashStatus(),
-              //                         builder: (context, snapshot) {
-              //                           return Text('Flash: ${snapshot.data}');
-              //                         },
-              //                       )),
-              //                 ),
-              //                 Container(
-              //                   margin: const EdgeInsets.all(8),
-              //                   child: ElevatedButton(
-              //                       onPressed: () async {
-              //                         await controller?.flipCamera();
-              //                         setState(() {});
-              //                       },
-              //                       child: FutureBuilder(
-              //                         future: controller?.getCameraInfo(),
-              //                         builder: (context, snapshot) {
-              //                           if (snapshot.data != null) {
-              //                             return Text(
-              //                                 'Camera facing ${describeEnum(snapshot.data!)}');
-              //                           } else {
-              //                             return const Text('loading');
-              //                           }
-              //                         },
-              //                       )),
-              //                 )
-              //               ],
-              //             ),
-              //             Row(
-              //               mainAxisAlignment: MainAxisAlignment.center,
-              //               crossAxisAlignment: CrossAxisAlignment.center,
-              //               children: <Widget>[
-              //                 Container(
-              //                   margin: const EdgeInsets.all(8),
-              //                   child: ElevatedButton(
-              //                     onPressed: () async {
-              //                       await controller?.pauseCamera();
-              //                     },
-              //                     child: const Text('pause',
-              //                         style: TextStyle(fontSize: 20)),
-              //                   ),
-              //                 ),
-              //                 Container(
-              //                   margin: const EdgeInsets.all(8),
-              //                   child: ElevatedButton(
-              //                     onPressed: () async {
-              //                       await controller?.resumeCamera();
-              //                     },
-              //                     child: const Text('resume',
-              //                         style: TextStyle(fontSize: 20)),
-              //                   ),
-              //                 )
-              //               ],
-              //             ),
-              //           ],
-              //         ),
-              //       ),
-              //     )
-              //   ],
-              // ),
-              ),
+              )),
         ),
       ),
     );
+  }
+
+  header() {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 60,
+            child: Container(
+              margin: EdgeInsets.only(left: 8),
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () => Get.back(),
+                child: Icon(
+                  Iconsax.arrow_left,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 40,
+            child: Container(
+              margin: EdgeInsets.only(left: 16, right: 16),
+              decoration: BoxDecoration(
+                  borderRadius: Utility.borderStyle1,
+                  border: Border.all(color: Colors.white)),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 6, right: 6),
+                      child: Center(
+                        child: Icon(
+                          Iconsax.refresh,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                        padding: EdgeInsets.only(left: 3, right: 3),
+                        child: InkWell(
+                          onTap: () {
+                            controller?.resumeCamera();
+                            scanBarangCt.scannerValue.value = false;
+                            scanBarangCt.scannerValue.refresh();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Refresh",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ))
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  buttoncheckinproduct() {
+    return Container(
+        height: 80,
+        padding: EdgeInsets.all(10),
+        color: Utility.baseColor2,
+        child: SizedBox(
+          height: 50,
+          child: Button4(
+              totalItem: "1",
+              totalAll: Text(
+                globalCt.convertToIdr(1000000, 0),
+                style: TextStyle(color: Utility.baseColor2),
+              ),
+              onTap: () {},
+              colorButton: Utility.primaryDefault,
+              colortext: Utility.baseColor2,
+              border: BorderRadius.circular(8.0),
+              icon: Icon(
+                Icons.navigate_next_outlined,
+                color: Utility.baseColor2,
+              )),
+        ));
   }
 
   Widget screenDataScan(result) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 65,
+        Container(
+          padding: EdgeInsets.all(15),
+          width: MediaQuery.of(Get.context!).size.width,
+          decoration: BoxDecoration(
+              color: Color.fromARGB(255, 255, 255, 255),
+              borderRadius: Utility.borderStyle1),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: Utility.medium,
-              ),
               IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 60,
+                      flex: 25,
                       child: Container(
-                        margin: EdgeInsets.only(left: 8),
-                        alignment: Alignment.centerLeft,
-                        child: InkWell(
-                          onTap: () => Get.back(),
-                          child: Icon(
-                            Iconsax.arrow_left,
-                            color: Colors.white,
-                          ),
-                        ),
+                        height: 60,
+                        alignment: Alignment.center,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(6),
+                                topRight: Radius.circular(6),
+                                bottomLeft: Radius.circular(6),
+                                bottomRight: Radius.circular(6)),
+                            image: DecorationImage(
+                                alignment: Alignment.topCenter,
+                                image: AssetImage('assets/no_image.png'),
+                                // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
+                                fit: BoxFit.fill)),
                       ),
                     ),
                     Expanded(
-                      flex: 40,
-                      child: Container(
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        decoration: BoxDecoration(
-                            borderRadius: Utility.borderStyle1,
-                            border: Border.all(color: Colors.white)),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 6, right: 6),
-                                child: Center(
-                                  child: Icon(
-                                    Iconsax.refresh,
-                                    color: Colors.white,
-                                  ),
+                      flex: 65,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Samsung Monitor",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Utility.primaryDefault,
+                              ),
+                            ),
+                            if (scanBarangCt.barangSelect.value.isNotEmpty)
+                              Text(
+                                "${scanBarangCt.barangSelect[0]['NAMA'] ?? ''}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Utility.primaryDefault,
                                 ),
                               ),
-                              Padding(
-                                  padding: EdgeInsets.only(left: 3, right: 3),
-                                  child: InkWell(
-                                    onTap: () {
-                                      controller?.resumeCamera();
-                                      scanBarangCt.scannerValue.value = false;
-                                      scanBarangCt.scannerValue.refresh();
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Refresh",
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ))
-                            ],
+                            if (scanBarangCt.barangSelect.value.isNotEmpty)
+                              Text(
+                                "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect[0]['STDJUAL'] ?? 0, 0)}",
+                                style: TextStyle(
+                                    color: Utility.grey500, fontSize: 12),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => scanBarangCt.validasiDetailPilihMenu(),
+                      child: Expanded(
+                        child: Container(
+                          height: 60,
+                          width: 60,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Utility.primaryDefault,
+                          ),
+                          child: Icon(
+                            Iconsax.add,
+                            color: Utility.baseColor2,
                           ),
                         ),
                       ),
@@ -229,140 +257,6 @@ class _ScanBarangState extends State<ScanBarang> {
                 ),
               ),
             ],
-          ),
-        ),
-        Expanded(
-          flex: 35,
-          child: SizedBox(
-            child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(Get.context!).size.width,
-                        margin: EdgeInsets.only(left: 16, right: 16),
-                        decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 255, 255, 255),
-                            borderRadius: Utility.borderStyle1),
-                        child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: Utility.medium,
-                                ),
-                                IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 25,
-                                        child: Container(
-                                          height: 60,
-                                          alignment: Alignment.center,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(6),
-                                                  topRight: Radius.circular(6),
-                                                  bottomLeft:
-                                                      Radius.circular(6),
-                                                  bottomRight:
-                                                      Radius.circular(6)),
-                                              image: DecorationImage(
-                                                  alignment:
-                                                      Alignment.topCenter,
-                                                  image: AssetImage(
-                                                      'assets/no_image.png'),
-                                                  // gambar == null || gambar == "" ? AssetImage('assets/no_image.png') : ,
-                                                  fit: BoxFit.fill)),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 65,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              // Text(
-                                              //   "${scanBarangCt.barangSelect[0]['NAMA'] ?? ''}",
-                                              //   style: TextStyle(
-                                              //     fontWeight: FontWeight.bold,
-                                              //   ),
-                                              // ),
-                                              // Text(
-                                              //   "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect[0]['STDJUAL'] ?? 0, 0)}",
-                                              //   style: TextStyle(
-                                              //     color: Utility.greyDark,
-                                              //   ),
-                                              // ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 10,
-                                        child: IconButton(
-                                          onPressed: () => scanBarangCt
-                                              .validasiDetailPilihMenu(),
-                                          icon: Icon(
-                                            Iconsax.add_circle,
-                                            color: Utility.primaryDefault,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: Utility.medium,
-                                ),
-                                // Text(
-                                //   "Barcode Type",
-                                //   style: TextStyle(
-                                //       fontWeight: FontWeight.bold,
-                                //       fontSize: Utility.medium),
-                                // ),
-                                // SizedBox(
-                                //   height: Utility.small,
-                                // ),
-                                // Text("${scanBarangCt.typeScan.value}"),
-                                // SizedBox(
-                                //   height: Utility.medium,
-                                // ),
-                                // Text(
-                                //   "Data Scan",
-                                //   style: TextStyle(
-                                //       fontWeight: FontWeight.bold,
-                                //       fontSize: Utility.medium),
-                                // ),
-                                // SizedBox(
-                                //   height: Utility.small,
-                                // ),
-                                // Text("${scanBarangCt.codeScan.value}"),
-                                // SizedBox(
-                                //   height: Utility.medium,
-                                // ),
-                                // Button1(
-                                //   textBtn: "Periksa Barang",
-                                //   colorBtn: Utility.primaryDefault,
-                                //   colorText: Colors.white,
-                                //   onTap: () {},
-                                // ),
-                              ],
-                            )),
-                      )
-                    ],
-                  ),
-                )),
           ),
         )
       ],
@@ -395,10 +289,8 @@ class _ScanBarangState extends State<ScanBarang> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() async {
-        result = scanData;
-        SecondPageRoute(scanData);
-      });
+      result = scanData;
+      SecondPageRoute(scanData);
     });
     controller.pauseCamera();
     controller.resumeCamera();

@@ -43,11 +43,9 @@ class BuatFakturController extends BaseController {
         if (tanggalNow == inputDate) {
           // print(nomorAntriLastFaktur);
           if (nomorAntriLastFaktur == null || nomorAntriLastFaktur == "") {
-            print('nomor antri tidak valid');
             dashboardCt.nomorOrder.value =
                 "${DateFormat('yyyyMMdd').format(dt)}001";
           } else {
-            print('nomor antri valid');
             var ft1 =
                 nomorAntriLastFaktur.substring(nomorAntriLastFaktur.length - 3);
             var ft2 = int.parse(ft1) + 1;

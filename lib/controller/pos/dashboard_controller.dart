@@ -7,6 +7,7 @@ import 'package:siscom_pos/controller/getdata_controller.dart';
 import 'package:siscom_pos/controller/pos/arsip_faktur_controller.dart';
 import 'package:siscom_pos/utils/api.dart';
 import 'package:siscom_pos/utils/app_data.dart';
+import 'package:siscom_pos/utils/controllers/controller_implementation.dart';
 import 'package:siscom_pos/utils/toast.dart';
 import 'package:siscom_pos/utils/utility.dart';
 
@@ -109,8 +110,34 @@ class DashbardController extends BaseController {
   var listPelanggan = [].obs;
   var listfakturArsip = [].obs;
   var informasiJlhd = [].obs;
+//NEW VARIABEL
+  var searchdataentry = [].obs;
+//SEARCH SALES ENTRY DATA
+  salessearch(search) {
+    searchdataentry.clear();
+    final dataentry = listSalesman.value
+        .where((element) => element['NAMA']
+            .toString()
+            .toUpperCase()
+            .contains(search.toString().toUpperCase()))
+        .toList();
+    searchdataentry.value.addAll(dataentry);
+    debugPrint('berapa datanya ${searchdataentry}');
+  }
 
-  void startLoad(type) {
+  kelompokbarangsearch(search) {
+    searchdataentry.clear();
+    final dataentry = listKelompokBarang.value
+        .where((element) => element['NAMA']
+            .toString()
+            .toUpperCase()
+            .contains(search.toString().toUpperCase()))
+        .toList();
+    searchdataentry.value.addAll(dataentry);
+    debugPrint('berapa datanya ${searchdataentry}');
+  }
+
+  Future<void> startLoad(type) async {
     if (AppData.noFaktur != "") {
       // arsipController.startLoad();
       var getValue1 = AppData.noFaktur.split("|");
@@ -375,6 +402,7 @@ class DashbardController extends BaseController {
         var valueBody = jsonDecode(res.body);
         List data = valueBody['data'];
         data.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
+        debugPrint('Sales $data');
         listSalesman.value = data;
         if (data.isEmpty) {
           pelayanSelected.value = "-";
@@ -476,11 +504,11 @@ class DashbardController extends BaseController {
             List hasilDataSales = await checkSales;
 
             if (hasilDataSales.isNotEmpty) {
-              kodePelayanSelected.value = hasilDataSales[0]['KODE'];
-              kodePelayanSelected.refresh();
+              // kodePelayanSelected.value = hasilDataSales[0]['KODE'];
+              // kodePelayanSelected.refresh();
 
-              pelayanSelected.value = hasilDataSales[0]['NAMA'];
-              pelayanSelected.refresh();
+              // pelayanSelected.value = hasilDataSales[0]['NAMA'];
+              // pelayanSelected.refresh();
 
               Future<List> listSalesSelected = GetDataController()
                   .getSpesifikData("CUSTOM", "SALESM",
@@ -512,18 +540,21 @@ class DashbardController extends BaseController {
     connect.then((dynamic res) {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
-        var data = valueBody['data'];
+        List data = valueBody['data'];
         listKelompokBarang.value = data;
         listKelompokBarang.value.sort((a, b) => a['NAMA'].compareTo(b['NAMA']));
         if (type == "arsip") {
           aksiPilihKategoriBarang();
         } else {
-          var getFirst = data.first;
-          var kodeInisial = getFirst['INISIAL'];
-          kategoriBarang.value = getFirst['NAMA'];
+          if (data.isNotEmpty) {
+            var getFirst = data.first;
+            var kodeInisial = getFirst['INISIAL'];
+            kategoriBarang.value = getFirst['NAMA'];
+            getMenu(kodeInisial, type);
+          } else {
+            kategoriBarang.value = '';
+          }
           kategoriBarang.refresh();
-          print('load menu first');
-          getMenu(kodeInisial, type);
         }
         kategoriBarang.refresh();
         listKelompokBarang.refresh();
@@ -576,7 +607,7 @@ class DashbardController extends BaseController {
     connect.then((dynamic res) {
       if (res.statusCode == 200) {
         var valueBody = jsonDecode(res.body);
-        List data = valueBody['data'];
+        List data = valueBody['data'] ?? [];
         loadingString.value =
             data.isEmpty ? "Tidak ada barang" : "Sedang memuat...";
         if (data.isNotEmpty) {

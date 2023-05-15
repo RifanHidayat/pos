@@ -5,6 +5,7 @@ class Utility {
   // COLOR
   static Color baseColor1 = Color(0xff11151e);
   static Color baseColor2 = Color(0xffffffff);
+  static Color fielddisable = Color(0xffE9EDF5);
 
   static Color primaryDefault = Color(0xff001767);
   static Color primaryDark600 = Color(0xff001158);
@@ -36,6 +37,8 @@ class Utility {
   static Color greyLight50 = Color(0xffF8FAFF);
   static Color grey100 = Color(0xffE9EDF5);
   static Color grey600 = Color(0xff687182);
+  static Color grey300 = Colors.grey.shade300;
+  static Color grey500 = Colors.grey.shade500;
   static Color grey900 = Color(0xff333B4A);
   static Color greyDark = Color(0xff333B4A);
 
@@ -62,10 +65,10 @@ class Utility {
       bottomRight: Radius.circular(6));
 
   static BorderRadius borderStyle2 = BorderRadius.only(
-      topLeft: Radius.circular(16),
-      topRight: Radius.circular(16),
-      bottomLeft: Radius.circular(16),
-      bottomRight: Radius.circular(16));
+      topLeft: Radius.circular(6),
+      topRight: Radius.circular(6),
+      bottomLeft: Radius.circular(6),
+      bottomRight: Radius.circular(6));
 
   static BorderRadius borderStyle3 = BorderRadius.only(
       topLeft: Radius.circular(24),

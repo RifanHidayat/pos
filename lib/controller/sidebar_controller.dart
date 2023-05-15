@@ -218,7 +218,6 @@ class SidebarController extends BaseController {
               AppData.periodeSelected = "";
               AppData.cabangSelected = "";
               sidebarMenuSelected.value = 1;
-              sidebarMenuSelected.refresh();
               Get.offAll(Login());
             },
           ),

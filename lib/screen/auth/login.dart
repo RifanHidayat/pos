@@ -112,7 +112,7 @@ class _LoginState extends State<Login> {
                       Padding(
                         padding: EdgeInsets.only(left: 5),
                         child: Text(
-                          "Database",
+                          "Nama Perusahaan",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -130,8 +130,19 @@ class _LoginState extends State<Login> {
                             child: Padding(
                               padding:
                                   const EdgeInsets.only(top: 6.0, left: 8.0),
-                              child: Obx(() =>
-                                  Text("${controller.databaseSelected.value}")),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Iconsax.buildings,
+                                    color: Utility.grey500,
+                                  ),
+                                  SizedBox(
+                                    width: Utility.medium,
+                                  ),
+                                  Obx(() => Text(
+                                      "${controller.companynameSelected.value}")),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -210,8 +221,8 @@ class _LoginState extends State<Login> {
                               child: Padding(
                                 padding:
                                     const EdgeInsets.only(top: 6.0, left: 8.0),
-                                child: Text(
-                                    "${controller.bulanTahunShow.value}"),
+                                child:
+                                    Text("${controller.bulanTahunShow.value}"),
                               ),
                             ),
                           ),

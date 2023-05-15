@@ -24,8 +24,10 @@ class AuthController extends GetxController {
   var namaPerusahaan = TextEditingController().obs;
   var emailRegister = TextEditingController().obs;
   var passwordRegister = TextEditingController().obs;
+  var confirmpasswordRegister = TextEditingController().obs;
 
   var showpassword = false.obs;
+  var showconfirmpassword = false.obs;
   var checkedKetentuan = false.obs;
 
   var database = [].obs;
@@ -35,6 +37,8 @@ class AuthController extends GetxController {
   var bulanTahunSelected = "".obs;
   var databaseSelected = "".obs;
   var databaseSelectedRegis = "".obs;
+  var companynameSelectedRegis = "".obs;
+  var companynameSelected = "".obs;
   var passwordSelected = "".obs;
 
   var sidebarCt = Get.put(SidebarController());
@@ -138,7 +142,7 @@ class AuthController extends GetxController {
         var valueBody = jsonDecode(res.body);
         if (valueBody['status'] == true) {
           var data = valueBody['data'];
-          
+
           AppData.sysuserInformasi =
               "${data[0]['USID']}-${data[0]['USLEVEL']}-${data[0]['LOGINFLAG']}-${data[0]['AKSESCABANG']}-${data[0]['AKSESGUDANG']}";
           var aksesCabangUser = "${data[0]['AKSESCABANG']}".split(" ");
@@ -200,7 +204,9 @@ class AuthController extends GetxController {
     bulanTahunShow.refresh();
   }
 
-  void filterBulan() {
+//NEW VARIABLE FOR VALIDATE DATETIME WHEN SELECTED
+
+  void filterBulan({key}) {
     DatePicker.showPicker(
       Get.context!,
       pickerModel: CustomMonthPicker(
@@ -209,13 +215,17 @@ class AuthController extends GetxController {
         currentTime: DateTime.now(),
       ),
       onConfirm: (time) {
-        if (time != null) {
-          tanggalSelected.value = "${DateFormat('yyyy-MM-dd').format(time)}";
-          bulanTahunSelected.value = "${DateFormat('MM-yyyy').format(time)}";
-          bulanTahunShow.value =
-              "${Utility.convertDate3('${tanggalSelected.value}')}";
-          this.tanggalSelected.refresh();
-          this.bulanTahunSelected.refresh();
+        tanggalSelected.value =
+            DateFormat('yyyy-MM-dd').format(time).toString();
+        bulanTahunSelected.value =
+            DateFormat('MM-yyyy').format(time).toString();
+        bulanTahunShow.value = Utility.convertDate3(tanggalSelected.value);
+        tanggalSelected.refresh();
+        bulanTahunSelected.refresh();
+        debugPrint('masuk kesini ?');
+        if (key != null) {
+          Get.back();
+          nextStep1();
         }
       },
     );
@@ -276,16 +286,25 @@ class AuthController extends GetxController {
     });
   }
 
-  void selectDatabaseDanPassword(url, dbname, password) {
+  void selectDatabaseDanPassword({url, dbname, password, companyname, name}) {
     if (url == "regis") {
       databaseSelectedRegis.value = dbname;
-      this.databaseSelectedRegis.refresh();
+      companynameSelectedRegis.value = companyname;
+      namaRegister.value.text = name;
+      namaPerusahaan.value.text = companyname;
+      companynameSelectedRegis.refresh();
+      databaseSelectedRegis.refresh();
       Get.back();
     } else {
       databaseSelected.value = dbname;
       passwordSelected.value = password;
-      this.databaseSelected.refresh();
-      this.passwordSelected.refresh();
+      namaPerusahaan.value.text = companyname;
+
+      companynameSelected.value = companyname;
+      databaseSelected.refresh();
+      companynameSelected.refresh();
+
+      passwordSelected.refresh();
       Get.back();
     }
   }
@@ -298,6 +317,11 @@ class AuthController extends GetxController {
       UtilsAlert.showToast("Lengkapi form terlebi dahulu");
     } else if (checkedKetentuan.value == false) {
       UtilsAlert.showToast("Anda belum menyetujui syarat dan ketentuan");
+    } else if (confirmpasswordRegister.value.text !=
+        passwordRegister.value.text) {
+      UtilsAlert.showToast("Password yang anda masukkan tidak sama");
+      passwordRegister.value.text = '';
+      confirmpasswordRegister.value.text = '';
     } else {
       UtilsAlert.loadingSimpanData(Get.context!, "Sedang proses...");
       Map<String, dynamic> body = {
