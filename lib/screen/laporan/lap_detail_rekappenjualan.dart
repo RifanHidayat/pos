@@ -6,8 +6,23 @@ import 'package:siscom_pos/controller/laporan/lap_rekap_penjualan_ct.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/appbar.dart';
 
-class LaporanDetailRekapPenjualan extends StatelessWidget {
+class LaporanDetailRekapPenjualan extends StatefulWidget {
+  final String? number;
+  const LaporanDetailRekapPenjualan({super.key, this.number});
+
+  @override
+  State<LaporanDetailRekapPenjualan> createState() =>
+      _LaporanDetailRekapPenjualanState();
+}
+
+class _LaporanDetailRekapPenjualanState
+    extends State<LaporanDetailRekapPenjualan> {
   final controller = Get.put(LaporanRekapPenjualanController());
+  @override
+  void initState() {
+    controller.getProsesDetailListRekap(widget.number);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +55,7 @@ class LaporanDetailRekapPenjualan extends StatelessWidget {
                     SizedBox(
                       height: Utility.medium,
                     ),
-                    Flexible(child: listRekapPenjualan())
+                    Obx(() => Flexible(child: detaillistRekapPenjualan()))
                   ],
                 ),
               )),
@@ -49,8 +64,8 @@ class LaporanDetailRekapPenjualan extends StatelessWidget {
     );
   }
 
-  Widget listRekapPenjualan() {
-    return controller.listRekapPenjualan.isEmpty &&
+  Widget detaillistRekapPenjualan() {
+    return controller.detaillistRekapPenjualan.isEmpty &&
             controller.screenLoad.value == true
         ? Center(
             child: Column(
@@ -71,7 +86,7 @@ class LaporanDetailRekapPenjualan extends StatelessWidget {
               )
             ],
           ))
-        : controller.listRekapPenjualan.isEmpty &&
+        : controller.detaillistRekapPenjualan.isEmpty &&
                 controller.screenLoad.value == false
             ? Center(
                 child: Column(
@@ -117,18 +132,21 @@ class LaporanDetailRekapPenjualan extends StatelessWidget {
                 },
                 controller: controller.refreshDetailController,
                 child: ListView.builder(
-                    physics: controller.listRekapPenjualan.length <= 10
+                    physics: controller.detaillistRekapPenjualan.length <= 10
                         ? AlwaysScrollableScrollPhysics()
                         : BouncingScrollPhysics(),
-                    itemCount: controller.listRekapPenjualan.length,
-                    // itemCount: controller.listRekapPenjualan.length >
+                    itemCount: controller.detaillistRekapPenjualan.length,
+                    // itemCount: controller.detaillistRekapPenjualan.length >
                     //         controller.page.value
                     //     ? controller.page.value
-                    //     : controller.listRekapPenjualan.length,
+                    //     : controller.detaillistRekapPenjualan.length,
                     itemBuilder: (context, index) {
-                      var title = controller.listRekapPenjualan[index].title;
-                      var jumlah = controller.listRekapPenjualan[index].jumlah;
-                      var total = controller.listRekapPenjualan[index].total;
+                      var number =
+                          controller.detaillistRekapPenjualan[index].title;
+                      var jumlah =
+                          controller.detaillistRekapPenjualan[index].jumlah;
+                      var total =
+                          controller.detaillistRekapPenjualan[index].total;
                       return InkWell(
                         onTap: () {
                           controller.detailBarang();
@@ -146,12 +164,12 @@ class LaporanDetailRekapPenjualan extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "$title",
+                                        Utility.convertNoFaktur(number ?? ''),
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Text(
-                                        "$jumlah Barang",
+                                        "${jumlah} Barang",
                                         style: TextStyle(
                                             fontSize: Utility.normal,
                                             color: Utility.nonAktif),

@@ -67,6 +67,7 @@ class CardCustom extends StatelessWidget {
   final Color? colorBg;
   final Color? colorBorder;
   final BorderRadius? radiusBorder;
+  final EdgeInsetsGeometry? margin;
 
   const CardCustom({
     Key? key,
@@ -74,11 +75,13 @@ class CardCustom extends StatelessWidget {
     this.colorBg,
     this.colorBorder,
     this.radiusBorder,
+    this.margin,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
+        margin: margin,
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
             color: colorBg,

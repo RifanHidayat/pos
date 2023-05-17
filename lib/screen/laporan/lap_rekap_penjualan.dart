@@ -88,14 +88,18 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
       children: [
         Expanded(
           flex: 20,
-          child: CardCustom(
-            colorBg: Utility.baseColor2,
-            colorBorder: Colors.black,
-            radiusBorder: Utility.borderStyle1,
-            widgetCardCustom: Padding(
-              padding: EdgeInsets.all(8),
-              child: Center(
-                child: Icon(Iconsax.setting_4),
+          child: InkWell(
+            onTap: () {},
+            child: CardCustom(
+              margin: EdgeInsets.only(right: 10),
+              colorBg: Utility.baseColor2,
+              colorBorder: Colors.black,
+              radiusBorder: BorderRadius.circular(30),
+              widgetCardCustom: Padding(
+                padding: EdgeInsets.all(8),
+                child: Center(
+                  child: Icon(Icons.close),
+                ),
               ),
             ),
           ),
@@ -121,7 +125,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                       color: controller.filterAktif.value == 1
                           ? Utility.primaryLight100
                           : Utility.baseColor2,
-                      borderRadius: Utility.borderStyle1,
+                      borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: Utility.nonAktif,
                         width: 1.0,
@@ -129,7 +133,12 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Tanggal"),
+                      child: Row(
+                        children: const [
+                          Text("Tanggal"),
+                          Icon(Icons.arrow_drop_down_outlined)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -146,7 +155,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                       color: controller.filterAktif.value == 2
                           ? Utility.primaryLight100
                           : Utility.baseColor2,
-                      borderRadius: Utility.borderStyle1,
+                      borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: Utility.nonAktif,
                         width: 1.0,
@@ -154,7 +163,12 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Pelanggan"),
+                      child: Row(
+                        children: const [
+                          Text("Pelanggan"),
+                          Icon(Icons.arrow_drop_down_outlined)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -171,7 +185,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                       color: controller.filterAktif.value == 3
                           ? Utility.primaryLight100
                           : Utility.baseColor2,
-                      borderRadius: Utility.borderStyle1,
+                      borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: Utility.nonAktif,
                         width: 1.0,
@@ -179,7 +193,12 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Sales"),
+                      child: Row(
+                        children: const [
+                          Text("Sales"),
+                          Icon(Icons.arrow_drop_down_outlined)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -196,7 +215,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                       color: controller.filterAktif.value == 4
                           ? Utility.primaryLight100
                           : Utility.baseColor2,
-                      borderRadius: Utility.borderStyle1,
+                      borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color: Utility.nonAktif,
                         width: 1.0,
@@ -204,7 +223,12 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Barang"),
+                      child: Row(
+                        children: const [
+                          Text("Barang"),
+                          Icon(Icons.arrow_drop_down_outlined)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -298,7 +322,10 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                       var total = controller.listRekapPenjualan[index].total;
                       return InkWell(
                         onTap: () {
-                          Get.to(LaporanDetailRekapPenjualan(),
+                          Get.to(
+                              LaporanDetailRekapPenjualan(
+                                number: title,
+                              ),
                               duration: Duration(milliseconds: 300),
                               transition: Transition.rightToLeftWithFade);
                         },
@@ -310,22 +337,10 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                               children: [
                                 Expanded(
                                   flex: 60,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "$title",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        "$jumlah",
-                                        style: TextStyle(
-                                            fontSize: Utility.normal,
-                                            color: Utility.nonAktif),
-                                      )
-                                    ],
+                                  child: Text(
+                                    Utility.convertNoFaktur(title ?? ''),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Expanded(

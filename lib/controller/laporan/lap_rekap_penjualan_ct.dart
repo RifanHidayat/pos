@@ -25,6 +25,7 @@ class LaporanRekapPenjualanController extends GetxController {
   var bestSellerView = true.obs;
 
   var listRekapPenjualan = <ListRekapPenjualanModel>[].obs;
+  var detaillistRekapPenjualan = <ListRekapPenjualanModel>[].obs;
   var detailRekap = [].obs;
   var dataBarang = [].obs;
   var dataPelanggan = [].obs;
@@ -138,12 +139,37 @@ class LaporanRekapPenjualanController extends GetxController {
     debugPrint('Convert ${data}');
     for (var element in data) {
       listRekapPenjualan.add(ListRekapPenjualanModel(
-        title: element["NOMOR"],
+        title:
+            '${element["TANGGAL"]}\n${Utility.convertNoFaktur(element["NOMOR"])}\n${element['NAMA_PELANGGAN']}',
         jumlah: element["PK"].toString(),
         total: element["NETTO"].toString(),
       ));
     }
     listRekapPenjualan.refresh();
+
+    for (var element in dummyDataBarang) {
+      dataBarang.add(element);
+    }
+    dataBarang.refresh();
+
+    return Future.value(true);
+  }
+
+  Future<bool> getProsesDetailListRekap(number) async {
+    var connect = Api.connectionApi2("get", "", "penjualan/${number}",
+        "&cabang=${sidebarCt.cabangKodeSelectedSide.value}&kode_sales=${dashbardController.kodePelayanSelected}");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    debugPrint('Convert number ${data}');
+    for (var element in data) {
+      detaillistRekapPenjualan.add(ListRekapPenjualanModel(
+        title: element["NOMOR"],
+        jumlah: element["QTY"].toString(),
+        total: element["HARGA"].toString(),
+      ));
+    }
+    detaillistRekapPenjualan.refresh();
 
     for (var element in dummyDataBarang) {
       dataBarang.add(element);
