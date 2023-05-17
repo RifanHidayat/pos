@@ -9,8 +9,12 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:siscom_pos/controller/global_controller.dart';
 import 'package:siscom_pos/controller/pos/buttomSheet/bottomsheetPos_controller.dart';
 import 'package:siscom_pos/controller/pos/scan_barang_controller.dart';
+import 'package:siscom_pos/screen/pos/rincian_pemesanan.dart';
 import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/button.dart';
+
+import '../../controller/pos/dashboard_controller.dart';
+import '../../utils/toast.dart';
 
 class ScanBarang extends StatefulWidget {
   const ScanBarang({Key? key}) : super(key: key);
@@ -23,9 +27,11 @@ class _ScanBarangState extends State<ScanBarang> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final dascontroller = Get.put(DashbardController());
 
   var scanBarangCt = Get.put(ScanBarangController());
   var globalCt = Get.put(GlobalController());
+  var buttomSheetProduk = Get.put(BottomSheetPos());
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -62,13 +68,14 @@ class _ScanBarangState extends State<ScanBarang> {
                           left: 20,
                           right: 20,
                           child: screenDataScan(result)),
-                    if (scanBarangCt.scannerValue.value)
+                    if (scanBarangCt.scannerValue.value &&
+                        scanBarangCt.barangSelect.isNotEmpty)
                       Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
                         child: buttoncheckinproduct(),
-                      )
+                      ),
                   ],
                 ),
               )),
@@ -150,20 +157,34 @@ class _ScanBarangState extends State<ScanBarang> {
         color: Utility.baseColor2,
         child: SizedBox(
           height: 50,
-          child: Button4(
-              totalItem: "1",
-              totalAll: Text(
-                globalCt.convertToIdr(1000000, 0),
-                style: TextStyle(color: Utility.baseColor2),
-              ),
-              onTap: () {},
-              colorButton: Utility.primaryDefault,
-              colortext: Utility.baseColor2,
-              border: BorderRadius.circular(8.0),
-              icon: Icon(
-                Icons.navigate_next_outlined,
-                color: Utility.baseColor2,
-              )),
+          child: Obx(
+            () => SizedBox(
+              height: 50,
+              child: Button4(
+                  totalItem: "${dascontroller.jumlahItemDikeranjang.value}",
+                  totalAll: Text(
+                    globalCt.convertToIdr(
+                        dascontroller.totalNominalDikeranjang.value, 2),
+                    style: TextStyle(color: Utility.baseColor2),
+                  ),
+                  onTap: () {
+                    dascontroller.hitungAllArsipMenu();
+                    Get.to(RincianPemesanan(),
+                        duration: Duration(milliseconds: 200),
+                        transition: Transition.zoom);
+                  },
+                  colorButton: Utility.primaryDefault,
+                  colortext: Utility.baseColor2,
+                  border: BorderRadius.circular(8.0),
+                  icon: RotatedBox(
+                    quarterTurns: 2,
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Utility.baseColor2,
+                    ),
+                  )),
+            ),
+          ),
         ));
   }
 
@@ -210,13 +231,6 @@ class _ScanBarangState extends State<ScanBarang> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Samsung Monitor",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Utility.primaryDefault,
-                              ),
-                            ),
                             if (scanBarangCt.barangSelect.value.isNotEmpty)
                               Text(
                                 "${scanBarangCt.barangSelect[0]['NAMA'] ?? ''}",
@@ -225,9 +239,17 @@ class _ScanBarangState extends State<ScanBarang> {
                                   color: Utility.primaryDefault,
                                 ),
                               ),
+                            if (scanBarangCt.barangSelect.value.isEmpty)
+                              Text('Produk tidak tersedia'),
                             if (scanBarangCt.barangSelect.value.isNotEmpty)
                               Text(
                                 "Rp ${globalCt.convertToIdr(scanBarangCt.barangSelect[0]['STDJUAL'] ?? 0, 0)}",
+                                style: TextStyle(
+                                    color: Utility.grey500, fontSize: 12),
+                              ),
+                            if (scanBarangCt.barangSelect.value.isEmpty)
+                              Text(
+                                "Anda dapat mengisikan manual jika Scan QR bermasalah, Terimakasih",
                                 style: TextStyle(
                                     color: Utility.grey500, fontSize: 12),
                               ),
@@ -235,24 +257,41 @@ class _ScanBarangState extends State<ScanBarang> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () => scanBarangCt.validasiDetailPilihMenu(),
-                      child: Expanded(
-                        child: Container(
-                          height: 60,
-                          width: 60,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Utility.primaryDefault,
-                          ),
-                          child: Icon(
-                            Iconsax.add,
-                            color: Utility.baseColor2,
-                          ),
-                        ),
-                      ),
-                    )
+                    scanBarangCt.barangSelect.value.isEmpty
+                        ? SizedBox()
+                        : InkWell(
+                            onTap: () {
+                              if (dascontroller.nomorFaktur.value != "-") {
+                                buttomSheetProduk.buttomShowCardMenu(
+                                    Get.context!,
+                                    "${scanBarangCt.barangSelect.value[0]['GROUP']}${scanBarangCt.barangSelect.value[0]['KODE']}",
+                                    globalCt.convertToIdr(
+                                        scanBarangCt.barangSelect.value[0]
+                                                ['STDJUAL'] ??
+                                            0,
+                                        0),
+                                    key: 'get_qrcode_by_scan');
+                              } else {
+                                UtilsAlert.showToast(
+                                    "Harap buat faktur terlebih dahulu");
+                              }
+                            },
+                            child: Expanded(
+                              child: Container(
+                                height: 60,
+                                width: 60,
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Utility.primaryDefault,
+                                ),
+                                child: Icon(
+                                  Iconsax.add,
+                                  color: Utility.baseColor2,
+                                ),
+                              ),
+                            ),
+                          )
                   ],
                 ),
               ),
@@ -300,13 +339,12 @@ class _ScanBarangState extends State<ScanBarang> {
     controller?.pauseCamera();
     var compileData = await scanData;
     if (compileData.format != "" || compileData.code != "") {
-      setState(() {
-        scanBarangCt.getBarcode(compileData.format, compileData.code);
-      });
+      scanBarangCt.getBarcode('get_qrcode_by_scan', compileData.code,
+          key: 'get_qrcode_by_scan');
+      // scanBarangCt.getBarcode(compileData.format, compileData.code);
     } else {
       controller?.resumeCamera();
     }
-    print('hasil data ${compileData.code}');
 
     // var value =
     //     await Navigator.push(context, MaterialPageRoute(builder: (context) {

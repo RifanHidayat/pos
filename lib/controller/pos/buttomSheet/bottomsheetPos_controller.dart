@@ -102,8 +102,8 @@ class BottomSheetPos extends BaseController
     _focus.dispose();
   }
 
-  void buttomShowCardMenu(context, id, jual) async {
-    dashboardCt.totalPesan.value = 0;
+  void buttomShowCardMenu(context, id, jual, {key}) async {
+    // dashboardCt.totalPesan.value = 0;
     dashboardCt.totalPesanNoEdit.value = 0;
     dashboardCt.catatanPembelian.value.text = "";
     dashboardCt.persenDiskonPesanBarang.value.text = "";
@@ -117,7 +117,6 @@ class BottomSheetPos extends BaseController
         produkSelected.add(element);
       }
     }
-    print('produk terpilih $produkSelected');
     dashboardCt.tipeBarangDetail.value = int.parse(produkSelected[0]['TIPE']);
     if (dashboardCt.kodePelayanSelected.value == "" ||
         dashboardCt.customSelected.value == "" ||
@@ -126,20 +125,24 @@ class BottomSheetPos extends BaseController
           "Harap pilih cabang, sales dan pelanggan terlebih dahulu");
     } else {
       if (produkSelected[0]['TIPE'] == "1") {
-        print('proses check imei');
         Future<bool> checkingImei = prosesCheckImei(produkSelected);
         var hasilEmei = await checkingImei;
         if (hasilEmei == true) {
+          //IMEI _
           // print(imeiBarang.value);
           // print(imeiSelected.value);
           checkingUkuran(context, produkSelected, jual, "", 0, "", "", "", "",
-              "", "", "", "");
+              "", "", "", "",
+              key: key);
         } else {
           UtilsAlert.showToast("Data IMEI tidak valid");
         }
       } else {
+        //NON IMEI
+
         checkingUkuran(context, produkSelected, jual, "", 0, "", "", "", "", "",
-            "", "", "");
+            "", "", "",
+            key: key);
       }
     }
   }
@@ -180,7 +183,8 @@ class BottomSheetPos extends BaseController
   }
 
   void checkingUkuran(context, produkSelected, jual, type, qtyProduk, nomorUrut,
-      keyFaktur, nomorFaktur, gudang, group, kode, discd, diskon) {
+      keyFaktur, nomorFaktur, gudang, group, kode, discd, diskon,
+      {key}) {
     dashboardCt.typeBarang.value.clear();
     dashboardCt.typeBarang.refresh();
     Map<String, dynamic> body = {
@@ -200,8 +204,10 @@ class BottomSheetPos extends BaseController
         dashboardCt.htgUkuran.value = "${getFirst['HTG']}";
         dashboardCt.pakUkuran.value = "${getFirst['PAK']}";
         if (type != "edit_keranjang") {
-          dashboardCt.jumlahPesan.value.text =
-              produkSelected[0]["TIPE"] == "1" ? "0" : "1";
+          if (key != 'get_qrcode_manualy') {
+            dashboardCt.jumlahPesan.value.text =
+                produkSelected[0]["TIPE"] == "1" ? "0" : "1";
+          }
           // // validasi harga standar jual jika global include ppn
           // var cabangSelected = dashboardCt.listCabang.firstWhere(
           //     (el) => el["KODE"] == dashboardCt.cabangKodeSelected.value);
@@ -216,13 +222,22 @@ class BottomSheetPos extends BaseController
           qtySebelumEdit.value = "0";
           qtySebelumEdit.refresh();
           listDataImeiSelected.value.clear();
-          dashboardCt.totalPesan.value = double.parse("${getFirst['STDJUAL']}");
+          if (key != 'get_qrcode_manualy') {
+            dashboardCt.totalPesan.value =
+                double.parse("${getFirst['STDJUAL']}");
+          } else if (key == 'get_qrcode_manualy' &&
+              dashboardCt.jumlahPesan.value.text == '1') {
+            dashboardCt.totalPesan.value =
+                double.parse("${getFirst['STDJUAL']}");
+          }
           dashboardCt.totalPesanNoEdit.value =
               double.parse("${getFirst['STDJUAL']}");
           dashboardCt.hargaJualPesanBarang.value.text =
               Utility.rupiahFormat("${getFirst['STDJUAL']}", type);
 
-          Get.back();
+          if (key != 'get_qrcode_by_scan') {
+            Get.back();
+          }
         } else {
           qtySebelumEdit.value = "$qtyProduk";
           qtySebelumEdit.refresh();
@@ -251,7 +266,9 @@ class BottomSheetPos extends BaseController
           dashboardCt.persenDiskonPesanBarang.value.text = "$diskon";
           var convertDiskonNominal = globalCt.convertToIdr(discd, 0);
           dashboardCt.hargaDiskonPesanBarang.value.text = convertDiskonNominal;
-          Get.back();
+          if (key != 'get_qrcode_by_scan') {
+            Get.back();
+          }
         }
 
         for (var element in data) {
@@ -262,6 +279,7 @@ class BottomSheetPos extends BaseController
         dashboardCt.listTypeBarang.value = data;
         refreshAll();
         typeFocus.value = "";
+
         sheetButtomMenu1(produkSelected, type, nomorUrut, keyFaktur,
             nomorFaktur, gudang, group, kode, qtyProduk);
       }
@@ -567,11 +585,11 @@ class BottomSheetPos extends BaseController
                             flex: 85,
                             child: Container(
                               alignment: Alignment.centerRight,
-                              child: Text(
-                                // "${totalPesan.value}",
-                                "${currencyFormatter.format(dashboardCt.totalPesan.value)}",
-                                style: TextStyle(fontSize: Utility.medium),
-                              ),
+                              child: Obx(() => Text(
+                                    // "${totalPesan.value}",
+                                    "${currencyFormatter.format(dashboardCt.totalPesan.value)}",
+                                    style: TextStyle(fontSize: Utility.medium),
+                                  )),
                             ),
                           )
                         ],
@@ -632,14 +650,24 @@ class BottomSheetPos extends BaseController
                                             type,
                                             produkSelected);
                                       } else {
-                                        print(
-                                            dashboardCt.totalPesanNoEdit.value);
-                                        validasiSebelumAksi(
-                                            "Simpan Barang",
-                                            "Yakin simpan barang ini ke keranjang ?",
-                                            "",
-                                            type,
-                                            produkSelected);
+                                        if (tipeImei.value == true &&
+                                            dashboardCt
+                                                    .jumlahPesan.value.text ==
+                                                '0') {
+                                          UtilsAlert.showToast(
+                                              'Imei belum di pilih');
+                                        } else {
+                                          masukKeranjangCt.masukKeranjang(
+                                              produkSelected,
+                                              [],
+                                              qtySebelumEdit.value);
+                                          validasiSebelumAksi(
+                                              "Simpan Barang",
+                                              "Yakin simpan barang ini ke keranjang ?",
+                                              "",
+                                              type,
+                                              produkSelected);
+                                        }
                                       }
                                     },
                                     child: CardCustom(
@@ -706,26 +734,23 @@ class BottomSheetPos extends BaseController
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                if (tipeImei.value == false) {
-                                  aksiKurangQty(Get.context!);
-                                }
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: Center(
-                                child: Icon(
-                                  Iconsax.minus_square,
-                                  size: 22,
+                        if (tipeImei.value == false)
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                aksiKurangQty(Get.context!);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: Center(
+                                  child: Icon(
+                                    Iconsax.minus_square,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
                         Expanded(
                           child: CardCustomForm(
                             colorBg: Utility.baseColor2,
@@ -738,49 +763,48 @@ class BottomSheetPos extends BaseController
                                   onFocusChange: (focus) {
                                     aksiFokus1();
                                   },
-                                  child: TextField(
-                                    textAlign: TextAlign.center,
-                                    readOnly:
-                                        tipeImei.value == false ? false : true,
-                                    cursorColor: Utility.primaryDefault,
-                                    controller: dashboardCt.jumlahPesan.value,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                    ),
-                                    style: TextStyle(
-                                        fontSize: 14.0,
-                                        height: 1.0,
-                                        color: Colors.black),
-                                    onSubmitted: (value) {
-                                      aksiInputQty(Get.context!, value);
-                                    },
+                                  child: Obx(() => TextField(
+                                        textAlign: TextAlign.center,
+                                        readOnly: tipeImei.value == false
+                                            ? false
+                                            : true,
+                                        cursorColor: Utility.primaryDefault,
+                                        controller:
+                                            dashboardCt.jumlahPesan.value,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        style: TextStyle(
+                                            fontSize: 14.0,
+                                            height: 1.0,
+                                            color: Colors.black),
+                                        onSubmitted: (value) {
+                                          aksiInputQty(Get.context!, value);
+                                        },
+                                      )),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (tipeImei.value == false)
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                aksiTambahQty(Get.context!);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: Center(
+                                  child: Icon(
+                                    Iconsax.add_square,
+                                    size: 22,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                if (tipeImei.value == false) {
-                                  aksiTambahQty(Get.context!);
-                                }
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: Center(
-                                child: Icon(
-                                  Iconsax.add_square,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
                       ],
                     )),
               )
@@ -1206,6 +1230,60 @@ class BottomSheetPos extends BaseController
             ),
           ),
           SizedBox(
+            height: Utility.medium,
+          ),
+          SizedBox(
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 5.0),
+                    child: Text(
+                      "Quantity",
+                      style: TextStyle(color: Utility.grey900),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: CardCustomForm(
+                    colorBg: Utility.baseColor2,
+                    tinggiCard: 30.0,
+                    radiusBorder: Utility.borderStyle1,
+                    widgetCardForm: Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: FocusScope(
+                        child: Focus(
+                          onFocusChange: (focus) {
+                            aksiFokus1();
+                          },
+                          child: Obx(() => TextField(
+                                textAlign: TextAlign.center,
+                                readOnly:
+                                    tipeImei.value == false ? false : true,
+                                cursorColor: Utility.primaryDefault,
+                                controller: dashboardCt.jumlahPesan.value,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                style: TextStyle(
+                                    fontSize: 14.0,
+                                    height: 1.0,
+                                    color: Colors.black),
+                                onSubmitted: (value) {
+                                  aksiInputQty(Get.context!, value);
+                                },
+                              )),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
             height: Utility.large,
           ),
           Container(
@@ -1227,7 +1305,7 @@ class BottomSheetPos extends BaseController
                 SizedBox(
                   height: Utility.medium,
                 ),
-                ListView.builder(
+                Obx(() => ListView.builder(
                     physics: BouncingScrollPhysics(),
                     shrinkWrap: true,
                     itemCount: listDataImeiSelected.value.length,
@@ -1282,7 +1360,7 @@ class BottomSheetPos extends BaseController
                           Divider()
                         ],
                       );
-                    })
+                    }))
               ],
             ),
           ),
@@ -1300,7 +1378,7 @@ class BottomSheetPos extends BaseController
   void aksiFokus4() {}
 
   void hitungTotalAsli() {
-    double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
+    int vld1 = int.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
 
     var convertHargaJual =
@@ -1620,7 +1698,7 @@ class BottomSheetPos extends BaseController
   }
 
   void aksiKurangQty(content) {
-    double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
+    int vld1 = int.parse(dashboardCt.jumlahPesan.value.text);
     int vld2 = vld1.toInt();
     int vld3 = vld2 - 1;
     if (vld3 < 0) {
@@ -1633,7 +1711,7 @@ class BottomSheetPos extends BaseController
       var filter3 = filter2.replaceAll(".", "");
       var hrgJualEdit = double.parse(filter3);
       double hargaProduk = hrgJualEdit;
-      double hitungJumlahPesan = double.parse('$vld3');
+      int hitungJumlahPesan = int.parse('$vld3');
       // dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
       dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toString();
       var hasill = hargaProduk * hitungJumlahPesan;
@@ -1677,8 +1755,8 @@ class BottomSheetPos extends BaseController
   }
 
   void aksiTambahQty(context) {
-    double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
-    int vld2 = vld1.toInt();
+    int vld1 = int.parse(dashboardCt.jumlahPesan.value.text);
+    int vld2 = vld1;
 
     var convertHrgjual = dashboardCt.hargaJualPesanBarang.value.text.split(',');
     var filter1 = convertHrgjual[0].replaceAll("Rp", "");
@@ -1686,7 +1764,7 @@ class BottomSheetPos extends BaseController
     var filter3 = filter2.replaceAll(".", "");
     var hrgJualEdit = double.parse(filter3);
     double hargaProduk = hrgJualEdit;
-    double hitungJumlahPesan = vld2 + 1;
+    int hitungJumlahPesan = vld2 + 1;
     // dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toStringAsFixed(2);
     dashboardCt.jumlahPesan.value.text = hitungJumlahPesan.toString();
     var hasill = hargaProduk * hitungJumlahPesan;
@@ -1708,7 +1786,7 @@ class BottomSheetPos extends BaseController
       var filter2 = filter1.replaceAll(" ", "");
       var filter3 = filter2.replaceAll(".", "");
       double hrgJualEdit = double.parse(filter3);
-      double vld1 = double.parse(dashboardCt.jumlahPesan.value.text);
+      int vld1 = int.parse(dashboardCt.jumlahPesan.value.text);
       double perhitungan = hrgJualEdit * vld1;
       // dashboardCt.totalPesan.value = perhitungan.toPrecision(2);
       // dashboardCt.totalPesanNoEdit.value = perhitungan.toPrecision(2);
@@ -1745,7 +1823,7 @@ class BottomSheetPos extends BaseController
         dashboardCt.hargaDiskonPesanBarang.value.text =
             "${globalCt.convertToIdr(hitung.toInt(), 0)}";
 
-        var flt1 = hitung * double.parse(dashboardCt.jumlahPesan.value.text);
+        var flt1 = hitung * int.parse(dashboardCt.jumlahPesan.value.text);
         dashboardCt.totalPesan.value = dashboardCt.totalPesan.value - flt1;
         dashboardCt.totalPesan.refresh();
       }
@@ -1766,7 +1844,7 @@ class BottomSheetPos extends BaseController
 
       var hitung = (inputNominal / double.parse("$flt2")) * 100;
       var hitungFinal =
-          inputNominal * double.parse(dashboardCt.jumlahPesan.value.text);
+          inputNominal * int.parse(dashboardCt.jumlahPesan.value.text);
 
       dashboardCt.persenDiskonPesanBarang.value.text =
           // hitung.toStringAsFixed(2);
@@ -1782,7 +1860,7 @@ class BottomSheetPos extends BaseController
         dashboardCt.hargaDiskonPesanBarang.value.text.replaceAll(".", "");
     var flt2 = flt1.replaceAll(",", "");
     var hitung =
-        double.parse(flt2) * double.parse(dashboardCt.jumlahPesan.value.text);
+        double.parse(flt2) * int.parse(dashboardCt.jumlahPesan.value.text);
     var hitungFinal = dashboardCt.totalPesan.value - hitung;
     dashboardCt.totalPesan.value = hitungFinal;
     dashboardCt.totalPesan.refresh();

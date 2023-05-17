@@ -1025,6 +1025,7 @@ class DashbardController extends BaseController {
   }
 
   void pencarianDataBarang(value) async {
+    listMenu.clear();
     var valueCari = value.toUpperCase();
     if (valueCari != "") {
       statusCari.value = true;
@@ -1064,6 +1065,7 @@ class DashbardController extends BaseController {
         tmp1.add(filter);
       }
       listMenu.value = tmp1;
+      debugPrint('listMenu $listMenu');
       listMenu.refresh();
       viewButtonKeranjang.value = true;
       viewButtonKeranjang.refresh();

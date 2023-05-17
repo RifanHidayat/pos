@@ -78,14 +78,10 @@ class _ScanImeiState extends State<ScanImei> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
+    this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
-      setState(() async {
-        result = scanData;
-        SecondPageRoute(scanData);
-      });
+      result = scanData;
+      SecondPageRoute(scanData);
     });
     controller.pauseCamera();
     controller.resumeCamera();
@@ -95,13 +91,11 @@ class _ScanImeiState extends State<ScanImei> {
     controller?.pauseCamera();
     var compileData = await scanData;
     if (compileData.format != "" || compileData.code != "") {
-      setState(() {
-        scanBarangCt.getBarcodeImei(compileData.format, compileData.code, widget.scanMenu);
-      });
+      scanBarangCt.getBarcodeImei(
+          compileData.format, compileData.code, widget.scanMenu);
     } else {
       controller?.resumeCamera();
     }
-    print('hasil data ${compileData.code}');
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {

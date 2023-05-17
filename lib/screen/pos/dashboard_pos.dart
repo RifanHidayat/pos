@@ -727,7 +727,6 @@ class _DashboardState extends State<Dashboard> {
                 child: status == false
                     ? InkWell(
                         onTap: () {
-                          print('tipe barang selected $type');
                           if (controller.nomorFaktur.value == "-") {
                             UtilsAlert.showToast(
                                 "Harap buat faktur terlebih dahulu");
@@ -984,7 +983,9 @@ class _DashboardState extends State<Dashboard> {
                               totalItem:
                                   "${controller.jumlahItemDikeranjang.value}",
                               totalAll: Text(
-                                "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
+                                globalController.convertToIdr(
+                                    controller.totalNominalDikeranjang.value,
+                                    2),
                                 style: TextStyle(color: Utility.baseColor2),
                               ),
                               onTap: () {
@@ -1358,7 +1359,9 @@ class _DashboardState extends State<Dashboard> {
                               totalItem:
                                   "${controller.jumlahItemDikeranjang.value}",
                               totalAll: Text(
-                                "${globalController.convertToIdr(controller.totalNominalDikeranjang.value, 2)}",
+                                globalController.convertToIdr(
+                                    controller.totalNominalDikeranjang.value,
+                                    2),
                                 style: TextStyle(color: Utility.baseColor2),
                               ),
                               onTap: () {
@@ -1426,6 +1429,7 @@ class _DashboardState extends State<Dashboard> {
     if (!_hideButtonController!.position.outOfRange) {
       _isVisible = true;
     }
+    setState(() {});
   }
 }
 
