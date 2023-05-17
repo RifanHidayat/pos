@@ -11,8 +11,8 @@ import '../../../utils/widget/card_custom.dart';
 class Search {
   static var controller = TextEditingController();
   static var getcontroller = Get.find<ListPelangganViewController>();
-  static var paramimpl = ControllerImpl.paramscontrollerimpl;
-  static var dashboardcontroller = Get.put(DashbardController());
+  static var paramimpl = ControllerFindImpl.paramscontrollerimpl;
+  static var dashboardcontroller = Get.find<DashbardController>();
 
   static search(key) {
     return Padding(

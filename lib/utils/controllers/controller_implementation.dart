@@ -7,3 +7,8 @@ class ControllerImpl {
   static var pelanggancontrollerimpl = Get.put(ListPelangganViewController());
   static var paramscontrollerimpl = Get.put(ParamsController());
 }
+
+class ControllerFindImpl {
+  static var pelanggancontrollerimpl = Get.find<ListPelangganViewController>();
+  static var paramscontrollerimpl = Get.find<ParamsController>();
+}

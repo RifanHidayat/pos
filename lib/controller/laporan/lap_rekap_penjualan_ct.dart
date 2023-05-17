@@ -10,10 +10,14 @@ import 'package:siscom_pos/utils/utility.dart';
 import 'package:siscom_pos/utils/widget/text_form_field_group.dart';
 import 'package:siscom_pos/utils/widget/text_label.dart';
 
+import '../../utils/api.dart';
+import '../pos/dashboard_controller.dart';
+
 class LaporanRekapPenjualanController extends GetxController {
   RefreshController refreshController = RefreshController(initialRefresh: true);
   RefreshController refreshDetailController =
       RefreshController(initialRefresh: true);
+  var dashbardController = Get.put(DashbardController());
 
   var sidebarCt = Get.put(SidebarController());
 
@@ -125,12 +129,18 @@ class LaporanRekapPenjualanController extends GetxController {
     tanggalSampai.refresh();
   }
 
-  Future<bool> getProsesListRekap() {
-    for (var element in dummyData) {
+  Future<bool> getProsesListRekap() async {
+    var connect = Api.connectionApi2("get", "", "penjualan/report",
+        "&cabang=${sidebarCt.cabangKodeSelectedSide.value}&kode_sales=${dashbardController.kodePelayanSelected}");
+    var getValue = await connect;
+    var valueBody = jsonDecode(getValue.body);
+    List data = valueBody['data'];
+    debugPrint('Convert ${data}');
+    for (var element in data) {
       listRekapPenjualan.add(ListRekapPenjualanModel(
-        title: element["title"],
-        jumlah: element["jumlah"],
-        total: element["total"],
+        title: element["NOMOR"],
+        jumlah: element["PK"].toString(),
+        total: element["NETTO"].toString(),
       ));
     }
     listRekapPenjualan.refresh();

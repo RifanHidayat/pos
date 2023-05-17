@@ -66,14 +66,14 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
                     SizedBox(
                       height: Utility.medium,
                     ),
-                    Text(
-                      "3 Data di tampilkan",
-                      style: TextStyle(color: Utility.nonAktif),
-                    ),
+                    Obx(() => Text(
+                          "${controller.listRekapPenjualan.length} Data di tampilkan",
+                          style: TextStyle(color: Utility.nonAktif),
+                        )),
                     SizedBox(
                       height: Utility.medium,
                     ),
-                    Flexible(child: listRekapPenjualan())
+                    Obx(() => Flexible(child: listRekapPenjualan()))
                   ],
                 ),
               )),
@@ -95,7 +95,7 @@ class _LaporaRekapPenjualan extends State<LaporanRekapPenjualan> {
             widgetCardCustom: Padding(
               padding: EdgeInsets.all(8),
               child: Center(
-                child: Icon(Iconsax.filter),
+                child: Icon(Iconsax.setting_4),
               ),
             ),
           ),
